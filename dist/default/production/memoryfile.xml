@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project>
-  <executable name="dist/default/production/sampler_0.49.production.elf">
+  <executable name="dist/default/production/sampler_0.49.1.production.elf">
     <memory name="data">
       <units>bytes</units>
       <length>49152</length>
-      <used>24388</used>
-      <free>24764</free>
+      <used>23364</used>
+      <free>25788</free>
     </memory>
     <memory name="program">
       <units>bytes</units>
       <length>524514</length>
-      <used>29307</used>
-      <free>495207</free>
+      <used>29286</used>
+      <free>495228</free>
     </memory>
   </executable>
 </project>

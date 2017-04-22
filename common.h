@@ -4,27 +4,26 @@
 
 #define Fin    7372800
 #define Fosc 138240000
-//#define Fosc 140030000                                                          //system clock
 #define Fcy Fosc/2                                      
 
 #define BAUDRATE 57600                  //target baud rate for *UART*           //peripheral configs
 #define BRGVAL ((Fcy/BAUDRATE)/16)-1    //calculate baud value (MAY TRUNCATE)
 #define T3freq 44100                    //target timer 3 frequency
 #define Fscan 512                       //target buttons & pots sampling rate
-#define Fout 44100                      //target output sampling rate
-#define STREAMBUF 512                   //input adc stack size
+#define Fout 44100                      //target output sampling rate (~45k last measured)
+#define STREAMBUF 256                   //input adc stack size, must be large enough to avoid SD write respond latency
 #define Fdisp 30                        //15hz display update rate
 
 #define LOOP_BUF_SIZE 11025             //about 1/4th of a second               //FX settings
 
-#define SLED _LATF0                                                            //various status LED's
+#define SLED _LATF0                                                             //various status LED's
 #define YLED _LATE1
 #define GLED _LATC4
 #define RLED _LATC0
 #define HARD_CLIP_LED _LATC1            //Clip indicator LED
 #define TREMELO_LED _LATD15
 
-#define p0 PORTGbits.RG0                                                        //RAW unbounced button inputs
+#define p0 PORTGbits.RG0                //raw button inputs
 #define p4 PORTGbits.RG1
 #define p5 PORTGbits.RG3
 #define p1 PORTGbits.RG10

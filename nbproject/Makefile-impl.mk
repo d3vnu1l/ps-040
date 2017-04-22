@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=sampler_0.49.1
+PROJECTNAME=ps-040
 
 # Active Configuration
 DEFAULTCONF=default

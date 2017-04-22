@@ -60,7 +60,7 @@ void __attribute__ ((interrupt, auto_psv)) _DCIInterrupt(void){
     }
     stream[rw][write_ptr]=fx(stream[rw][write_ptr]);    //run fx on latest sample
     if(rw==0)
-        output=mixer(stream[1][write_ptr]);                                   //mix  new output
+        output=mixer(stream[1][write_ptr]);             //mix  new output
     else output = mixer(stream[0][write_ptr]);
     IFS3bits.DCIIF=0;
 }
