@@ -20,6 +20,13 @@ Table of Contents:
 Audio processing flow:
   A new sample is ready for processing after the DCI interrupt is triggered. When this happens; 
       1. the last processed samples are loaded into TXBUF0 & TXBUF 1
-      2. new samples are fetched from RXBUF0 & RXBUF1
+      2. new samples are fetched from RXBUF0 & RXBUF1 (ADC)
           -MSB is toggled to fix signing error
-      3...
+          -Check for clipping
+          -Add to stream[rw][write_ptr] ping pong array
+              *ping pong array allows writing to memory while simultanously transfering blocks to SD over DMA
+      3. call fx function to process sample
+          -overwrite stream with return value
+      4. call mixer(stream[~rw][write_ptr])
+          -set 'output' as return value
+      'output' is sent to DAC on next interrupt
