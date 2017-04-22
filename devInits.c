@@ -1,5 +1,5 @@
 /*
- * This file contains functions to initialize various peripheral devices
+ ** This file contains functions to initialize various peripheral devices
  */
 
 #include <xc.h>
