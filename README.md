@@ -30,3 +30,4 @@ Audio processing flow:
       4. call mixer(stream[~rw][write_ptr])
           -set 'output' as return value
       'output' is sent to DAC on next interrupt
+
