@@ -2,7 +2,7 @@
 #define	COMMON_H
 #include <xc.h> 
 
-#define Fin    7372800
+#define Fin   73728000
 #define Fosc 138240000
 #define Fcy Fosc/2                                      
 

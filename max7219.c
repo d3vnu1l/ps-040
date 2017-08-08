@@ -111,17 +111,11 @@ static unsigned char MAX7219_LookupCode (char character);
 void MAX7219_Init (void)
 {
   MAX7219_Send(REG_SCAN_LIMIT, 7);                   // set up to scan all eight digits
-  __delay32(40);
   MAX7219_Send(REG_DECODE, 0x00);                    // set to "no decode" for all digits
-  __delay32(40);
   MAX7219_ShutdownStop();                             // select normal operation (i.e. not shutdown)
-  __delay32(40);
   MAX7219_DisplayTestStop();                          // select normal operation (i.e. not test mode)
-  __delay32(40);
   MAX7219_Clear();                                    // clear all digits
-  __delay32(40);
   MAX7219_SetBrightness(INTENSITY_MAX);               // set to maximum intensity
-  __delay32(40);
 }
 
 
@@ -213,8 +207,9 @@ void MAX7219_SetBrightness (char brightness)
 void MAX7219_Clear (void)
 {
   char i;
-  for (i=0; i < 8; i++)
+  for (i=1; i < 9; i++){
     MAX7219_Send(i, 0x00);                           // turn all segments off
+  }
 }
 
 
@@ -306,13 +301,14 @@ static unsigned char MAX7219_LookupCode (char character)
 */
 static void MAX7219_Send(unsigned char dataouta, unsigned char dataoutb)
 {
-    //dataouta = 0x00;
-    //dataoutb = 0xFF;
     unsigned int data = (dataouta<<8)+dataoutb;
+    
     SEG_SEL=0;
     SPI3BUF=data;
     while (!SPI3STATbits.SPIRBF);
-    SEG_SEL=1;
     int trash=SPI3BUF;
+    SEG_SEL=1;
+    
+    
 }
 

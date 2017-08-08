@@ -44,10 +44,10 @@ void initBuffer(void){
 }
 
 int main(void) {
-    UART_ON = TRUE;
+    UART_ON = FALSE;
     TEST_SIN = FALSE;
     initPorts();                    //configure io device & adc 
-    initUART1();                    //configure & enable UART
+    //initUART1();                    //configure & enable UART
     initBuffer();
     initADC1();                     //configure & enable internal ADC
     //initSPI2_ADC();                  //configure & enable SPI ADC !!!DEFUNCT!!!
@@ -58,10 +58,6 @@ int main(void) {
     //initCAP_BPM();                  //configure bpm capture
     //initT3();                       //configure & start T3
     while(1){   
-        //if (SEG_SEL==0){
-        //    if(!SPI3STATbits.SPIRBF);
-        //    else SEG_SEL=1;
-        //}
         if(t2flag==TRUE){
             scanMatrix();                   //read button matrix
             readPots();                     //read control pots

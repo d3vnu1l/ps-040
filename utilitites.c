@@ -32,7 +32,7 @@ extern fractional tremelo_depth;
 
 void scanMatrix(void){
     static unsigned char pad_last[8] = {1,1,1,1,1,1,1,1};
-    MAX7219_DisplayChar('0', 'A');
+    //MAX7219_DisplayChar('0', 'A');
     pad[0]=p0;
     pad[1]=p1;
     pad[2]=p2;
@@ -51,7 +51,7 @@ void scanMatrix(void){
     else{
         pad_last[4]=pad[4];
     }
-   
+    
     if(pad[5]==0){                                                              //LOOPER CONTROL
         looper=TRUE;
         YLED=looper;
@@ -71,6 +71,10 @@ void scanMatrix(void){
     else{
         pad_last[6]=pad[6];
     }
+    
+    lpf=TRUE;
+    
+    
 }
 
 void readPots(void){
@@ -132,6 +136,20 @@ void readPots(void){
 
 void display(void){
    SLED=~SLED;
+   static unsigned char i = 1;
+   static unsigned char j = 1;
+   static char fonts[] = {'A','B','C','D','E','F','0','1','2'};
+   
+   i++;
+   if(i==8)
+       j++;
+   if(i==9)
+       i = 1;
+   if(j==9)
+       j=1;
+   MAX7219_Clear();
+   MAX7219_DisplayChar(j,fonts[j]);
+   
     if(hard_clipped==TRUE){                                                     //CLIP CONTROL    
         HARD_CLIP_LED=1;
         hard_clipped=FALSE;
@@ -142,7 +160,7 @@ void display(void){
         //printf("b4 %d, b5 %d, b6 %d, b7 %d\r\n", pad[4], pad[5], pad[6], pad[7]);
         //printf("P1 %x  P1 %d bpm %d\r\n", pots[0], pots[0], bpm);   //check pots
         //printf("P1 %d  P2 %d P3 %d\r\n", pots[0], pots[1], pots[2]);   //check pots
-        printf("%d\r\n", sample);  //check input ADC
+        //printf("%d\r\n", sample);  //check input ADC
         //printf("%d, pot1 %x, pot2 %x, avg %x\r\n", sample, pots[1], pots[2], average);  //check input ADC
     }
 }
