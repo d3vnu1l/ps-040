@@ -23,8 +23,9 @@ void initPorts(void){
     while(OSCCONbits.LOCK!=1) {};   //wait for PLL to lock
     //RP pin config
 	__builtin_write_OSCCONL(OSCCON & ~(1<<6));      // Unlock Registers
-    //RPINR18bits.U1RXR = 0x37;   //U1 rx on RP55
-    RPOR6bits.RP54R=1;          //U1 tx on RP54
+    //RPINR18bits.U1RXR = 0x37; //U1 rx on RP55
+    //RPOR6bits.RP54R=0x1;          //U1 tx on RP54
+    RPOR2bits.RP38R = 0x1;
     RPINR24bits.CSDIR=0x2D;     //DCI IN on RPI45
     RPOR3bits.RP40R=0x0C;       //DCI clock
     RPOR2bits.RP39R=0x0D;       //DCI frame sync
@@ -117,7 +118,7 @@ void initSPI3_SEG(void){
     SPI3CON1bits.CKP=0;         //idle clock is low
     SPI3CON1bits.CKE=1;         //data changes from H to L
     SPI3CON1bits.PPRE=1;        //4:1 primary prescale
-    SPI3CON1bits.SPRE=0;        //8:1 secondary
+    SPI3CON1bits.SPRE=7;        //1:1 secondary
     SPI3STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
     IPC22bits.SPI3IP = 3;        // Interrupt priority
     IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag

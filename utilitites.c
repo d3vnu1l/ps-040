@@ -4,6 +4,7 @@
 #include <libpic30.h>
 #include <dsp.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include "common.h"
 #include "sounds.h"
@@ -135,32 +136,42 @@ void readPots(void){
 }
 
 void display(void){
-   SLED=~SLED;
-   static unsigned char i = 1;
-   static unsigned char j = 1;
    static char fonts[] = {'A','B','C','D','E','F','0','1','2'};
    
-   i++;
-   if(i==8)
-       j++;
-   if(i==9)
-       i = 1;
-   if(j==9)
-       j=1;
    MAX7219_Clear();
-   MAX7219_DisplayChar(j,fonts[j]);
+   char i = 0, temp; 
+   //char seventByte = j[6];
+   temp = sample&0x000F;
+   if (temp > 9)
+      MAX7219_DisplayChar(1, (temp+55));
+    else MAX7219_DisplayChar(1, (temp+48));
+   for(i=1; i<4; i++){
+      temp = ((sample>>(i*4))&0x0000F);
+      if (temp > 9)
+        MAX7219_DisplayChar(i+1, (temp+55));
+      else MAX7219_DisplayChar(i+1, (temp+48));
+   }
+   if(sample<0)
+       MAX7219_DisplayChar(5, '-');
+
    
     if(hard_clipped==TRUE){                                                     //CLIP CONTROL    
         HARD_CLIP_LED=1;
+        MAX7219_DisplayChar(8,'C');
+        MAX7219_DisplayChar(7,'L');
+        MAX7219_DisplayChar(6,'I');
+        MAX7219_DisplayChar(5,'P');
         hard_clipped=FALSE;
-    } else HARD_CLIP_LED=0;
-    if(UART_ON==TRUE){
+    }  else HARD_CLIP_LED=0;
+    
+   if(UART_ON==TRUE){
         //IC1CON2bits.TRIGSTAT = ~pad[4]; 
         //printf("b1 %d, b2 %d, b3 %d, b4 %d\r\n", pad[0], pad[1], pad[2], pad[3]);
         //printf("b4 %d, b5 %d, b6 %d, b7 %d\r\n", pad[4], pad[5], pad[6], pad[7]);
         //printf("P1 %x  P1 %d bpm %d\r\n", pots[0], pots[0], bpm);   //check pots
         //printf("P1 %d  P2 %d P3 %d\r\n", pots[0], pots[1], pots[2]);   //check pots
-        //printf("%d\r\n", sample);  //check input ADC
+        printf("%d\r\n", sample);  //check input ADC
         //printf("%d, pot1 %x, pot2 %x, avg %x\r\n", sample, pots[1], pots[2], average);  //check input ADC
     }
+   SLED=~SLED;
 }

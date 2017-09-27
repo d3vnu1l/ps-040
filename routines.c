@@ -48,7 +48,7 @@ void __attribute__ ((interrupt, auto_psv)) _DCIInterrupt(void){
     sample=RXBUF1;
     int trash=RXBUF0;
     __builtin_btg(&sample, 15);                             //convert to Q1.15 compatible format
-    if(sample<=-32600||sample>=32600)
+    if(sample<=-32766||sample>=32766)
         hard_clipped=TRUE;
     if(write_ptr==(STREAMBUF-1)){                       //reset pointer when out of bounds
         write_ptr=0;

@@ -28,8 +28,8 @@ unsigned char hard_clipped=FALSE;                                               
 volatile unsigned char t1flag=FALSE;
 volatile unsigned char t2flag=FALSE;
 volatile unsigned char recording=TRUE;
-unsigned char UART_ON;
-unsigned char TEST_SIN;
+unsigned char UART_ON = FALSE;
+unsigned char TEST_SIN = FALSE;
 
 volatile unsigned char tremelo=FALSE;                                           //FX FLAGS//
 volatile unsigned char looper=FALSE;
@@ -44,10 +44,8 @@ void initBuffer(void){
 }
 
 int main(void) {
-    UART_ON = FALSE;
-    TEST_SIN = FALSE;
     initPorts();                    //configure io device & adc 
-    //initUART1();                    //configure & enable UART
+    initUART1();                    //configure & enable UART
     initBuffer();
     initADC1();                     //configure & enable internal ADC
     //initSPI2_ADC();                  //configure & enable SPI ADC !!!DEFUNCT!!!
@@ -64,8 +62,10 @@ int main(void) {
             t2flag=FALSE;
         }
         if(t1flag==TRUE){
+            //printf("help");
             display();
-            t1flag=FALSE;
+            t1flag=FALSE; 
+            
         }
     }
     return 0;
