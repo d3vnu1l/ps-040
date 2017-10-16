@@ -45,7 +45,7 @@ void initBuffer(void){
 
 int main(void) {
     initPorts();                    //configure io device & adc 
-    initUART1();                    //configure & enable UART
+    //initUART1();                    //configure & enable UART
     initBuffer();
     initADC1();                     //configure & enable internal ADC
     //initSPI2_ADC();                  //configure & enable SPI ADC !!!DEFUNCT!!!
@@ -62,7 +62,6 @@ int main(void) {
             t2flag=FALSE;
         }
         if(t1flag==TRUE){
-            //printf("help");
             display();
             t1flag=FALSE; 
             

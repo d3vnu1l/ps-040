@@ -26,11 +26,11 @@ extern fractional kick[5552];
 extern unsigned char hat_playing;
 extern unsigned int hat_max, hat_ptr;
 extern fractional hat[5552];
- 
+ */
 extern unsigned char snare_playing;
 extern unsigned int snare_max, snare_ptr;
 extern fractional snare[5552];
-*/
+
 fractional mixer(fractional sample){
     volatile register int result1 asm("A");
     static int i=0;
@@ -61,7 +61,7 @@ fractional mixer(fractional sample){
         hat_playing=FALSE;
         hat_ptr=0;
     }
-    
+    */
     if(pad[2]==0&&snare_playing==FALSE){                                        //snare
         snare_playing=TRUE;
     }
@@ -74,9 +74,10 @@ fractional mixer(fractional sample){
         snare_playing=FALSE;
         snare_ptr=0;
     }
-    */
+    
     
     //VOLUME CONTROL
+    /*
     if(pots[0]==0x001F)
         sample=0;
     else if(pots[0]>0xFFF0);
@@ -84,6 +85,7 @@ fractional mixer(fractional sample){
         result1 =__builtin_mpy(sample,pots[0], NULL, NULL, 0, NULL, NULL, 0);
         sample=__builtin_sac(result1, 0);
     }
+    */
     if (TEST_SIN==FALSE){
         return sample;
     }
@@ -101,7 +103,7 @@ fractional fx(fractional sample){
     static fractional delayed_sample;
     static fractional trem_mod;
     if(tremelo==TRUE){                                                          //TREMELO//
-        if (trem_var<=pots_scaled[2]){
+        if (trem_var<=pots_scaled[1]){
             trem_var++;
             result1 =__builtin_mpy(tremelo_depth,sintab[tremelo_ptr], NULL, NULL, 0, NULL, NULL, 0);
             trem_mod=__builtin_sac(result1, 0);

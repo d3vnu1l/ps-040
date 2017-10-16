@@ -61,7 +61,7 @@ void initPorts(void){
     TRISG=0xFFFF;
     //set digital outputs
     PORTA=0x0000;
-    PORTB=0x0800;
+    PORTB=0x0000;
     PORTC=0x0000;
     PORTD=0x0040;
     PORTE=0x0000;
@@ -69,6 +69,11 @@ void initPorts(void){
     PORTG=0x0000;
     //weak internal pull ups
     CNPUG=0xFFFF;       //weak pull ups on G
+    
+        ANSELBbits.ANSB0 = 1; // Ensure AN0/RB0 is analog
+    ANSELBbits.ANSB1 = 1; // Ensure AN1/RB1 is analog
+    ANSELBbits.ANSB2 = 1; // Ensure AN2/RB2 is analog
+    ANSELBbits.ANSB3 = 1; // Ensure AN5/RB5 is analog
 }
 
 //Description: Initializes UART1 device & interrupts
@@ -94,12 +99,15 @@ void initUART1(void){
 //Dependencies: NONE
 void initADC1(void){
     AD1CON1bits.ASAM = 1;       //enable simultaneous sample
-    AD1CON1bits.SIMSAM = 1;     //enable simultaneous sample
+    AD1CON1bits.SIMSAM = 0;     //enable simultaneous sample
     AD1CON1bits.FORM=2;         //signed fractional format
-    AD1CON2bits.CHPS = 0b11;    //sample channels 0-3
-    AD1CON3bits.ADCS = 0x3B;    //tad ~ 1us
-    AD1CHS0bits.CH0SA = 0x03;   //ch0->an3 (no use an0)
+    AD1CON2bits.CHPS = 0b01;    //sample channels 0-3
+    AD1CON3bits.ADCS = 0x3F;    //tad ~ 1us
+    //AD1CHS0bits.CH0SA = 0x03;   //ch0->an3 (no use an0)
+    AD1CHS0bits.CH0NA = 0; // Select Vref- for CH0 -ve input
+    AD1CHS123bits.CH123NA = 0; // Select Vref- for CH1/CH2/CH3 -ve input
     AD1CON1bits.ADON = 1;       //start ADC module
+    Delay_us(20);
 }
 
 void initSPI3_SEG(void){
@@ -250,3 +258,13 @@ void initSPI2_ADC(void){
     SPI2STATbits.SPIEN = 1;     //start SPI module
 }
 */
+
+void Delay_us(unsigned int delay)
+{
+    int i;
+    for (i = 0; i < delay; i++)
+    {
+        __asm__ volatile ("repeat #39");
+        __asm__ volatile ("nop");
+    }
+}

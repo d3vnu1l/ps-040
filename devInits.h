@@ -18,5 +18,6 @@ void initSPI2_ADC(void);
 void initSPI3_SEG(void);
 void initDCI_DAC(void);
 void initCAP_BPM(void);
+void Delay_us(unsigned int);
 
 #endif	/* DEVINITS_H */
