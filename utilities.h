@@ -11,6 +11,7 @@
 void scanMatrix(void);
 void readPots(void);
 void display(void);
+void writeLCD(void);
 
 #endif	/* UTILITIES_H */
 

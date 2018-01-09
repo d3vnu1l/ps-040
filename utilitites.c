@@ -141,39 +141,11 @@ void readPots(void){
 void display(void){
    static char fonts[] = {'A','B','C','D','E','F','0','1','2'};
    
-   MAX7219_Clear();
    char i = 0, temp; 
    //char seventByte = j[6];
-   temp = sample&0x000F;
-   if (temp > 9)
-      MAX7219_DisplayChar(1, (temp+55));
-    else MAX7219_DisplayChar(1, (temp+48));
-   for(i=1; i<4; i++){
-      temp = ((sample>>(i*4))&0x0000F);
-      if (temp > 9)
-        MAX7219_DisplayChar(i+1, (temp+55));
-      else MAX7219_DisplayChar(i+1, (temp+48));
-   }
-   if(sample<0)
-       MAX7219_DisplayChar(5, '-');
-
-   if(!pad[4]){
-        MAX7219_DisplayChar(8,'L');
-        MAX7219_DisplayChar(7,'O');
-        MAX7219_DisplayChar(6,'O');
-        MAX7219_DisplayChar(5,'P');
-   }
-   else if (tremelo){
-        MAX7219_DisplayChar(8,'C');
-        MAX7219_DisplayChar(7,'H');
-        MAX7219_DisplayChar(6,'R');
-   } 
-   else if (lpf){
-        MAX7219_DisplayChar(8,'L');
-        MAX7219_DisplayChar(7,'P');
-        MAX7219_DisplayChar(6,'F');
-   }
-   else if(hard_clipped==TRUE){                                                     //CLIP CONTROL    
+   writeLCD();
+   
+   if(hard_clipped==TRUE){                                                     //CLIP CONTROL    
         HARD_CLIP_LED=1;
         MAX7219_DisplayChar(8,'C');
         MAX7219_DisplayChar(7,'L');
@@ -192,6 +164,10 @@ void display(void){
         //printf("%d, pot1 %x, pot2 %x, avg %x\r\n", sample, pots[1], pots[2], average);  //check input ADC
     }
    SLED=~SLED;
+}
+
+void writeLCD(void){
+    PMDIN1=0xFF;
 }
 
 //change

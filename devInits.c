@@ -113,6 +113,8 @@ void initADC1(void){
 void initPMP(void){
     //init PMP here
     PMCONbits.PMPEN = 1;
+    PMCONbits.PTWREN = 1;
+    PMCONbits.PTRDEN = 1;
 }
 
 void initSPI3_SEG(void){

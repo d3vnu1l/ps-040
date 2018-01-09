@@ -52,7 +52,8 @@ int main(void) {
     initDCI_DAC();                  //configure & enable DAC
     initT1();                       //configure & start T1 
     initT2();                       //configure & start T2 
-    initSPI3_SEG();                  //start segment display
+    //initSPI3_SEG();                  //start segment display
+    initPMP();
     //initCAP_BPM();                  //configure bpm capture
     //initT3();                       //configure & start T3
     while(1){   
