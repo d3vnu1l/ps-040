@@ -18,7 +18,7 @@ extern unsigned char UART_ON;
 void initPorts(void){
     //CLOCK CONFIG
     CLKDIVbits.PLLPOST=0;
-    CLKDIVbits.PLLPRE=0;
+    CLKDIVbits.PLLPRE=0;PMA0
     PLLFBDbits.PLLDIV = 0x49;       //d_73 for ~140Mhz
     while(OSCCONbits.LOCK!=1) {};   //wait for PLL to lock
     //RP pin config
@@ -26,7 +26,7 @@ void initPorts(void){
     //RPINR18bits.U1RXR = 0x37; //U1 rx on RP55
     //RPOR6bits.RP54R=0x1;          //U1 tx on RP54
     RPOR2bits.RP38R = 0x1;
-    RPINR24bits.CSDIR=0x2D;     //DCI IN on RPI45
+    RPINR24bits.CSDIR=0x3D;     //DCI IN on RPI61           
     RPOR3bits.RP40R=0x0C;       //DCI clock
     RPOR2bits.RP39R=0x0D;       //DCI frame sync
     RPOR3bits.RP41R=0x0B;       //DCI output
@@ -39,7 +39,7 @@ void initPorts(void){
     //enable disable peripherals:
     PMD1=0x06C6;
     PMD2=0x00FF;
-    PMD3=0x0FFF;
+    PMD3=0x0EFF;
     PMD4=0xFFFF;
     PMD6=0xFFFE;
     PMD7=0xFFEF;
@@ -52,11 +52,11 @@ void initPorts(void){
     ANSELF=0x0000;  //0400
     ANSELG=0x0000;
     //set digital i/o direction
-    TRISA=0x0203;
-    TRISB=0x2003;
-    TRISC=0x0080;
+    TRISA=0x0683;
+    TRISB=0xFC03;
+    TRISC=0x2480;
     TRISD=0x0000;
-    TRISE=0x8000;
+    TRISE=0xF000;
     TRISF=0x0000;
     TRISG=0xFFFF;
     //set digital outputs
@@ -108,6 +108,10 @@ void initADC1(void){
     AD1CHS123bits.CH123NA = 0; // Select Vref- for CH1/CH2/CH3 -ve input
     AD1CON1bits.ADON = 1;       //start ADC module
     Delay_us(20);
+}
+
+void initPMP(void){
+    //init PMP here
 }
 
 void initSPI3_SEG(void){
