@@ -38,7 +38,6 @@
 //#define ADC_CONV _LATB11             //was originally for adc conv, now unused
 //spi1 (SD-card) manula CS
 #define SD_EN _LATC5
-#define SEG_SEL _LATD13
 
 //misc
 #define TRUE 0xFF
