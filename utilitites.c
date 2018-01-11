@@ -9,7 +9,6 @@
 #include "common.h"
 #include "sounds.h"
 #include "audio.h"
-#include "max7219.h"
 
 
 //CONTROL VARIABLES//
@@ -147,10 +146,6 @@ void display(void){
    
    if(hard_clipped==TRUE){                                                     //CLIP CONTROL    
         HARD_CLIP_LED=1;
-        MAX7219_DisplayChar(8,'C');
-        MAX7219_DisplayChar(7,'L');
-        MAX7219_DisplayChar(6,'I');
-        MAX7219_DisplayChar(5,'P');
         hard_clipped=FALSE;
     }  else HARD_CLIP_LED=0;
     
@@ -167,7 +162,8 @@ void display(void){
 }
 
 void writeLCD(void){
-    PMDIN1=0xFF;
+    PMDIN1=0x00FF;
+    //LATEbits.LATE15=1;
 }
 
 //change

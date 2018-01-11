@@ -18,7 +18,7 @@ extern unsigned char UART_ON;
 void initPorts(void){
     //CLOCK CONFIG
     CLKDIVbits.PLLPOST=0;
-    CLKDIVbits.PLLPRE=0;PMA0
+    CLKDIVbits.PLLPRE=0;
     PLLFBDbits.PLLDIV = 0x49;       //d_73 for ~140Mhz
     while(OSCCONbits.LOCK!=1) {};   //wait for PLL to lock
     //RP pin config
@@ -37,43 +37,42 @@ void initPorts(void){
     //RPOR8bits.RP69R=0x21;       //SS3 on pin 82
 	__builtin_write_OSCCONL(OSCCON | (1<<6));       // Lock Registers
     //enable disable peripherals:
-    PMD1=0x06C6;
-    PMD2=0x00FF;
-    PMD3=0x0EFF;
-    PMD4=0xFFFF;
-    PMD6=0xFFFE;
-    PMD7=0xFFEF;
-    //set analog ports
-    ANSELA=0x0003; 
-    ANSELB=0x0003;
-    ANSELC=0x0000;
-    ANSELD=0x0000;
-    ANSELE=0x0000;
-    ANSELF=0x0000;  //0400
-    ANSELG=0x0000;
-    //set digital i/o direction
-    TRISA=0x0683;
-    TRISB=0xFC03;
-    TRISC=0x2480;
-    TRISD=0x0000;
-    TRISE=0xF000;
-    TRISF=0x0000;
-    TRISG=0xFFFF;
-    //set digital outputs
-    PORTA=0x0000;
-    PORTB=0x0000;
-    PORTC=0x0000;
-    PORTD=0x0040;
-    PORTE=0x0000;
-    PORTF=0x0000;
-    PORTG=0x0000;
-    //weak internal pull ups
-    CNPUG=0xFFFF;       //weak pull ups on G
+    PMD1=PMD2=PMD3=PMD4=PMD6=PMD7=0xFFFF;
+    PMD1bits.AD1MD=0;
+    PMD1bits.SPI1MD=0;
+    PMD1bits.SPI2MD=0;
+    PMD1bits.U1MD=0;
+    PMD1bits.U2MD=0;
+    PMD1bits.DCIMD=0;
+    PMD1bits.T1MD=0;
+    PMD1bits.T2MD=0;
+    PMD1bits.T3MD=0;
+    PMD1bits.T4MD=0;
+    PMD3bits.PMPMD=0;
+    PMD3bits.CMPMD=0;
+    PMD6bits.SPI3MD=0;
+    PMD7bits.DMA0MD=0;
     
-        ANSELBbits.ANSB0 = 1; // Ensure AN0/RB0 is analog
+    //set analog ports
+    ANSELA=ANSELB=ANSELC=ANSELD=ANSELE=ANSELF=ANSELG=0x0000;
+    ANSELBbits.ANSB0 = 1; // Ensure AN0/RB0 is analog
     ANSELBbits.ANSB1 = 1; // Ensure AN1/RB1 is analog
     ANSELBbits.ANSB2 = 1; // Ensure AN2/RB2 is analog
     ANSELBbits.ANSB3 = 1; // Ensure AN5/RB5 is analog
+    
+    //set digital i/o direction
+    TRISA=0x0603;
+    TRISB=0x0003;
+    TRISC=0x2080;
+    TRISD=0x0000;
+    TRISE=0x7000;
+    TRISF=0x0000;
+    TRISG=0xFFFF;
+    //set digital outputs
+    PORTA=PORTB=PORTC=PORTD=PORTE=PORTF=PORTG=0x0000;
+    PORTD=0x0040;
+    //weak internal pull ups
+    CNPUG=0xFFFF;       //weak pull ups on G
 }
 
 //Description: Initializes UART1 device & interrupts
@@ -112,36 +111,21 @@ void initADC1(void){
 
 void initPMP(void){
     //init PMP here
-    PMCONbits.PMPEN = 1;
+    PMMODEbits.MODE=3;  //master mode 1 
     PMCONbits.PTWREN = 1;
     PMCONbits.PTRDEN = 1;
+    PMCONbits.WRSP=1;   //write strobe active high
+    PMCONbits.RDSP=1;   //read strobe active high
+    PMMODEbits.WAITB = 3;
+    PMMODEbits.WAITM = 0x08;
+    PMMODEbits.WAITE = 3;
+    PMAEN=1;
+    //PMCONbits.CSF=2;
+    PMCONbits.PMPEN = 1;
+    Delay_us(10);
+    //PMDIN1=;
 }
 
-void initSPI3_SEG(void){
-    SEG_SEL = 1;
-    IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
-    IEC5bits.SPI3IE = 0;        // Disable the interrupt
-    SPI3CON1bits.MSTEN=1;       //master mode
-    SPI3CON1bits.DISSCK = 0;    //Internal serial clock is enabled
-    SPI3CON1bits.MODE16=1;      //16 bit
-    SPI3CON1bits.DISSDO=0;      //enable SDO 
-    SPI3CON1bits.SSEN=0;        //use SS
-    SPI3CON2bits.FRMEN=0;       //no enable framed mode
-    SPI3CON2bits.SPIBEN=0;      //enhanced buffer mode
-    SPI2STATbits.SISEL=5;       //interrupt when done sending
-    SPI3CON1bits.SMP=0;         //data sampled at end of output time
-    SPI3CON1bits.CKP=0;         //idle clock is low
-    SPI3CON1bits.CKE=1;         //data changes from H to L
-    SPI3CON1bits.PPRE=1;        //4:1 primary prescale
-    SPI3CON1bits.SPRE=7;        //1:1 secondary
-    SPI3STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
-    IPC22bits.SPI3IP = 3;        // Interrupt priority
-    IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
-    IEC5bits.SPI3IE = 0;        // Enable the interrupt
-    SPI3STATbits.SPIEN = 1;     //start SPI module
-    __delay32(40);
-    MAX7219_Init();
-}
 
 //Description: Initializes timer for LED's UART and display
 //Prereq: initUART1()
@@ -226,6 +210,7 @@ void initDCI_DAC(void){
     //seg_display(ij);
 }
 
+/*
 void initCAP_BPM(void){
     IFS0bits.IC1IF=0;
     IPC0bits.IC1IP=3;
@@ -236,7 +221,6 @@ void initCAP_BPM(void){
     IEC0bits.IC1IE=1;
 }
 
-/*
 //Description: Initializes 16 bit SPI ADC 
 //Prereq: NONE
 //Dependencies: NONE
@@ -263,6 +247,32 @@ void initSPI2_ADC(void){
     IFS2bits.SPI2IF = 0;        // Clear the Interrupt flag
     IEC2bits.SPI2IE = 1;        // Enable the interrupt
     SPI2STATbits.SPIEN = 1;     //start SPI module
+}
+
+void initSPI3_SEG(void){
+    SEG_SEL = 1;
+    IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
+    IEC5bits.SPI3IE = 0;        // Disable the interrupt
+    SPI3CON1bits.MSTEN=1;       //master mode
+    SPI3CON1bits.DISSCK = 0;    //Internal serial clock is enabled
+    SPI3CON1bits.MODE16=1;      //16 bit
+    SPI3CON1bits.DISSDO=0;      //enable SDO 
+    SPI3CON1bits.SSEN=0;        //use SS
+    SPI3CON2bits.FRMEN=0;       //no enable framed mode
+    SPI3CON2bits.SPIBEN=0;      //enhanced buffer mode
+    SPI2STATbits.SISEL=5;       //interrupt when done sending
+    SPI3CON1bits.SMP=0;         //data sampled at end of output time
+    SPI3CON1bits.CKP=0;         //idle clock is low
+    SPI3CON1bits.CKE=1;         //data changes from H to L
+    SPI3CON1bits.PPRE=1;        //4:1 primary prescale
+    SPI3CON1bits.SPRE=7;        //1:1 secondary
+    SPI3STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
+    IPC22bits.SPI3IP = 3;        // Interrupt priority
+    IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
+    IEC5bits.SPI3IE = 0;        // Enable the interrupt
+    SPI3STATbits.SPIEN = 1;     //start SPI module
+    __delay32(40);
+    MAX7219_Init();
 }
 */
 
