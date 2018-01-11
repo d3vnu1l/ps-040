@@ -9,6 +9,7 @@
 #include "common.h"
 #include "sounds.h"
 #include "audio.h"
+#include "plcd.h"
 
 
 //CONTROL VARIABLES//
@@ -160,10 +161,3 @@ void display(void){
     }
    SLED=~SLED;
 }
-
-void writeLCD(void){
-    PMDIN1=0x00FF;
-    //LATEbits.LATE15=1;
-}
-
-//change

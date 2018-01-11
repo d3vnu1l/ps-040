@@ -34,9 +34,8 @@ void initPorts(void){
     RPINR29bits.SCK3R=0x39;      //SCK3 input on pin 84
     RPOR7bits.RP57R=0x20;        //SCK3 output on pin 84
     RPOR8bits.RP70R=0x1F;       //SDO3 on pin 83
-    //RPOR8bits.RP69R=0x21;       //SS3 on pin 82
 	__builtin_write_OSCCONL(OSCCON | (1<<6));       // Lock Registers
-    //enable disable peripherals:
+    /*PERIPHERAL ENABLE (0) - DISABLE (1)*/
     PMD1=PMD2=PMD3=PMD4=PMD6=PMD7=0xFFFF;
     PMD1bits.AD1MD=0;
     PMD1bits.SPI1MD=0;
@@ -53,26 +52,27 @@ void initPorts(void){
     PMD6bits.SPI3MD=0;
     PMD7bits.DMA0MD=0;
     
-    //set analog ports
+    /* ANALOG PINS (1 = analog) */
     ANSELA=ANSELB=ANSELC=ANSELD=ANSELE=ANSELF=ANSELG=0x0000;
     ANSELBbits.ANSB0 = 1; // Ensure AN0/RB0 is analog
     ANSELBbits.ANSB1 = 1; // Ensure AN1/RB1 is analog
     ANSELBbits.ANSB2 = 1; // Ensure AN2/RB2 is analog
     ANSELBbits.ANSB3 = 1; // Ensure AN5/RB5 is analog
     
-    //set digital i/o direction
+    /* IO DIRECTION (1 = input) */
+    TRISA=TRISB=TRISC=TRISD=TRISE=TRISF=TRISG=0x0000;
     TRISA=0x0603;
     TRISB=0x0003;
     TRISC=0x2080;
-    TRISD=0x0000;
     TRISE=0x7000;
-    TRISF=0x0000;
-    TRISG=0xFFFF;
-    //set digital outputs
-    PORTA=PORTB=PORTC=PORTD=PORTE=PORTF=PORTG=0x0000;
-    PORTD=0x0040;
+    TRISG=0xFFFF;   //PORTG all inputs
+    
+    /* DIGITAL OUTPUT LATCH */
+    LATA=LATB=LATC=LATD=LATE=LATF=LATG=0x0000;
+    LATA=0x0040;
+    
     //weak internal pull ups
-    CNPUG=0xFFFF;       //weak pull ups on G
+    CNPUG=0xFFFF;       //weak pull ups on all of G
 }
 
 //Description: Initializes UART1 device & interrupts
@@ -110,7 +110,11 @@ void initADC1(void){
 }
 
 void initPMP(void){
-    //init PMP here
+    /*
+     Data is clocked on falling edge of E
+     *  RS = 44 = PMAO (H = display data, L = display instruction)
+     *  E = 72 = CS1 (pulse width 450ns MIN, data triggers from H to L) 
+     */
     PMMODEbits.MODE=3;  //master mode 1 
     PMCONbits.PTWREN = 1;
     PMCONbits.PTRDEN = 1;

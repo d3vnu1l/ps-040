@@ -57,17 +57,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=devInits.c main.c utilitites.c routines.c sounds.c audio.c
+SOURCEFILES_QUOTED_IF_SPACED=devInits.c main.c utilitites.c routines.c sounds.c audio.c plcd.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/devInits.o ${OBJECTDIR}/main.o ${OBJECTDIR}/utilitites.o ${OBJECTDIR}/routines.o ${OBJECTDIR}/sounds.o ${OBJECTDIR}/audio.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/devInits.o.d ${OBJECTDIR}/main.o.d ${OBJECTDIR}/utilitites.o.d ${OBJECTDIR}/routines.o.d ${OBJECTDIR}/sounds.o.d ${OBJECTDIR}/audio.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/devInits.o ${OBJECTDIR}/main.o ${OBJECTDIR}/utilitites.o ${OBJECTDIR}/routines.o ${OBJECTDIR}/sounds.o ${OBJECTDIR}/audio.o ${OBJECTDIR}/plcd.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/devInits.o.d ${OBJECTDIR}/main.o.d ${OBJECTDIR}/utilitites.o.d ${OBJECTDIR}/routines.o.d ${OBJECTDIR}/sounds.o.d ${OBJECTDIR}/audio.o.d ${OBJECTDIR}/plcd.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/devInits.o ${OBJECTDIR}/main.o ${OBJECTDIR}/utilitites.o ${OBJECTDIR}/routines.o ${OBJECTDIR}/sounds.o ${OBJECTDIR}/audio.o
+OBJECTFILES=${OBJECTDIR}/devInits.o ${OBJECTDIR}/main.o ${OBJECTDIR}/utilitites.o ${OBJECTDIR}/routines.o ${OBJECTDIR}/sounds.o ${OBJECTDIR}/audio.o ${OBJECTDIR}/plcd.o
 
 # Source Files
-SOURCEFILES=devInits.c main.c utilitites.c routines.c sounds.c audio.c
+SOURCEFILES=devInits.c main.c utilitites.c routines.c sounds.c audio.c plcd.c
 
 
 CFLAGS=
@@ -136,6 +136,13 @@ ${OBJECTDIR}/audio.o: audio.c  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} $(MP_EXTRA_CC_PRE)  audio.c  -o ${OBJECTDIR}/audio.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/audio.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/audio.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
+${OBJECTDIR}/plcd.o: plcd.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/plcd.o.d 
+	@${RM} ${OBJECTDIR}/plcd.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  plcd.c  -o ${OBJECTDIR}/plcd.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/plcd.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off  
+	@${FIXDEPS} "${OBJECTDIR}/plcd.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
 else
 ${OBJECTDIR}/devInits.o: devInits.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
@@ -178,6 +185,13 @@ ${OBJECTDIR}/audio.o: audio.c  nbproject/Makefile-${CND_CONF}.mk
 	@${RM} ${OBJECTDIR}/audio.o 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  audio.c  -o ${OBJECTDIR}/audio.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/audio.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/audio.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
+${OBJECTDIR}/plcd.o: plcd.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/plcd.o.d 
+	@${RM} ${OBJECTDIR}/plcd.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  plcd.c  -o ${OBJECTDIR}/plcd.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/plcd.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off  
+	@${FIXDEPS} "${OBJECTDIR}/plcd.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 endif
 
