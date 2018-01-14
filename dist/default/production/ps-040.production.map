@@ -138,14 +138,14 @@ Program Memory  [Origin = 0x200, Length = 0x555ec]
 section                    address   length (PC units)   length (bytes) (dec)
 -------                    -------   -----------------   --------------------
 .text                        0x200              0x10e4          0x1956  (6486)
-_f6d47a6c5a5ad4e7           0x12e4              0x2b60          0x4110  (16656)
-_f6d47bdc5a5ad4e7           0x3e44              0x2b60          0x4110  (16656)
+_f6d4ca6c5a5ae240           0x12e4              0x2b60          0x4110  (16656)
+_f6d4cbdc5a5ae240           0x3e44              0x2b60          0x4110  (16656)
 .const                      0x69a4               0x81a           0xc27  (3111)
-.text                       0x71be               0x654           0x97e  (2430)
-.dinit                      0x7812               0x10c           0x192  (402)
-.text                       0x791e                0x8c            0xd2  (210)
+.text                       0x71be               0x632           0x94b  (2379)
+.dinit                      0x77f0               0x10c           0x192  (402)
+.text                       0x78fc                0x8c            0xd2  (210)
 
-                 Total program memory used (bytes):         0xb37f  (45951) 8%
+                 Total program memory used (bytes):         0xb34c  (45900) 8%
 
 
 Ivt Memory  [Origin = 0x4, Length = 0x1fc]
@@ -334,20 +334,20 @@ External Symbols in Program Memory (by address):
                   0x00736c                  _initDCI_DAC
                   0x0073bc                  _Delay_us
                   0x0073ce                  _initPMP
-                  0x00744c                  _initADC1
-                  0x007472                  _scanMatrix
-                  0x007522                  _readPots
-                  0x007620                  _display
-                  0x00765c                  _mixer
-                  0x007728                  _fx
-                  0x00791e                  _lcdWrite
-                  0x007926                  _lcdClear
-                  0x00792c                  _lcdReturn
-                  0x007932                  _lcdPwr
-                  0x007944                  _lcdCursorEn
-                  0x007956                  _lcdCursorBlink
-                  0x007968                  _initBuffer
-                  0x00797c                  _main
+                  0x00742e                  _initADC1
+                  0x007454                  _scanMatrix
+                  0x007504                  _readPots
+                  0x007602                  _display
+                  0x00763a                  _mixer
+                  0x007706                  _fx
+                  0x0078fc                  _lcdWrite
+                  0x007904                  _lcdClear
+                  0x00790a                  _lcdReturn
+                  0x007910                  _lcdPwr
+                  0x007922                  _lcdCursorEn
+                  0x007934                  _lcdCursorBlink
+                  0x007946                  _initBuffer
+                  0x00795a                  _main
                   0x0557fa                  __FGS.sec
 
 External Symbols in Program Memory (by name):
@@ -386,13 +386,13 @@ External Symbols in Program Memory (by name):
                   0x000510                  __printf_cdnopuxX
                   0x00023c                  __psv_init
                   0x000200                  __resetPRI
-                  0x007620                  _display
+                  0x007602                  _display
                   0x000e10                  _fclose
                   0x000f52                  _free
                   0x0008a0                  _fwrite
-                  0x007728                  _fx
-                  0x00744c                  _initADC1
-                  0x007968                  _initBuffer
+                  0x007706                  _fx
+                  0x00742e                  _initADC1
+                  0x007946                  _initBuffer
                   0x00736c                  _initDCI_DAC
                   0x0073ce                  _initPMP
                   0x0071be                  _initPorts
@@ -402,19 +402,19 @@ External Symbols in Program Memory (by name):
                   0x0072ea                  _initUART1
                   0x0012e4                  _kick
                   0x0069a4                  _kick_max
-                  0x007926                  _lcdClear
-                  0x007956                  _lcdCursorBlink
-                  0x007944                  _lcdCursorEn
-                  0x007932                  _lcdPwr
-                  0x00792c                  _lcdReturn
-                  0x00791e                  _lcdWrite
-                  0x00797c                  _main
+                  0x007904                  _lcdClear
+                  0x007934                  _lcdCursorBlink
+                  0x007922                  _lcdCursorEn
+                  0x007910                  _lcdPwr
+                  0x00790a                  _lcdReturn
+                  0x0078fc                  _lcdWrite
+                  0x00795a                  _main
                   0x00101c                  _malloc
                   0x000948                  _memchr
                   0x00095c                  _memcpy
-                  0x00765c                  _mixer
-                  0x007522                  _readPots
-                  0x007472                  _scanMatrix
+                  0x00763a                  _mixer
+                  0x007504                  _readPots
+                  0x007454                  _scanMatrix
                   0x0069a8                  _sintab
                   0x003e44                  _snare
                   0x0069a6                  _snare_max
@@ -659,15 +659,15 @@ __FUID3
  .debug_abbrev    0x000481         0xc9 build/default/production/audio.o
  .debug_abbrev    0x00054a        0x100 build/default/production/plcd.o
 
-.debug_line       0x000000        0x57a
+.debug_line       0x000000        0x573
  *(.debug_line)
- .debug_line      0x000000        0x12d build/default/production/devInits.o
- .debug_line      0x00012d         0x8c build/default/production/main.o
- .debug_line      0x0001b9        0x11b build/default/production/utilitites.o
- .debug_line      0x0002d4         0xf4 build/default/production/routines.o
- .debug_line      0x0003c8         0x69 build/default/production/sounds.o
- .debug_line      0x000431         0xb4 build/default/production/audio.o
- .debug_line      0x0004e5         0x95 build/default/production/plcd.o
+ .debug_line      0x000000        0x127 build/default/production/devInits.o
+ .debug_line      0x000127         0x8c build/default/production/main.o
+ .debug_line      0x0001b3        0x11a build/default/production/utilitites.o
+ .debug_line      0x0002cd         0xf4 build/default/production/routines.o
+ .debug_line      0x0003c1         0x69 build/default/production/sounds.o
+ .debug_line      0x00042a         0xb4 build/default/production/audio.o
+ .debug_line      0x0004de         0x95 build/default/production/plcd.o
 
 .debug_frame      0x000000        0x2c8
  *(.debug_frame)
@@ -2789,15 +2789,15 @@ __c30_signature
  .ivt._SPI3Interrupt
                   0x0000ca          0x2 build/default/production/routines.o
 
-_f6d47a6c5a5ad4e7
+_f6d4ca6c5a5ae240
                     0x92e4       0x2b60 load address 0x0012e4  
- _f6d47a6c5a5ad4e7
+ _f6d4ca6c5a5ae240
                     0x92e4       0x2b60 build/default/production/sounds.o
                     0x92e4                  _kick
 
-_f6d47bdc5a5ad4e7
+_f6d4cbdc5a5ae240
                     0xbe44       0x2b60 load address 0x003e44  
- _f6d47bdc5a5ad4e7
+ _f6d4cbdc5a5ae240
                     0xbe44       0x2b60 build/default/production/sounds.o
                     0xbe44                  _snare
 
@@ -2808,8 +2808,8 @@ _f6d47bdc5a5ad4e7
                     0xe9a8                  _sintab
  .const             0xf1a8         0x16 build/default/production/utilitites.o
 
-.text             0x0071be        0x654
- .text            0x0071be        0x2b4 build/default/production/devInits.o
+.text             0x0071be        0x632
+ .text            0x0071be        0x296 build/default/production/devInits.o
                   0x0071be                  _initPorts
                   0x0072ea                  _initUART1
                   0x00730c                  _initT1
@@ -2818,26 +2818,26 @@ _f6d47bdc5a5ad4e7
                   0x00736c                  _initDCI_DAC
                   0x0073bc                  _Delay_us
                   0x0073ce                  _initPMP
-                  0x00744c                  _initADC1
- .text            0x007472        0x1ea build/default/production/utilitites.o
-                  0x007472                  _scanMatrix
-                  0x007522                  _readPots
-                  0x007620                  _display
- .text            0x00765c        0x1b6 build/default/production/audio.o
-                  0x00765c                  _mixer
-                  0x007728                  _fx
+                  0x00742e                  _initADC1
+ .text            0x007454        0x1e6 build/default/production/utilitites.o
+                  0x007454                  _scanMatrix
+                  0x007504                  _readPots
+                  0x007602                  _display
+ .text            0x00763a        0x1b6 build/default/production/audio.o
+                  0x00763a                  _mixer
+                  0x007706                  _fx
 
-.dinit            0x007812        0x10c
- .dinit           0x007812        0x10c data_init
+.dinit            0x0077f0        0x10c
+ .dinit           0x0077f0        0x10c data_init
 
-.text             0x00791e         0x8c
- .text            0x00791e         0x4a build/default/production/plcd.o
-                  0x00791e                  _lcdWrite
-                  0x007926                  _lcdClear
-                  0x00792c                  _lcdReturn
-                  0x007932                  _lcdPwr
-                  0x007944                  _lcdCursorEn
-                  0x007956                  _lcdCursorBlink
- .text            0x007968         0x42 build/default/production/main.o
-                  0x007968                  _initBuffer
-                  0x00797c                  _main
+.text             0x0078fc         0x8c
+ .text            0x0078fc         0x4a build/default/production/plcd.o
+                  0x0078fc                  _lcdWrite
+                  0x007904                  _lcdClear
+                  0x00790a                  _lcdReturn
+                  0x007910                  _lcdPwr
+                  0x007922                  _lcdCursorEn
+                  0x007934                  _lcdCursorBlink
+ .text            0x007946         0x42 build/default/production/main.o
+                  0x007946                  _initBuffer
+                  0x00795a                  _main
