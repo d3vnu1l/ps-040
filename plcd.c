@@ -8,7 +8,7 @@
 
 #include "xc.h"
 unsigned int statusReg = 0x0C;  //internal copy of pwr reg
-                                // 0b_0 0 0 0_1 D C B (display, cursor, blink)
+                                // 0b_0 0 0 0 - 1 D C B (display, cursor, blink)
 
 void lcdWrite(unsigned int data){
     if(!PMMODEbits.BUSY) PMDIN1=data; //(!skips if busy!)
