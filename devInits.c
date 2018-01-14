@@ -135,7 +135,7 @@ void initPMP(void){
     
     /* INIT DEVICE */
     Delay_us(40000);
-    lcdWrite(0x30);   //function set, 8 bits, 1 line disp, 5x8
+    lcdWrite(0x38);   //function set, 8 bits, 1 line disp, 5x8
     Delay_us(4500);    //>4.1 mS required
     if(PMMODEbits.BUSY);  PMDIN1=0x0F;
     Delay_us(4500);
@@ -143,6 +143,7 @@ void initPMP(void){
     Delay_us(1800);     //>1.64mS required
     lcdWrite(0x07);      // entry Mode Set
     Delay_us(200);
+    LCD_RS=1;
 }
 
 

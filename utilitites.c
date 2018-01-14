@@ -142,7 +142,7 @@ void readPots(void){
 
 void display(void){
     
-   //lcdWrite(0xFF);
+   lcdWrite(0x41);
    
    if(hard_clipped==TRUE){                                                     //CLIP CONTROL    
         HARD_CLIP_LED=1;
