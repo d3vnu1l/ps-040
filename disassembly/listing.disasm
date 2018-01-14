@@ -1,390 +1,417 @@
-Disassembly Listing for sampler_0.43
+Disassembly Listing for sampler_0.49.2
 Generated From:
-D:/sampler_0.43/dist/default/production/sampler_0.43.production.elf
-Feb 25, 2017 1:30:56 AM
+/home/fbuga/Documents/ps-040/dist/default/production/ps-040.production.elf
+Jan 13, 2018 6:29:36 PM
 
----  D:/sampler_0.43/utilitites.c  ----------------------------------------------------------------------
-1:                 #include <xc.h>
-2:                 #include <p33EP512GM310.h>
-3:                 #include <libpic30.h>
-4:                 #include <dsp.h>
-5:                 #include <stdio.h>
-6:                 #include "common.h"
-7:                 #include "utilities.h"
+---  /home/fbuga/Documents/ps-040/utilitites.c  ---------------------------------------------------------
+1:                 #include "utilities.h"
+2:                 #include <xc.h>
+3:                 #include <p33EP512GM310.h>
+4:                 #include <libpic30.h>
+5:                 #include <dsp.h>
+6:                 #include <stdio.h>
+7:                 #include <stdlib.h>
 8:                 #include <math.h>
-9:                 #include "sounds.h"
-10:                #include "audio.h"
-11:                
-12:                
-13:                //CONTROL VARIABLES//
-14:                extern char pad[8];
-15:                extern fractional pots[4];
-16:                extern fractional pots_scaled[4];
-17:                
-18:                //STATUS VARIABLES//
-19:                extern unsigned char hard_clipped;
-20:                extern unsigned char UART_EN;
-21:                
-22:                //FX FLAGS & VARS
-23:                extern unsigned char tremelo, looper, lpf;
-24:                extern unsigned int tremelo_ptr, tremelo_length, trem_var;
-25:                extern unsigned int loop_lim;
-26:                extern fractional lpf_alpha, lpf_inv_alpha;
-27:                extern fractional tremelo_depth;
-28:                
-29:                void scanMatrix(void){
-30:                    static unsigned char pad_last[8] = {1,1,1,1,1,1,1,1};
-31:                    pad[0]=p0;
-0074E4  807311     MOV PORTG, W1
-0074E6  266640     MOV #0x6664, W0
-0074E8  60C861     AND.B W1, #0x1, [W0]
-32:                    pad[1]=p1;
-0074EA  807311     MOV PORTG, W1
-0074EC  DE08CA     LSR W1, #10, W1
-0074EE  E80000     INC W0, W0
-0074F0  60C861     AND.B W1, #0x1, [W0]
-33:                    pad[2]=p2;
-0074F2  807311     MOV PORTG, W1
-0074F4  DE08CC     LSR W1, #12, W1
-0074F6  E80000     INC W0, W0
-0074F8  60C861     AND.B W1, #0x1, [W0]
-34:                    pad[3]=p3;
-0074FA  807311     MOV PORTG, W1
-0074FC  DE08CE     LSR W1, #14, W1
-0074FE  E80000     INC W0, W0
-007500  60C861     AND.B W1, #0x1, [W0]
-35:                    pad[4]=p4;
-007502  D50E62     LSR PORTG, WREG
-007504  604061     AND.B W0, #0x1, W0
-007506  266681     MOV #0x6668, W1
-007508  784880     MOV.B W0, [W1]
-36:                    pad[5]=p5;
-00750A  807312     MOV PORTG, W2
-00750C  DE1143     LSR W2, #3, W2
-00750E  E80081     INC W1, W1
-007510  6148E1     AND.B W2, #0x1, [W1]
-37:                    pad[6]=p6;
-007512  807312     MOV PORTG, W2
-007514  DE114B     LSR W2, #11, W2
-007516  E80081     INC W1, W1
-007518  6148E1     AND.B W2, #0x1, [W1]
-38:                    pad[7]=p7;
-00751A  807312     MOV PORTG, W2
-00751C  DE114D     LSR W2, #13, W2
-00751E  E80081     INC W1, W1
-007520  6148E1     AND.B W2, #0x1, [W1]
-39:                    if(pad[4]==0&&pad_last[4]==1){                                              //TREMELO CONTROL
-007522  E00400     CP0.B W0
-007524  3A0013     BRA NZ, 0x754C
-007526  26F341     MOV #0x6F34, W1
-007528  B3C012     MOV.B #0x1, W2
-00752A  114F91     SUBR.B W2, [W1], [W15]
-00752C  3A000F     BRA NZ, 0x754C
-40:                        pad_last[4]=0;
-00752E  780001     MOV W1, W0
-007530  EB4800     CLR.B [W0]
-41:                        if(tremelo==FALSE)
-007532  E2501C     CP0.B tremelo
-007534  3A0002     BRA NZ, 0x753A
-42:                            tremelo=TRUE;
-007536  EFF01C     SETM.B tremelo
-007538  370001     BRA 0x753C
-43:                        else tremelo=FALSE;
-00753A  EF701C     CLR.B tremelo
-44:                        TREMELO_LED=tremelo;
-00753C  BFD01C     MOV.B tremelo, WREG
-00753E  DD004F     SL W0, #15, W0
-007540  27FFF1     MOV #0x7FFF, W1
-007542  8071A2     MOV LATD, W2
-007544  608082     AND W1, W2, W1
-007546  700081     IOR W0, W1, W1
-007548  8871A1     MOV W1, LATD
-00754A  370002     BRA 0x7550
-45:                    }
-46:                    else{
-47:                        pad_last[4]=pad[4];
-00754C  26F341     MOV #0x6F34, W1
-00754E  784880     MOV.B W0, [W1]
-48:                    }
-49:                   
-50:                    if(pad[5]==0){                                                              //LOOPER CONTROL
-007550  266690     MOV #0x6669, W0
-007552  E00410     CP0.B [W0]
-007554  3A0003     BRA NZ, 0x755C
-51:                        looper=TRUE;
-007556  EFF01D     SETM.B looper
-52:                        YLED=looper;
-007558  A82E44     BSET LATE, #1
-00755A  370002     BRA 0x7560
-53:                    }
-54:                    else {
-55:                        looper=FALSE;
-00755C  EF701D     CLR.B looper
-56:                        YLED=looper;
-00755E  A92E44     BCLR LATE, #1
-57:                    }
-58:                   
-59:                    if(pad[6]==0&&pad_last[6]==1){                                              //LPF CONTROL
-007560  2666A0     MOV #0x666A, W0
-007562  784010     MOV.B [W0], W0
-007564  E00400     CP0.B W0
-007566  3A0013     BRA NZ, 0x758E
-007568  26F361     MOV #0x6F36, W1
-00756A  B3C012     MOV.B #0x1, W2
-00756C  114F91     SUBR.B W2, [W1], [W15]
-00756E  3A000F     BRA NZ, 0x758E
-60:                        pad_last[6]=0;
-007570  780001     MOV W1, W0
-007572  EB4800     CLR.B [W0]
-61:                        if(lpf==FALSE)
-007574  E2501E     CP0.B lpf
-007576  3A0002     BRA NZ, 0x757C
-62:                            lpf=TRUE;
-007578  EFF01E     SETM.B lpf
-00757A  370001     BRA 0x757E
-63:                        else lpf=FALSE;
-00757C  EF701E     CLR.B lpf
-64:                        GLED=lpf;
-00757E  BFD01E     MOV.B lpf, WREG
-007580  600061     AND W0, #0x1, W0
-007582  DD0044     SL W0, #4, W0
-007584  807121     MOV LATC, W1
-007586  A14001     BCLR W1, #4
-007588  700081     IOR W0, W1, W1
-00758A  887121     MOV W1, LATC
-00758C  370002     BRA 0x7592
-65:                    }
-66:                    else{
-67:                        pad_last[6]=pad[6];
-00758E  26F361     MOV #0x6F36, W1
-007590  784880     MOV.B W0, [W1]
-68:                    }
-69:                }
-007592  060000     RETURN
-70:                
-71:                void readPots(void){
-72:                    AD1CON1bits.SAMP = 0;      // start sampling
-007594  A92320     BCLR AD1CON1, #1
-73:                    while (!_AD1IF);           //wait for conversions to complete
-007596  220001     MOV #0x2000, W1
-007598  804002     MOV IFS0, W2
-00759A  608002     AND W1, W2, W0
-00759C  32FFFD     BRA Z, 0x7598
-74:                    _AD1IF = 0;                //clear status bit
-00759E  A9A801     BCLR 0x801, #5
-75:                    pots[0]=(ADC1BUF0>>1)+0x1F;
-0075A0  210000     MOV #0x1000, W0
-0075A2  801801     MOV ADC1BUF0, W1
-0075A4  D10081     LSR W1, W1
-0075A6  40887F     ADD W1, #0x1F, [W0]
-76:                    pots[1]=(ADC1BUF1>>1)+0x1F;
-0075A8  801811     MOV ADC1BUF1, W1
-0075AA  D10081     LSR W1, W1
-0075AC  4080FF     ADD W1, #0x1F, W1
-0075AE  980011     MOV W1, [W0+2]
-77:                    pots[2]=(ADC1BUF2>>1)+0x1F;
-0075B0  801821     MOV ADC1BUF2, W1
-0075B2  D10081     LSR W1, W1
-0075B4  4080FF     ADD W1, #0x1F, W1
-0075B6  980021     MOV W1, [W0+4]
-78:                    pots[3]=(ADC1BUF3>>1)+0x1F;
-0075B8  801832     MOV ADC1BUF3, W2
-0075BA  D10102     LSR W2, W2
-0075BC  41017F     ADD W2, #0x1F, W2
-0075BE  980032     MOV W2, [W0+6]
-79:                    //pot scaling 
-80:                    if(pots[2]<=2048)
-0075C0  208000     MOV #0x800, W0
-0075C2  508F80     SUB W1, W0, [W15]
-0075C4  3C0003     BRA GT, 0x75CC
-81:                        pots_scaled[2]=8;
-0075C6  200080     MOV #0x8, W0
-0075C8  888060     MOV W0, 0x100C
-0075CA  370056     BRA 0x7678
-82:                    else if(pots[2]<=4096)
-0075CC  210000     MOV #0x1000, W0
-0075CE  508F80     SUB W1, W0, [W15]
-0075D0  3C0003     BRA GT, 0x75D8
-83:                        pots_scaled[2]=12;
-0075D2  2000C0     MOV #0xC, W0
-0075D4  888060     MOV W0, 0x100C
-0075D6  370050     BRA 0x7678
-84:                    else if(pots[2]<=6144)
-0075D8  218000     MOV #0x1800, W0
-0075DA  508F80     SUB W1, W0, [W15]
-0075DC  3C0003     BRA GT, 0x75E4
-85:                        pots_scaled[2]=14;
-0075DE  2000E0     MOV #0xE, W0
-0075E0  888060     MOV W0, 0x100C
-0075E2  37004A     BRA 0x7678
-86:                    else if(pots[2]<=8192)
-0075E4  220000     MOV #0x2000, W0
-0075E6  508F80     SUB W1, W0, [W15]
-0075E8  3C0003     BRA GT, 0x75F0
-87:                        pots_scaled[2]=16;
-0075EA  200100     MOV #0x10, W0
-0075EC  888060     MOV W0, 0x100C
-0075EE  370044     BRA 0x7678
-88:                    else if(pots[2]<=10240)
-0075F0  228000     MOV #0x2800, W0
-0075F2  508F80     SUB W1, W0, [W15]
-0075F4  3C0003     BRA GT, 0x75FC
-89:                        pots_scaled[2]=19;
-0075F6  200130     MOV #0x13, W0
-0075F8  888060     MOV W0, 0x100C
-0075FA  37003E     BRA 0x7678
-90:                    else if(pots[2]<=12288)
-0075FC  230000     MOV #0x3000, W0
-0075FE  508F80     SUB W1, W0, [W15]
-007600  3C0003     BRA GT, 0x7608
-91:                        pots_scaled[2]=23;
-007602  200170     MOV #0x17, W0
-007604  888060     MOV W0, 0x100C
-007606  370038     BRA 0x7678
-92:                    else if(pots[2]<=14336)
-007608  238000     MOV #0x3800, W0
-00760A  508F80     SUB W1, W0, [W15]
-00760C  3C0003     BRA GT, 0x7614
-93:                        pots_scaled[2]=28;
-00760E  2001C0     MOV #0x1C, W0
-007610  888060     MOV W0, 0x100C
-007612  370032     BRA 0x7678
-94:                    else if(pots[2]<=16384)
-007614  240000     MOV #0x4000, W0
-007616  508F80     SUB W1, W0, [W15]
-007618  3C0003     BRA GT, 0x7620
-95:                        pots_scaled[2]=32;
-00761A  200200     MOV #0x20, W0
-00761C  888060     MOV W0, 0x100C
-00761E  37002C     BRA 0x7678
-96:                    else if(pots[2]<=18432)
-007620  248000     MOV #0x4800, W0
-007622  508F80     SUB W1, W0, [W15]
-007624  3C0003     BRA GT, 0x762C
-97:                        pots_scaled[2]=36;
-007626  200240     MOV #0x24, W0
-007628  888060     MOV W0, 0x100C
-00762A  370026     BRA 0x7678
-98:                    else if(pots[2]<=20480)
-00762C  250000     MOV #0x5000, W0
-00762E  508F80     SUB W1, W0, [W15]
-007630  3C0003     BRA GT, 0x7638
-99:                        pots_scaled[2]=40;
-007632  200280     MOV #0x28, W0
-007634  888060     MOV W0, 0x100C
-007636  370020     BRA 0x7678
-100:                   else if(pots[2]<=22528)
-007638  258000     MOV #0x5800, W0
-00763A  508F80     SUB W1, W0, [W15]
-00763C  3C0003     BRA GT, 0x7644
-101:                       pots_scaled[2]=44;
-00763E  2002C0     MOV #0x2C, W0
-007640  888060     MOV W0, 0x100C
-007642  37001A     BRA 0x7678
-102:                   else if(pots[2]<=24576)
-007644  260000     MOV #0x6000, W0
-007646  508F80     SUB W1, W0, [W15]
-007648  3C0003     BRA GT, 0x7650
-103:                       pots_scaled[2]=48;
-00764A  200300     MOV #0x30, W0
-00764C  888060     MOV W0, 0x100C
-00764E  370014     BRA 0x7678
-104:                   else if(pots[2]<=26624)
-007650  268000     MOV #0x6800, W0
-007652  508F80     SUB W1, W0, [W15]
-007654  3C0003     BRA GT, 0x765C
-105:                       pots_scaled[2]=52;
-007656  200340     MOV #0x34, W0
-007658  888060     MOV W0, 0x100C
-00765A  37000E     BRA 0x7678
-106:                   else if(pots[2]<=28672)
-00765C  270000     MOV #0x7000, W0
-00765E  508F80     SUB W1, W0, [W15]
-007660  3C0003     BRA GT, 0x7668
-107:                       pots_scaled[2]=56;
-007662  200380     MOV #0x38, W0
-007664  888060     MOV W0, 0x100C
-007666  370008     BRA 0x7678
-108:                   else if(pots[2]<=30720)
-007668  278000     MOV #0x7800, W0
-00766A  508F80     SUB W1, W0, [W15]
-00766C  3C0003     BRA GT, 0x7674
-109:                       pots_scaled[2]=60;
-00766E  2003C0     MOV #0x3C, W0
-007670  888060     MOV W0, 0x100C
-007672  370002     BRA 0x7678
-110:                   else if(pots[2]<=32768)
-111:                       pots_scaled[2]=64;
-007674  200400     MOV #0x40, W0
-007676  888060     MOV W0, 0x100C
-112:                   else if(pots[2]<=34816)
-113:                       pots_scaled[2]=68;
-114:                   else 
-115:                       pots_scaled[2]=72;
-116:                                                                                                
-117:                   loop_lim=154*pots_scaled[2];                                                //LOOPER CONTROL
-007678  2009A0     MOV #0x9A, W0
-00767A  808061     MOV 0x100C, W1
-00767C  B98880     MULW.SS W1, W0, W0
-00767E  888110     MOV W0, loop_lim
-118:                   if(pots[1]>=310){                                                           //LPF CONTROL
-007680  808010     MOV 0x1002, W0
-007682  201351     MOV #0x135, W1
-007684  500F81     SUB W0, W1, [W15]
-007686  340004     BRA LE, 0x7690
-119:                       lpf_alpha=pots[1];
-007688  8881C0     MOV W0, 0x1038
-120:                       lpf_inv_alpha=(32767-lpf_alpha); 
-00768A  27FFF1     MOV #0x7FFF, W1
-00768C  508000     SUB W1, W0, W0
-00768E  8881D0     MOV W0, 0x103A
-121:                   }
-122:                   //tremelo_depth=pots[4];
-123:                           
-124:               }
-007690  060000     RETURN
-125:               
-126:               //writes to SPI2BUF to trigger spi transfer
-127:               void readDAC(void){
-128:                   ADC_CONV=0;
-007692  A96E15     BCLR 0xE15, #3
-129:                   SPI2BUF=0x0000;
-007694  EF2268     CLR SPI2BUF
-130:               }
-007696  060000     RETURN
-131:               
-132:               void display(void){
-133:                  SLED=~SLED;
-007698  8072A0     MOV LATF, W0
-00769A  EA8000     COM W0, W0
-00769C  600061     AND W0, #0x1, W0
-00769E  8072A1     MOV LATF, W1
-0076A0  A10001     BCLR W1, #0
-0076A2  700081     IOR W0, W1, W1
-0076A4  8872A1     MOV W1, LATF
-134:                   if(hard_clipped==TRUE){                                                     //CLIP CONTROL    
-0076A6  BFD018     MOV.B hard_clipped, WREG
-0076A8  404FE1     ADD.B W0, #0x1, [W15]
-0076AA  3A0003     BRA NZ, 0x76B2
-135:                       HARD_CLIP_LED=1;
-0076AC  A82E24     BSET LATC, #1
-136:                       hard_clipped=FALSE;
-0076AE  EF7018     CLR.B hard_clipped
-0076B0  370001     BRA 0x76B4
-137:                   } else HARD_CLIP_LED=0;
-0076B2  A92E24     BCLR LATC, #1
-138:                   if(UART_EN==TRUE){
-139:                       //IC1CON2bits.TRIGSTAT = ~pad[4]; 
-140:                       //printf("b1 %d, b2 %d, b3 %d, b4 %d\r\n", pad[0], pad[1], pad[2], pad[3]);
-141:                       //printf("b4 %d, b5 %d, b6 %d, b7 %d\r\n", pad[4], pad[5], pad[6], pad[7]);
-142:                       //printf("P1 %x  P1 %d bpm %d\r\n", pots[0], pots[0], bpm);   //check pots
-143:                       //printf("P1 %d  P2 %d P3 %d\r\n", pots[0], pots[1], pots[2]);   //check pots
-144:                       //printf("%x, %d, min %d, max %d, avg %d\r\n", sample, sample, min, max, average);  //check input ADC
-145:                       //printf("%d, pot1 %x, pot2 %x, avg %x\r\n", sample, pots[1], pots[2], average);  //check input ADC
-146:                   }
-147:               }
-0076B4  060000     RETURN
----  D:/sampler_0.43/routines.c  ------------------------------------------------------------------------
+9:                 #include "common.h"
+10:                #include "sounds.h"
+11:                #include "audio.h"
+12:                #include "plcd.h"
+13:                
+14:                
+15:                //CONTROL VARIABLES//
+16:                extern char pad[8];
+17:                extern fractional pots[4];
+18:                extern fractional pots_scaled[4];
+19:                extern unsigned char UART_ON;
+20:                
+21:                //STATUS VARIABLES//
+22:                extern unsigned char hard_clipped;
+23:                extern unsigned char UART_EN;
+24:                
+25:                extern fractional sample;
+26:                
+27:                //FX FLAGS & VARS
+28:                extern unsigned char tremelo, looper, lpf;
+29:                extern unsigned int tremelo_ptr, tremelo_length, trem_var;
+30:                extern unsigned int loop_lim;
+31:                extern fractional lpf_alpha, lpf_inv_alpha;
+32:                extern fractional tremelo_depth;
+33:                
+34:                void scanMatrix(void){
+35:                    static unsigned char pad_last[8] = {1,1,1,1,1,1,1,1};
+36:                    
+37:                    pad[0]=p0;
+007418  807311     MOV PORTG, W1
+00741A  DE08CE     LSR W1, #14, W1
+00741C  2666A0     MOV #0x666A, W0
+00741E  60C861     AND.B W1, #0x1, [W0]
+38:                    pad[1]=p1;
+007420  807311     MOV PORTG, W1
+007422  DE08CA     LSR W1, #10, W1
+007424  E80000     INC W0, W0
+007426  60C861     AND.B W1, #0x1, [W0]
+39:                    pad[2]=p2;
+007428  807311     MOV PORTG, W1
+00742A  D10081     LSR W1, W1
+00742C  E80000     INC W0, W0
+00742E  60C861     AND.B W1, #0x1, [W0]
+40:                    pad[3]=p3;
+007430  807311     MOV PORTG, W1
+007432  E80000     INC W0, W0
+007434  60C861     AND.B W1, #0x1, [W0]
+41:                    pad[4]=p4;
+007436  807311     MOV PORTG, W1
+007438  DE08CC     LSR W1, #12, W1
+00743A  E80000     INC W0, W0
+00743C  60C861     AND.B W1, #0x1, [W0]
+42:                    pad[5]=p5;
+00743E  807311     MOV PORTG, W1
+007440  DE08C3     LSR W1, #3, W1
+007442  E80000     INC W0, W0
+007444  60C861     AND.B W1, #0x1, [W0]
+43:                    pad[6]=p6;
+007446  807311     MOV PORTG, W1
+007448  DE08CB     LSR W1, #11, W1
+00744A  E80000     INC W0, W0
+00744C  60C861     AND.B W1, #0x1, [W0]
+44:                    pad[7]=p7;
+00744E  807310     MOV PORTG, W0
+007450  DE004D     LSR W0, #13, W0
+007452  604061     AND.B W0, #0x1, W0
+007454  266711     MOV #0x6671, W1
+007456  784880     MOV.B W0, [W1]
+45:                    
+46:                    if(pad[7]==0&&pad_last[7]==1){                                              //TREMELO CONTROL
+007458  3A0013     BRA NZ, 0x7480
+00745A  26B3D1     MOV #0x6B3D, W1
+00745C  B3C012     MOV.B #0x1, W2
+00745E  114F91     SUBR.B W2, [W1], [W15]
+007460  3A000F     BRA NZ, 0x7480
+47:                        pad_last[7]=0;
+007462  780001     MOV W1, W0
+007464  EB4800     CLR.B [W0]
+48:                        if(tremelo==FALSE)
+007466  E2501D     CP0.B tremelo
+007468  3A0002     BRA NZ, 0x746E
+49:                            tremelo=TRUE;
+00746A  EFF01D     SETM.B tremelo
+00746C  370001     BRA 0x7470
+50:                        else tremelo=FALSE;
+00746E  EF701D     CLR.B tremelo
+51:                        TREMELO_LED=tremelo;
+007470  BFD01D     MOV.B tremelo, WREG
+007472  DD004F     SL W0, #15, W0
+007474  27FFF1     MOV #0x7FFF, W1
+007476  8071A2     MOV LATD, W2
+007478  608082     AND W1, W2, W1
+00747A  700081     IOR W0, W1, W1
+00747C  8871A1     MOV W1, LATD
+00747E  370002     BRA 0x7484
+52:                    }
+53:                    else{
+54:                        pad_last[7]=pad[7];
+007480  26B3D1     MOV #0x6B3D, W1
+007482  784880     MOV.B W0, [W1]
+55:                    }
+56:                    
+57:                    if(pad[4]==0){                                                              //LOOPER CONTROL
+007484  2666E0     MOV #0x666E, W0
+007486  E00410     CP0.B [W0]
+007488  3A0003     BRA NZ, 0x7490
+58:                        looper=TRUE;
+00748A  EFF01E     SETM.B looper
+59:                        YLED=looper;
+00748C  A82E44     BSET LATE, #1
+00748E  370002     BRA 0x7494
+60:                    }
+61:                    else {
+62:                        looper=FALSE;
+007490  EF701E     CLR.B looper
+63:                        YLED=looper;
+007492  A92E44     BCLR LATE, #1
+64:                    }
+65:                   
+66:                    if(pad[0]==0&&pad_last[0]==1){                                              //LPF CONTROL
+007494  2666A0     MOV #0x666A, W0
+007496  784010     MOV.B [W0], W0
+007498  E00400     CP0.B W0
+00749A  3A0013     BRA NZ, 0x74C2
+00749C  26B361     MOV #0x6B36, W1
+00749E  B3C012     MOV.B #0x1, W2
+0074A0  114F91     SUBR.B W2, [W1], [W15]
+0074A2  3A000F     BRA NZ, 0x74C2
+67:                        pad_last[0]=0;
+0074A4  780001     MOV W1, W0
+0074A6  EB4800     CLR.B [W0]
+68:                        if(lpf==FALSE)
+0074A8  E2501F     CP0.B lpf
+0074AA  3A0002     BRA NZ, 0x74B0
+69:                            lpf=TRUE;
+0074AC  EFF01F     SETM.B lpf
+0074AE  370001     BRA 0x74B2
+70:                        else lpf=FALSE;
+0074B0  EF701F     CLR.B lpf
+71:                        GLED=lpf;
+0074B2  BFD01F     MOV.B lpf, WREG
+0074B4  600061     AND W0, #0x1, W0
+0074B6  DD0044     SL W0, #4, W0
+0074B8  807121     MOV LATC, W1
+0074BA  A14001     BCLR W1, #4
+0074BC  700081     IOR W0, W1, W1
+0074BE  887121     MOV W1, LATC
+0074C0  370002     BRA 0x74C6
+72:                    }
+73:                    else{
+74:                        pad_last[0]=pad[0];
+0074C2  26B361     MOV #0x6B36, W1
+0074C4  784880     MOV.B W0, [W1]
+75:                    }
+76:                    
+77:                    //lpf=TRUE;
+78:                    
+79:                    
+80:                }
+0074C6  060000     RETURN
+81:                
+82:                void readPots(void){
+83:                    volatile register int scaled asm("A");
+84:                    
+85:                    AD1CON1bits.SAMP = 0;      // start sampling
+0074C8  A92320     BCLR AD1CON1, #1
+86:                    while (!_AD1IF);           //wait for conversions to complete
+0074CA  220001     MOV #0x2000, W1
+0074CC  804002     MOV IFS0, W2
+0074CE  608002     AND W1, W2, W0
+0074D0  32FFFD     BRA Z, 0x74CC
+87:                    _AD1IF = 0;                //clear status bit
+0074D2  A9A801     BCLR 0x801, #5
+88:                    pots[0]=(ADC1BUF0>>1)+0x1F;
+0074D4  210000     MOV #0x1000, W0
+0074D6  801801     MOV ADC1BUF0, W1
+0074D8  D10081     LSR W1, W1
+0074DA  40887F     ADD W1, #0x1F, [W0]
+89:                    pots[1]=(ADC1BUF1>>1)+0x1F;
+0074DC  801811     MOV ADC1BUF1, W1
+0074DE  D10081     LSR W1, W1
+0074E0  4080FF     ADD W1, #0x1F, W1
+0074E2  980011     MOV W1, [W0+2]
+90:                    pots[2]=(ADC1BUF2>>1)+0x1F;
+0074E4  801822     MOV ADC1BUF2, W2
+0074E6  D10102     LSR W2, W2
+0074E8  41017F     ADD W2, #0x1F, W2
+0074EA  980022     MOV W2, [W0+4]
+91:                    pots[3]=(ADC1BUF3>>1)+0x1F;
+0074EC  801832     MOV ADC1BUF3, W2
+0074EE  D10102     LSR W2, W2
+0074F0  41017F     ADD W2, #0x1F, W2
+0074F2  980032     MOV W2, [W0+6]
+92:                    //pot scaling 
+93:                    
+94:                    if(pots[1]<=2048)
+0074F4  208000     MOV #0x800, W0
+0074F6  508F80     SUB W1, W0, [W15]
+0074F8  3C0003     BRA GT, 0x7500
+95:                        pots_scaled[1]=8;
+0074FA  200080     MOV #0x8, W0
+0074FC  888050     MOV W0, 0x100A
+0074FE  370056     BRA 0x75AC
+96:                    else if(pots[1]<=4096)
+007500  210000     MOV #0x1000, W0
+007502  508F80     SUB W1, W0, [W15]
+007504  3C0003     BRA GT, 0x750C
+97:                        pots_scaled[1]=12;
+007506  2000C0     MOV #0xC, W0
+007508  888050     MOV W0, 0x100A
+00750A  370050     BRA 0x75AC
+98:                    else if(pots[1]<=6144)
+00750C  218000     MOV #0x1800, W0
+00750E  508F80     SUB W1, W0, [W15]
+007510  3C0003     BRA GT, 0x7518
+99:                        pots_scaled[1]=14;
+007512  2000E0     MOV #0xE, W0
+007514  888050     MOV W0, 0x100A
+007516  37004A     BRA 0x75AC
+100:                   else if(pots[1]<=8192)
+007518  220000     MOV #0x2000, W0
+00751A  508F80     SUB W1, W0, [W15]
+00751C  3C0003     BRA GT, 0x7524
+101:                       pots_scaled[1]=16;
+00751E  200100     MOV #0x10, W0
+007520  888050     MOV W0, 0x100A
+007522  370044     BRA 0x75AC
+102:                   else if(pots[1]<=10240)
+007524  228000     MOV #0x2800, W0
+007526  508F80     SUB W1, W0, [W15]
+007528  3C0003     BRA GT, 0x7530
+103:                       pots_scaled[1]=19;
+00752A  200130     MOV #0x13, W0
+00752C  888050     MOV W0, 0x100A
+00752E  37003E     BRA 0x75AC
+104:                   else if(pots[1]<=12288)
+007530  230000     MOV #0x3000, W0
+007532  508F80     SUB W1, W0, [W15]
+007534  3C0003     BRA GT, 0x753C
+105:                       pots_scaled[1]=23;
+007536  200170     MOV #0x17, W0
+007538  888050     MOV W0, 0x100A
+00753A  370038     BRA 0x75AC
+106:                   else if(pots[1]<=14336)
+00753C  238000     MOV #0x3800, W0
+00753E  508F80     SUB W1, W0, [W15]
+007540  3C0003     BRA GT, 0x7548
+107:                       pots_scaled[1]=28;
+007542  2001C0     MOV #0x1C, W0
+007544  888050     MOV W0, 0x100A
+007546  370032     BRA 0x75AC
+108:                   else if(pots[1]<=16384)
+007548  240000     MOV #0x4000, W0
+00754A  508F80     SUB W1, W0, [W15]
+00754C  3C0003     BRA GT, 0x7554
+109:                       pots_scaled[1]=32;
+00754E  200200     MOV #0x20, W0
+007550  888050     MOV W0, 0x100A
+007552  37002C     BRA 0x75AC
+110:                   else if(pots[1]<=18432)
+007554  248000     MOV #0x4800, W0
+007556  508F80     SUB W1, W0, [W15]
+007558  3C0003     BRA GT, 0x7560
+111:                       pots_scaled[1]=36;
+00755A  200240     MOV #0x24, W0
+00755C  888050     MOV W0, 0x100A
+00755E  370026     BRA 0x75AC
+112:                   else if(pots[1]<=20480)
+007560  250000     MOV #0x5000, W0
+007562  508F80     SUB W1, W0, [W15]
+007564  3C0003     BRA GT, 0x756C
+113:                       pots_scaled[2]=40;
+007566  200280     MOV #0x28, W0
+007568  888060     MOV W0, 0x100C
+00756A  370020     BRA 0x75AC
+114:                   else if(pots[1]<=22528)
+00756C  258000     MOV #0x5800, W0
+00756E  508F80     SUB W1, W0, [W15]
+007570  3C0003     BRA GT, 0x7578
+115:                       pots_scaled[2]=44;
+007572  2002C0     MOV #0x2C, W0
+007574  888060     MOV W0, 0x100C
+007576  37001A     BRA 0x75AC
+116:                   else if(pots[1]<=24576)
+007578  260000     MOV #0x6000, W0
+00757A  508F80     SUB W1, W0, [W15]
+00757C  3C0003     BRA GT, 0x7584
+117:                       pots_scaled[1]=48;
+00757E  200300     MOV #0x30, W0
+007580  888050     MOV W0, 0x100A
+007582  370014     BRA 0x75AC
+118:                   else if(pots[1]<=26624)
+007584  268000     MOV #0x6800, W0
+007586  508F80     SUB W1, W0, [W15]
+007588  3C0003     BRA GT, 0x7590
+119:                       pots_scaled[1]=52;
+00758A  200340     MOV #0x34, W0
+00758C  888050     MOV W0, 0x100A
+00758E  37000E     BRA 0x75AC
+120:                   else if(pots[1]<=28672)
+007590  270000     MOV #0x7000, W0
+007592  508F80     SUB W1, W0, [W15]
+007594  3C0003     BRA GT, 0x759C
+121:                       pots_scaled[1]=56;
+007596  200380     MOV #0x38, W0
+007598  888050     MOV W0, 0x100A
+00759A  370008     BRA 0x75AC
+122:                   else if(pots[1]<=30720)
+00759C  278000     MOV #0x7800, W0
+00759E  508F80     SUB W1, W0, [W15]
+0075A0  3C0003     BRA GT, 0x75A8
+123:                       pots_scaled[1]=60;
+0075A2  2003C0     MOV #0x3C, W0
+0075A4  888050     MOV W0, 0x100A
+0075A6  370002     BRA 0x75AC
+124:                   else if(pots[1]<=32768)
+125:                       pots_scaled[1]=64;
+0075A8  200400     MOV #0x40, W0
+0075AA  888050     MOV W0, 0x100A
+126:                   else if(pots[1]<=34816)
+127:                       pots_scaled[1]=68;
+128:                   else 
+129:                       pots_scaled[1]=72;
+130:                    
+131:                                                                                                
+132:                   loop_lim=154*pots_scaled[1];                                                //LOOPER CONTROL
+0075AC  2009A0     MOV #0x9A, W0
+0075AE  808051     MOV 0x100A, W1
+0075B0  B98880     MULW.SS W1, W0, W0
+0075B2  888110     MOV W0, loop_lim
+133:                   if(pots[1]>=310){                                                           //LPF CONTROL
+0075B4  808010     MOV 0x1002, W0
+0075B6  201351     MOV #0x135, W1
+0075B8  500F81     SUB W0, W1, [W15]
+0075BA  340004     BRA LE, 0x75C4
+134:                       lpf_alpha=pots[1];
+0075BC  8881D0     MOV W0, 0x103A
+135:                       lpf_inv_alpha=(32767-lpf_alpha); 
+0075BE  27FFF1     MOV #0x7FFF, W1
+0075C0  508000     SUB W1, W0, W0
+0075C2  8881E0     MOV W0, 0x103C
+136:                   }
+137:                   //tremelo_depth=pots[4];
+138:                           
+139:               }
+0075C4  060000     RETURN
+140:               
+141:               void display(void){
+142:                   
+143:                  //lcdWrite(0xFF);
+144:                  PMDIN1=0xFF;
+0075C6  200FF0     MOV #0xFF, W0
+0075C8  883040     MOV W0, PMDIN1
+145:                   
+146:                  if(hard_clipped==TRUE){                                                     //CLIP CONTROL    
+0075CA  BFD018     MOV.B hard_clipped, WREG
+0075CC  404FE1     ADD.B W0, #0x1, [W15]
+0075CE  3A0003     BRA NZ, 0x75D6
+147:                       HARD_CLIP_LED=1;
+0075D0  A82E24     BSET LATC, #1
+148:                       hard_clipped=FALSE;
+0075D2  EF7018     CLR.B hard_clipped
+0075D4  370001     BRA 0x75D8
+149:                   }  else HARD_CLIP_LED=0;
+0075D6  A92E24     BCLR LATC, #1
+150:                   
+151:                  if(UART_ON==TRUE){
+0075D8  BFD01B     MOV.B UART_ON, WREG
+0075DA  404FE1     ADD.B W0, #0x1, [W15]
+0075DC  3A000A     BRA NZ, 0x75F2
+152:                       //IC1CON2bits.TRIGSTAT = ~pad[4]; 
+153:                       //printf("b1 %d, b2 %d, b3 %d, b4 %d\r\n", pad[0], pad[1], pad[2], pad[3]);
+154:                       //printf("b4 %d, b5 %d, b6 %d, b7 %d\r\n", pad[4], pad[5], pad[6], pad[7]);
+155:                       //printf("P1 %x  P1 %d bpm %d\r\n", pots[0], pots[0], bpm);   //check pots
+156:                       printf("P1 %d  P2 %d P3 %d\r\n", pots[0], pots[1], pots[2]);   //check pots
+0075DE  210000     MOV #0x1000, W0
+0075E0  9000A0     MOV [W0+4], W1
+0075E2  781F81     MOV W1, [W15++]
+0075E4  900090     MOV [W0+2], W1
+0075E6  781F81     MOV W1, [W15++]
+0075E8  781F90     MOV [W0], [W15++]
+0075EA  2F1A80     MOV #0xF1A8, W0
+0075EC  781F80     MOV W0, [W15++]
+0075EE  07C790     RCALL __printf_cdnopuxX
+0075F0  5787E8     SUB W15, #0x8, W15
+157:                       //printf("%d\r\n", sample);  //check input ADC
+158:                       //printf("%d, pot1 %x, pot2 %x, avg %x\r\n", sample, pots[1], pots[2], average);  //check input ADC
+159:                   }
+160:                  
+161:                  SLED=~SLED;
+0075F2  8072A0     MOV LATF, W0
+0075F4  EA8000     COM W0, W0
+0075F6  600061     AND W0, #0x1, W0
+0075F8  8072A1     MOV LATF, W1
+0075FA  A10001     BCLR W1, #0
+0075FC  700081     IOR W0, W1, W1
+0075FE  8872A1     MOV W1, LATF
+162:               }
+007600  060000     RETURN
+---  /home/fbuga/Documents/ps-040/routines.c  -----------------------------------------------------------
 1:                 #include <xc.h>
 2:                 #include <p33EP512GM310.h>
 3:                 #include <dsp.h>
@@ -455,1309 +482,1372 @@ Feb 25, 2017 1:30:56 AM
 00033A  F90032     POP DSRPAG
 00033C  064000     RETFIE
 42:                
-43:                //Description: This interrupt handles polling button input
-44:                //Dependencies: initADC1(); 
-45:                //Frequency: 44.1kHz
-46:                void __attribute__ ((interrupt, auto_psv)) _T3Interrupt(void){
-00033E  781F80     MOV W0, [W15++]
-000340  F80032     PUSH DSRPAG
-000342  F80034     PUSH DSWPAG
-000344  200010     MOV #0x1, W0
-000346  8801A0     MOV W0, DSWPAG
-000348  202000     MOV #0x200, W0
-00034A  880190     MOV W0, DSRPAG
-00034C  000000     NOP
-47:                    SEG_SEL=0;
-00034E  A9AE34     BCLR LATD, #5
-48:                    SPI3BUF=0x0100;
-000350  201000     MOV #0x100, W0
-000352  881540     MOV W0, SPI3BUF
-49:                    //SEG_SEL=1;
-50:                    IFS0bits.T3IF = 0;              //clear flag, restart
-000354  A90801     BCLR 0x801, #0
-51:                }
-000356  F90034     POP DSWPAG
-000358  F90032     POP DSRPAG
-00035A  78004F     MOV [--W15], W0
-00035C  064000     RETFIE
-52:                
-53:                //Description: This interrupt handles UART reception
-54:                //Dependencies: initUART1();
-55:                void __attribute__ ((interrupt, auto_psv)) _U1RXInterrupt(void){
-00035E  F80036     PUSH RCOUNT
-000360  BE9F80     MOV.D W0, [W15++]
-000362  BE9F82     MOV.D W2, [W15++]
-000364  BE9F84     MOV.D W4, [W15++]
-000366  BE9F86     MOV.D W6, [W15++]
-000368  F80032     PUSH DSRPAG
-00036A  F80034     PUSH DSWPAG
-00036C  200010     MOV #0x1, W0
-00036E  8801A0     MOV W0, DSWPAG
-000370  202000     MOV #0x200, W0
-000372  880190     MOV W0, DSRPAG
-000374  000000     NOP
-56:                    unsigned char trash;
-57:                    GLED=~GLED;
-000376  807120     MOV LATC, W0
-000378  DE0044     LSR W0, #4, W0
-00037A  EA8000     COM W0, W0
-00037C  600061     AND W0, #0x1, W0
-00037E  DD0044     SL W0, #4, W0
-000380  807121     MOV LATC, W1
-000382  A14001     BCLR W1, #4
-000384  700081     IOR W0, W1, W1
-000386  887121     MOV W1, LATC
-58:                    trash=U1RXREG;
-000388  801130     MOV U1RXREG, W0
-59:                    printf("RECIEVED: %d\r\n", trash);
-00038A  FB8000     ZE W0, W0
-00038C  781F80     MOV W0, [W15++]
-00038E  2F24E0     MOV #0xF24E, W0
-000390  781F80     MOV W0, [W15++]
-000392  070111     RCALL __printf_cdnopuxX
-60:                    IFS0bits.U1RXIF = 0;            //clear flag, restart
-000394  A96801     BCLR 0x801, #3
-000396  5787E4     SUB W15, #0x4, W15
-61:                }
-000398  F90034     POP DSWPAG
-00039A  F90032     POP DSRPAG
-00039C  BE034F     MOV.D [--W15], W6
-00039E  BE024F     MOV.D [--W15], W4
-0003A0  BE014F     MOV.D [--W15], W2
-0003A2  BE004F     MOV.D [--W15], W0
-0003A4  F90036     POP RCOUNT
-0003A6  064000     RETFIE
-62:                
-63:                //Description: This interrupt handles UART transmission
-64:                //Dependencies: initUART1();
-65:                void __attribute__ ((interrupt, auto_psv)) _U1TXInterrupt(void){
-0003A8  F80032     PUSH DSRPAG
-0003AA  F80034     PUSH DSWPAG
-0003AC  781F88     MOV W8, [W15++]
-0003AE  200018     MOV #0x1, W8
-0003B0  8801A8     MOV W8, DSWPAG
-0003B2  202008     MOV #0x200, W8
-0003B4  880198     MOV W8, DSRPAG
-0003B6  000000     NOP
-0003B8  78044F     MOV [--W15], W8
-66:                    IFS0bits.U1TXIF = 0;            //clear flag, restart
-0003BA  A98801     BCLR 0x801, #4
-67:                }
-0003BC  F90034     POP DSWPAG
-0003BE  F90032     POP DSRPAG
-0003C0  064000     RETFIE
-68:                
-69:                void __attribute__ ((interrupt, auto_psv)) _SPI2Interrupt(void){
-0003C2  BE9F80     MOV.D W0, [W15++]
-0003C4  F80032     PUSH DSRPAG
-0003C6  F80034     PUSH DSWPAG
-0003C8  200010     MOV #0x1, W0
-0003CA  8801A0     MOV W0, DSWPAG
-0003CC  202000     MOV #0x200, W0
-0003CE  880190     MOV W0, DSRPAG
-0003D0  000000     NOP
-70:                    //GLED=~GLED;                                             //check half freq w/ RLED
-71:                    sample=SPI2BUF;                                         //store ADC sample but DO NOT load
-0003D2  F80268     PUSH SPI2BUF
-0003D4  F91040     POP sample
-72:                    __builtin_btg(&sample, 15);                             //convert to Q1.15 compatible format
-0003D6  210400     MOV #0x1040, W0
-0003D8  A2F010     BTG [W0], #15
-73:                    if(sample<=-32700||sample>=32700)
-0003DA  27FBB0     MOV #0x7FBB, W0
-0003DC  B41040     ADD sample, WREG
-0003DE  2FF761     MOV #0xFF76, W1
-0003E0  500F81     SUB W0, W1, [W15]
-0003E2  360001     BRA LEU, 0x3E6
-74:                        hard_clipped=TRUE;
-0003E4  EFF018     SETM.B hard_clipped
-75:                    ADC_CONV=1;                                             //returns SS2 to idle state
-0003E6  A86E15     BSET 0xE15, #3
-76:                    SPI2STATbits.SPIROV = 0;                                //Clear SPI1 receive overflow flag if set
-0003E8  A9C260     BCLR SPI2STAT, #6
-77:                    IFS2bits.SPI2IF = 0;                                    //reset flag & restart
-0003EA  A92804     BCLR IFS2, #1
-78:                }
-0003EC  F90034     POP DSWPAG
-0003EE  F90032     POP DSRPAG
-0003F0  BE004F     MOV.D [--W15], W0
-0003F2  064000     RETFIE
-79:                
-80:                //Description: This interrupt triggers at the completion of DCI output
-81:                //Dependancies: initSPI2(); 
-82:                void __attribute__ ((interrupt, auto_psv)) _DCIInterrupt(void){
-0003F4  F80036     PUSH RCOUNT
-0003F6  BE9F80     MOV.D W0, [W15++]
-0003F8  BE9F82     MOV.D W2, [W15++]
-0003FA  BE9F84     MOV.D W4, [W15++]
-0003FC  BE9F86     MOV.D W6, [W15++]
-0003FE  781F88     MOV W8, [W15++]
-000400  F80032     PUSH DSRPAG
-000402  F80034     PUSH DSWPAG
-000404  200010     MOV #0x1, W0
-000406  8801A0     MOV W0, DSWPAG
-000408  202000     MOV #0x200, W0
-00040A  880190     MOV W0, DSRPAG
-00040C  000000     NOP
-83:                    TXBUF0=output;                                    //output buffered sample to DAC
-00040E  808080     MOV output, W0
-000410  8814C0     MOV W0, TXBUF0
-84:                    TXBUF1=output;
-000412  8814D0     MOV W0, TXBUF1
-85:                    if(recording==TRUE){
-000414  BFD03E     MOV.B 0x103E, WREG
-000416  404FE1     ADD.B W0, #0x1, [W15]
-000418  3A000B     BRA NZ, 0x430
-86:                        ADC_CONV=0;
-00041A  A96E15     BCLR 0xE15, #3
-87:                        SPI2BUF=0x0000;
-00041C  EF2268     CLR SPI2BUF
-88:                        stream[rw][write_ptr]=sample;                 //get output
-00041E  8080B0     MOV rw, W0
-000420  DD0049     SL W0, #9, W0
-000422  8080A1     MOV write_ptr, W1
-000424  400001     ADD W0, W1, W0
-000426  400000     ADD W0, W0, W0
-000428  2666C1     MOV #0x666C, W1
-00042A  408000     ADD W1, W0, W0
-00042C  808201     MOV sample, W1
-00042E  780801     MOV W1, [W0]
-89:                    }
-90:                    if(write_ptr==(STREAMBUF-1)){                       //reset pointer when out of bounds
-000430  8080A0     MOV write_ptr, W0
-000432  201FF1     MOV #0x1FF, W1
-000434  500F81     SUB W0, W1, [W15]
-000436  3A0003     BRA NZ, 0x43E
-91:                        write_ptr=0;
-000438  EF3014     CLR write_ptr
-92:                        __builtin_btg(&rw,0);
-00043A  AA1016     BTG rw, #0
-00043C  370002     BRA 0x442
-93:                    }
-94:                    else write_ptr++;
-00043E  E80000     INC W0, W0
-000440  8880A0     MOV W0, write_ptr
-95:                    stream[rw][write_ptr]=fx(stream[rw][write_ptr]);    //run fx on latest sample
-000442  8080B8     MOV rw, W8
-000444  DD4449     SL W8, #9, W8
-000446  8080A0     MOV write_ptr, W0
-000448  440400     ADD W8, W0, W8
-00044A  440408     ADD W8, W8, W8
-00044C  2666C0     MOV #0x666C, W0
-00044E  400408     ADD W0, W8, W8
-000450  780018     MOV [W8], W0
-000452  073994     RCALL fx
-000454  780C00     MOV W0, [W8]
-96:                    if(rw==0)
-000456  E21016     CP0 rw
-000458  3A0009     BRA NZ, 0x46C
-97:                        output=mixer(stream[1][write_ptr]);                                   //mix  new output
-00045A  8080A0     MOV write_ptr, W0
-00045C  B02000     ADD #0x200, W0
-00045E  400000     ADD W0, W0, W0
-000460  2666C1     MOV #0x666C, W1
-000462  408000     ADD W1, W0, W0
-000464  780010     MOV [W0], W0
-000466  073927     RCALL mixer
-000468  888080     MOV W0, output
-00046A  370007     BRA 0x47A
-98:                    else output = mixer(stream[0][write_ptr]);
-00046C  8080A0     MOV write_ptr, W0
-00046E  400000     ADD W0, W0, W0
-000470  2666C1     MOV #0x666C, W1
-000472  408000     ADD W1, W0, W0
-000474  780010     MOV [W0], W0
-000476  07391F     RCALL mixer
-000478  888080     MOV W0, output
-99:                    IFS3bits.DCIIF=0;
-00047A  A98807     BCLR 0x807, #4
-100:               }
-00047C  F90034     POP DSWPAG
-00047E  F90032     POP DSRPAG
-000480  78044F     MOV [--W15], W8
-000482  BE034F     MOV.D [--W15], W6
-000484  BE024F     MOV.D [--W15], W4
-000486  BE014F     MOV.D [--W15], W2
-000488  BE004F     MOV.D [--W15], W0
-00048A  F90036     POP RCOUNT
-00048C  064000     RETFIE
-101:               
-102:               void __attribute__ ((interrupt, auto_psv)) _IC1Interrupt(void){
-00048E  BE9F80     MOV.D W0, [W15++]
-000490  F80032     PUSH DSRPAG
-000492  F80034     PUSH DSWPAG
-000494  200010     MOV #0x1, W0
-000496  8801A0     MOV W0, DSWPAG
-000498  202000     MOV #0x200, W0
-00049A  880190     MOV W0, DSRPAG
-00049C  000000     NOP
-103:                   IFS0bits.IC1IF=0;   
-00049E  A92800     BCLR IFS0, #1
-104:                   //bpm=IC1BUF;
-105:                   RLED=~RLED;
-0004A0  807120     MOV LATC, W0
-0004A2  EA8000     COM W0, W0
-0004A4  600061     AND W0, #0x1, W0
-0004A6  807121     MOV LATC, W1
-0004A8  A10001     BCLR W1, #0
-0004AA  700081     IOR W0, W1, W1
-0004AC  887121     MOV W1, LATC
+43:                //Description: This interrupt triggers at the completion of DCI output
+44:                //Dependancies: initSPI2(); 
+45:                void __attribute__ ((interrupt, auto_psv)) _DCIInterrupt(void){
+00033E  F80036     PUSH RCOUNT
+000340  BE9F80     MOV.D W0, [W15++]
+000342  BE9F82     MOV.D W2, [W15++]
+000344  BE9F84     MOV.D W4, [W15++]
+000346  BE9F86     MOV.D W6, [W15++]
+000348  781F88     MOV W8, [W15++]
+00034A  F80032     PUSH DSRPAG
+00034C  F80034     PUSH DSWPAG
+00034E  200010     MOV #0x1, W0
+000350  8801A0     MOV W0, DSWPAG
+000352  202000     MOV #0x200, W0
+000354  880190     MOV W0, DSRPAG
+000356  000000     NOP
+46:                    TXBUF0=output;                                    //output buffered sample to DAC
+000358  808080     MOV output, W0
+00035A  8814C0     MOV W0, TXBUF0
+47:                    TXBUF1=output;
+00035C  8814D0     MOV W0, TXBUF1
+48:                    sample=RXBUF1;
+00035E  F80292     PUSH RXBUF1
+000360  F91044     POP sample
+49:                    int trash=RXBUF0;
+000362  801480     MOV RXBUF0, W0
+50:                    __builtin_btg(&sample, 15);                             //convert to Q1.15 compatible format
+000364  210440     MOV #0x1044, W0
+000366  A2F010     BTG [W0], #15
+51:                    if(sample<=-32766||sample>=32766)
+000368  27FFD0     MOV #0x7FFD, W0
+00036A  B41044     ADD sample, WREG
+00036C  400FE6     ADD W0, #0x6, [W15]
+00036E  360001     BRA LEU, 0x372
+52:                        hard_clipped=TRUE;
+000370  EFF018     SETM.B hard_clipped
+53:                    if(write_ptr==(STREAMBUF-1)){                       //reset pointer when out of bounds
+000372  8080A0     MOV write_ptr, W0
+000374  200FF1     MOV #0xFF, W1
+000376  500F81     SUB W0, W1, [W15]
+000378  3A0003     BRA NZ, 0x380
+54:                        write_ptr=0;
+00037A  EF3014     CLR write_ptr
+55:                        __builtin_btg(&rw,0);
+00037C  AA1016     BTG rw, #0
+00037E  370002     BRA 0x384
+56:                    }
+57:                    else write_ptr++;
+000380  E80000     INC W0, W0
+000382  8880A0     MOV W0, write_ptr
+58:                    if(recording==TRUE){
+000384  BFD042     MOV.B 0x1042, WREG
+000386  404FE1     ADD.B W0, #0x1, [W15]
+000388  3A0009     BRA NZ, 0x39C
+59:                        stream[rw][write_ptr]=sample;                 //get output
+00038A  8080B0     MOV rw, W0
+00038C  DD0048     SL W0, #8, W0
+00038E  8080A1     MOV write_ptr, W1
+000390  400001     ADD W0, W1, W0
+000392  400000     ADD W0, W0, W0
+000394  266721     MOV #0x6672, W1
+000396  408000     ADD W1, W0, W0
+000398  808221     MOV sample, W1
+00039A  780801     MOV W1, [W0]
+60:                    }
+61:                    stream[rw][write_ptr]=fx(stream[rw][write_ptr]);    //run fx on latest sample
+00039C  8080B8     MOV rw, W8
+00039E  DD4448     SL W8, #8, W8
+0003A0  8080A0     MOV write_ptr, W0
+0003A2  440400     ADD W8, W0, W8
+0003A4  440408     ADD W8, W8, W8
+0003A6  266720     MOV #0x6672, W0
+0003A8  400408     ADD W0, W8, W8
+0003AA  780018     MOV [W8], W0
+0003AC  073990     RCALL fx
+0003AE  780C00     MOV W0, [W8]
+62:                    if(rw==0)
+0003B0  E21016     CP0 rw
+0003B2  3A0009     BRA NZ, 0x3C6
+63:                        output=mixer(stream[1][write_ptr]);             //mix  new output
+0003B4  8080A0     MOV write_ptr, W0
+0003B6  B01000     ADD #0x100, W0
+0003B8  400000     ADD W0, W0, W0
+0003BA  266721     MOV #0x6672, W1
+0003BC  408000     ADD W1, W0, W0
+0003BE  780010     MOV [W0], W0
+0003C0  073920     RCALL mixer
+0003C2  888080     MOV W0, output
+0003C4  370007     BRA 0x3D4
+64:                    else output = mixer(stream[0][write_ptr]);
+0003C6  8080A0     MOV write_ptr, W0
+0003C8  400000     ADD W0, W0, W0
+0003CA  266721     MOV #0x6672, W1
+0003CC  408000     ADD W1, W0, W0
+0003CE  780010     MOV [W0], W0
+0003D0  073918     RCALL mixer
+0003D2  888080     MOV W0, output
+65:                    IFS3bits.DCIIF=0;
+0003D4  A98807     BCLR 0x807, #4
+66:                }
+0003D6  F90034     POP DSWPAG
+0003D8  F90032     POP DSRPAG
+0003DA  78044F     MOV [--W15], W8
+0003DC  BE034F     MOV.D [--W15], W6
+0003DE  BE024F     MOV.D [--W15], W4
+0003E0  BE014F     MOV.D [--W15], W2
+0003E2  BE004F     MOV.D [--W15], W0
+0003E4  F90036     POP RCOUNT
+0003E6  064000     RETFIE
+67:                
+68:                void __attribute__ ((interrupt, auto_psv)) _IC1Interrupt(void){
+0003E8  BE9F80     MOV.D W0, [W15++]
+0003EA  F80032     PUSH DSRPAG
+0003EC  F80034     PUSH DSWPAG
+0003EE  200010     MOV #0x1, W0
+0003F0  8801A0     MOV W0, DSWPAG
+0003F2  202000     MOV #0x200, W0
+0003F4  880190     MOV W0, DSRPAG
+0003F6  000000     NOP
+69:                    IFS0bits.IC1IF=0;   
+0003F8  A92800     BCLR IFS0, #1
+70:                    //bpm=IC1BUF;
+71:                    RLED=~RLED;
+0003FA  807120     MOV LATC, W0
+0003FC  EA8000     COM W0, W0
+0003FE  600061     AND W0, #0x1, W0
+000400  807121     MOV LATC, W1
+000402  A10001     BCLR W1, #0
+000404  700081     IOR W0, W1, W1
+000406  887121     MOV W1, LATC
+72:                }
+000408  F90034     POP DSWPAG
+00040A  F90032     POP DSRPAG
+00040C  BE004F     MOV.D [--W15], W0
+00040E  064000     RETFIE
+73:                
+74:                void __attribute__ ((interrupt, auto_psv)) _SPI3Interrupt(void){
+000410  781F80     MOV W0, [W15++]
+000412  F80032     PUSH DSRPAG
+000414  F80034     PUSH DSWPAG
+000416  200010     MOV #0x1, W0
+000418  8801A0     MOV W0, DSWPAG
+00041A  202000     MOV #0x200, W0
+00041C  880190     MOV W0, DSRPAG
+00041E  000000     NOP
+75:                    //SEG_SEL=1;
+76:                    int trash=SPI3BUF;
+000420  801540     MOV SPI3BUF, W0
+77:                    SPI3STATbits.SPIROV = 0;                                //Clear SPI1 receive overflow flag if set
+000422  A9C2A0     BCLR SPI3STAT, #6
+78:                    IFS5bits.SPI3IF=0;
+000424  A9680B     BCLR 0x80B, #3
+79:                    
+80:                }
+000426  F90034     POP DSWPAG
+000428  F90032     POP DSRPAG
+00042A  78004F     MOV [--W15], W0
+00042C  064000     RETFIE
+81:                
+82:                /*
+83:                //Description: This interrupt handles polling button input
+84:                //Dependencies: initADC1(); 
+85:                //Frequency: 44.1kHz
+86:                void __attribute__ ((interrupt, auto_psv)) _T3Interrupt(void){
+87:                    SEG_SEL=0;
+88:                    SPI3BUF=0x0100;
+89:                    //SEG_SEL=1;
+90:                    IFS0bits.T3IF = 0;              //clear flag, restart
+91:                }
+92:                
+93:                void __attribute__ ((interrupt, auto_psv)) _SPI2Interrupt(void){
+94:                    //GLED=~GLED;                                             //check half freq w/ RLED                                        //returns SS2 to idle state
+95:                    SPI2STATbits.SPIROV = 0;                                //Clear SPI1 receive overflow flag if set
+96:                    IFS2bits.SPI2IF = 0;                                    //reset flag & restart
+97:                }
+98:                //Description: This interrupt handles UART reception
+99:                //Dependencies: initUART1();
+100:               void __attribute__ ((interrupt, auto_psv)) _U1RXInterrupt(void){
+101:                   unsigned char trash;
+102:                   GLED=~GLED;
+103:                   trash=U1RXREG;
+104:                   printf("RECIEVED: %d\r\n", trash);
+105:                   IFS0bits.U1RXIF = 0;            //clear flag, restart
 106:               }
-0004AE  F90034     POP DSWPAG
-0004B0  F90032     POP DSRPAG
-0004B2  BE004F     MOV.D [--W15], W0
-0004B4  064000     RETFIE
 107:               
-108:               void __attribute__ ((interrupt, auto_psv)) _SPI3Interrupt(void){
-0004B6  781F80     MOV W0, [W15++]
-0004B8  F80032     PUSH DSRPAG
-0004BA  F80034     PUSH DSWPAG
-0004BC  200010     MOV #0x1, W0
-0004BE  8801A0     MOV W0, DSWPAG
-0004C0  202000     MOV #0x200, W0
-0004C2  880190     MOV W0, DSRPAG
-0004C4  000000     NOP
-109:                   SEG_SEL=1;
-0004C6  A8AE34     BSET LATD, #5
-110:                   int trash=SPI3BUF;
-0004C8  801540     MOV SPI3BUF, W0
-111:                   IFS5bits.SPI3IF=0;
-0004CA  A9680B     BCLR 0x80B, #3
-112:               }
-0004CC  F90034     POP DSWPAG
----  D:/sampler_0.43/main.c  ----------------------------------------------------------------------------
+108:               //Description: This interrupt handles UART transmission
+109:               //Dependencies: initUART1();
+110:               void __attribute__ ((interrupt, auto_psv)) _U1TXInterrupt(void){
+111:                   YLED=~YLED;
+112:                   IFS0bits.U1TXIF = 0;            //clear flag, restart
+113:               } 
+114:                */
+---  /home/fbuga/Documents/ps-040/plcd.c  ---------------------------------------------------------------
 1:                 /*
-2:                  * WORKING:
-3:                  *  UART 
-4:                  *  POTS
-5:                  *  BUTTONS
-6:                  *  ADC
-7:                  * 
-8:                  * NOT WORKING:
-9:                  *  SD CARD
-10:                 *  DMA?
-11:                 *  FATFS
-12:                 */
-13:                
-14:                #include <xc.h>
-15:                #include <p33EP512GM310.h>
-16:                #include <dsp.h>
-17:                #include <libpic30.h>
-18:                #include <stdio.h>
-19:                #include "common.h"
-20:                #include "devInits.h"
-21:                #include "utilities.h"
-22:                //#include "routines.h"
-23:                //#include "fatfs/src/ff.h"
+2:                  * File:   plcd.c
+3:                  * Author: root
+4:                  *
+5:                  * Created on January 10, 2018, 4:48 PM
+6:                  */
+7:                 
+8:                 
+9:                 #include "xc.h"
+10:                unsigned int statusReg = 0x0C;  //internal copy of pwr reg
+11:                                                // 0b_0 0 0 0_1 D C B (display, cursor, blink)
+12:                
+13:                void lcdWrite(unsigned int data){
+14:                    if(!PMMODEbits.BUSY) PMDIN1=data; //(!skips if busy!)
+0078C4  E20602     CP0 PMMODE
+0078C6  350001     BRA LT, 0x78CA
+0078C8  883040     MOV W0, PMDIN1
+15:                }
+0078CA  060000     RETURN
+16:                
+17:                void lcdClear(void){
+18:                    lcdWrite(0x01);
+0078CC  200010     MOV #0x1, W0
+0078CE  07FFFA     RCALL lcdWrite
+19:                }
+0078D0  060000     RETURN
+20:                
+21:                void lcdReturn(void){
+22:                    lcdWrite(0x02);
+0078D2  200020     MOV #0x2, W0
+0078D4  07FFF7     RCALL lcdWrite
+23:                }
+0078D6  060000     RETURN
 24:                
-25:                #pragma config ICS = PGD1       //pgeDC 1 is used
-26:                #pragma config JTAGEN = OFF     //disable jtag
-27:                #pragma config BOREN = OFF      //disable brown out 
-28:                #pragma config FWDTEN = OFF     //disable watchdog timer 
-29:                #pragma config GCP = OFF        //disable general segment code protect
-30:                #pragma config PLLKEN = ON      //wait for PLL lock
-31:                #pragma config POSCMD = NONE    //no external oscillator
-32:                #pragma config OSCIOFNC = ON   //OSC2 is clock output
-33:                #pragma config FNOSC = FRCPLL   //clock source
+25:                
+26:                void lcdPwr(signed int pwr){
+27:                    //lcd soft power on/off, does not reset device
+28:                    if(pwr)
+0078D8  E00000     CP0 W0
+0078DA  320003     BRA Z, 0x78E2
+29:                        statusReg&=0x04;
+0078DC  200040     MOV #0x4, W0
+0078DE  B63046     AND 0x1046
+0078E0  370001     BRA 0x78E4
+30:                    else __builtin_btg(&statusReg, 2);
+0078E2  AA5046     BTG 0x1046, #2
+31:                    
+32:                    lcdWrite(statusReg);
+0078E4  808230     MOV 0x1046, W0
+0078E6  07FFEE     RCALL lcdWrite
+33:                }
+0078E8  060000     RETURN
 34:                
-35:                //CONTROL VARIABLES//
-36:                char pad[8]={0};
-37:                fractional pots[4]={0};
-38:                fractional pots_scaled[4]={0};
-39:                fractional output=0;
-40:                fractional stream[2][STREAMBUF];
-41:                unsigned int bpm=0, write_ptr=0, rw=0;
-42:                
-43:                //STATUS VARIABLES//
-44:                unsigned char hard_clipped=FALSE;
-45:                volatile unsigned char t1flag=FALSE;
-46:                volatile unsigned char t2flag=FALSE;
-47:                volatile unsigned char recording=TRUE;
-48:                unsigned char UART_ON = FALSE;
-49:                
-50:                //FX FLAGS
-51:                volatile unsigned char tremelo=FALSE;
-52:                volatile unsigned char looper=FALSE;
-53:                volatile unsigned char lpf=FALSE;
-54:                
-55:                
-56:                void initBuffer(void){
-007964  2666C2     MOV #0x666C, W2
-007966  26A6C0     MOV #0x6A6C, W0
-007968  26E6C3     MOV #0x6E6C, W3
-57:                    int i=0;
-58:                    for(; i<STREAMBUF; i++){
-007970  500F83     SUB W0, W3, [W15]
-007972  3AFFFC     BRA NZ, 0x796C
-59:                        stream[0][i]=0;
-00796A  EB0080     CLR W1
-00796C  781901     MOV W1, [W2++]
-60:                        stream[1][i]=0;
-00796E  781801     MOV W1, [W0++]
-61:                    }
-62:                }
-007974  060000     RETURN
-63:                
-64:                int main(void) {
-007976  781F88     MOV W8, [W15++]
-65:                    initPorts();                    //configure io device & adc 
-007978  07FC72     RCALL initPorts
-66:                    //initUART1();                    //configure & enable UART
-67:                    initBuffer();
-00797A  07FFF4     RCALL initBuffer
-68:                    initADC1();                     //configure & enable internal ADC
-00797C  07FCFD     RCALL initADC1
-69:                    initSPI2_ADC();                  //configure & enable SPI ADC
-00797E  07FD0C     RCALL initSPI2_ADC
-70:                    initDCI_DAC();                  //configure & enable DAC
-007980  07FD80     RCALL initDCI_DAC
-71:                    initT1();                       //configure & start T1 
-007982  07FD4F     RCALL initT1
-72:                    initT2();                       //configure & start T2 
-007984  07FD5D     RCALL initT2
-73:                    //initSPI3_SEG();                  //start segment display
-74:                    //initCAP_BPM();                  //configure bpm capture
-75:                    initT3();                       //configure & start T3
-007986  07FD6E     RCALL initT3
-76:                
-77:                    while(1){    
-78:                        if(t2flag==TRUE){
-00798A  BFD01A     MOV.B t2flag, WREG
-00798C  404FE1     ADD.B W0, #0x1, [W15]
-00798E  3A0004     BRA NZ, 0x7998
-79:                            scanMatrix();                   //read button matrix
-007990  07FDA9     RCALL scanMatrix
-80:                            readPots();                     //read control pots
-007992  07FE00     RCALL readPots
-81:                            t2flag=FALSE;
-007988  EB4400     CLR.B W8
-007994  2101A0     MOV #0x101A, W0
-007996  784808     MOV.B W8, [W0]
-82:                        }
-83:                        if(t1flag==TRUE){
-007998  BFD019     MOV.B t1flag, WREG
-00799A  404FE1     ADD.B W0, #0x1, [W15]
-00799C  3AFFF6     BRA NZ, 0x798A
-84:                            display();
-00799E  07FE7C     RCALL display
-85:                            t1flag=FALSE;
-0079A0  210190     MOV #0x1019, W0
-86:                        }
-87:                    }
-88:                    return 0;
-89:                }
----  D:/sampler_0.43/devInits.c  ------------------------------------------------------------------------
+35:                void lcdCursorEn(signed int pwr){
+36:                    //cursor on / off
+37:                    if(pwr)
+0078EA  E00000     CP0 W0
+0078EC  320003     BRA Z, 0x78F4
+38:                        statusReg&=0x0A;
+0078EE  2000A0     MOV #0xA, W0
+0078F0  B63046     AND 0x1046
+0078F2  370001     BRA 0x78F6
+39:                    else __builtin_btg(&statusReg, 1);
+0078F4  AA3046     BTG 0x1046, #1
+40:                    
+41:                    lcdWrite(statusReg);
+0078F6  808230     MOV 0x1046, W0
+0078F8  07FFE5     RCALL lcdWrite
+42:                }
+0078FA  060000     RETURN
+43:                
+44:                void lcdCursorBlink(signed int pwr){
+45:                    if(pwr)
+0078FC  E00000     CP0 W0
+0078FE  320003     BRA Z, 0x7906
+46:                        statusReg&=0x09;
+007900  200090     MOV #0x9, W0
+007902  B63046     AND 0x1046
+007904  370001     BRA 0x7908
+47:                    else __builtin_btg(&statusReg, 0);
+007906  AA1046     BTG 0x1046, #0
+48:                    
+49:                    lcdWrite(statusReg);
+007908  808230     MOV 0x1046, W0
+00790A  07FFDC     RCALL lcdWrite
+50:                }
+00790C  060000     RETURN
+---  /home/fbuga/Documents/ps-040/main.c  ---------------------------------------------------------------
+1:                 #include <xc.h>
+2:                 #include <p33EP512GM310.h>
+3:                 #include <dsp.h>
+4:                 #include <libpic30.h>
+5:                 #include "common.h"
+6:                 #include "devInits.h"
+7:                 #include "utilities.h"
+8:                 //#include "fatfs/src/ff.h"
+9:                 
+10:                #pragma config ICS = PGD1       //pgeDC 1 is used
+11:                #pragma config JTAGEN = OFF     //disable jtag
+12:                #pragma config BOREN = OFF      //disable brown out (FYI possible erratta case in 33eMU810)
+13:                #pragma config FWDTEN = OFF     //disable watchdog timer 
+14:                #pragma config GCP = OFF        //disable general segment code protect
+15:                #pragma config PLLKEN = ON      //wait for PLL lock
+16:                #pragma config POSCMD = NONE    //no external oscillator
+17:                #pragma config OSCIOFNC = ON   //OSC2 is clock output
+18:                #pragma config FNOSC = FRCPLL   //clock source
+19:                
+20:                char pad[8]={0};                                                                //CONTROL VARIABLES//
+21:                fractional pots[4]={0};
+22:                fractional pots_scaled[4]={0};
+23:                fractional output=0;
+24:                fractional stream[2][STREAMBUF];
+25:                unsigned int bpm=0, write_ptr=0, rw=0;
+26:                
+27:                unsigned char hard_clipped=FALSE;                                               //STATUS VARIABLES//
+28:                volatile unsigned char t1flag=FALSE;
+29:                volatile unsigned char t2flag=FALSE;
+30:                volatile unsigned char recording=TRUE;
+31:                unsigned char UART_ON = FALSE;
+32:                unsigned char TEST_SIN = FALSE;
+33:                
+34:                volatile unsigned char tremelo=FALSE;                                           //FX FLAGS//
+35:                volatile unsigned char looper=FALSE;
+36:                volatile unsigned char lpf=FALSE;
+37:                
+38:                void initBuffer(void){
+00790E  266720     MOV #0x6672, W0
+007910  202001     MOV #0x200, W1
+007912  408080     ADD W1, W0, W1
+007914  780181     MOV W1, W3
+39:                    int i=0;
+40:                    for(; i<STREAMBUF; i++){
+00791C  500F83     SUB W0, W3, [W15]
+00791E  3AFFFC     BRA NZ, 0x7918
+41:                        stream[0][i]=0;
+007916  EB0100     CLR W2
+007918  781802     MOV W2, [W0++]
+42:                        stream[1][i]=0;
+00791A  781882     MOV W2, [W1++]
+43:                    }
+44:                }
+007920  060000     RETURN
+45:                
+46:                int main(void) {
+007922  781F88     MOV W8, [W15++]
+47:                    initPorts();                    //configure io device & adc 
+007924  07FC4C     RCALL initPorts
+48:                    //initUART1();                    //configure & enable UART
+49:                    initBuffer();
+007926  07FFF3     RCALL initBuffer
+50:                    initADC1();                     //configure & enable internal ADC
+007928  07FD64     RCALL initADC1
+51:                    //initSPI2_ADC();                  //configure & enable SPI ADC !!!DEFUNCT!!!
+52:                    initDCI_DAC();                  //configure & enable DAC
+00792A  07FD32     RCALL initDCI_DAC
+53:                    initT1();                       //configure & start T1 
+00792C  07FD01     RCALL initT1
+54:                    initT2();                       //configure & start T2 
+00792E  07FD0F     RCALL initT2
+55:                    //initSPI3_SEG();                  //start segment display
+56:                    initPMP();
+007930  07FCED     RCALL initPMP
+57:                    //initCAP_BPM();                  //configure bpm capture
+58:                    //initT3();                       //configure & start T3
+59:                    while(1){   
+60:                        if(t2flag==TRUE){
+007934  BFD01A     MOV.B t2flag, WREG
+007936  404FE1     ADD.B W0, #0x1, [W15]
+007938  3A0004     BRA NZ, 0x7942
+61:                            scanMatrix();                   //read button matrix
+00793A  07FD6E     RCALL scanMatrix
+62:                            readPots();                     //read control pots
+00793C  07FDC5     RCALL readPots
+63:                            t2flag=FALSE;
+007932  EB4400     CLR.B W8
+00793E  2101A0     MOV #0x101A, W0
+007940  784808     MOV.B W8, [W0]
+64:                        }
+65:                        if(t1flag==TRUE){
+007942  BFD019     MOV.B t1flag, WREG
+007944  404FE1     ADD.B W0, #0x1, [W15]
+007946  3AFFF6     BRA NZ, 0x7934
+66:                            display();
+007948  07FE3E     RCALL display
+67:                            t1flag=FALSE; 
+00794A  210190     MOV #0x1019, W0
+00794C  784808     MOV.B W8, [W0]
+00794E  37FFF2     BRA 0x7934
+68:                            
+69:                        }
+70:                    }
+71:                    return 0;
+72:                }
+73:                // example test 
+---  /home/fbuga/Documents/ps-040/devInits.c  -----------------------------------------------------------
 1:                 /*
-2:                  * This file contains functions to initialize various peripheral devices
+2:                  ** This file contains functions to initialize various peripheral devices
 3:                  */
 4:                 
 5:                 #include <xc.h>
 6:                 #include <p33EP512GM310.h>
-7:                 #include "common.h"
-8:                 #include "devInits.h"
-9:                 
-10:                extern unsigned char UART_ON;
-11:                //Description: Responsible i/o, clock, & RP pin config setup
-12:                //Prereq: NONE
-13:                //Dependencies: NONE
-14:                //*Note: This is ALWAYS the first function called in main*
-15:                void initPorts(void){
-16:                    //CLOCK CONFIG
-17:                    CLKDIVbits.PLLPOST=0;
-00725E  2FF3F0     MOV #0xFF3F, W0
-007260  B62744     AND CLKDIV
-18:                    CLKDIVbits.PLLPRE=0;
-007262  2FFE00     MOV #0xFFE0, W0
-007264  B62744     AND CLKDIV
-19:                    PLLFBDbits.PLLDIV = 0x3F;       //d_63 for ~120Mhz
-007266  2FE000     MOV #0xFE00, W0
-007268  B60746     AND PLLFBD, WREG
-00726A  B303F0     IOR #0x3F, W0
-00726C  883A30     MOV W0, PLLFBD
-20:                    while(OSCCONbits.LOCK!=1) {};   //wait for PLL to lock
-00726E  200201     MOV #0x20, W1
-007270  803A12     MOV OSCCON, W2
-007272  608002     AND W1, W2, W0
-007274  32FFFD     BRA Z, 0x7270
-21:                    //RP pin config
-22:                	__builtin_write_OSCCONL(OSCCON & ~(1<<6));      // Unlock Registers
-007276  803A10     MOV OSCCON, W0
-007278  A16000     BCLR W0, #6
-00727A  200462     MOV #0x46, W2
-00727C  200573     MOV #0x57, W3
-00727E  207421     MOV #0x742, W1
-007280  784882     MOV.B W2, [W1]
-007282  784883     MOV.B W3, [W1]
-007284  784880     MOV.B W0, [W1]
-23:                    RPINR18bits.U1RXR = 0x37;   //U1 rx on RP55
-007286  2FF801     MOV #0xFF80, W1
-007288  803624     MOV RPINR18, W4
-00728A  608004     AND W1, W4, W0
-00728C  B30370     IOR #0x37, W0
-00728E  883620     MOV W0, RPINR18
-24:                    RPOR6bits.RP54R=1;          //U1 tx on RP54
-007290  2FFC00     MOV #0xFFC0, W0
-007292  803465     MOV RPOR6, W5
-007294  600205     AND W0, W5, W4
-007296  A00004     BSET W4, #0
-007298  883464     MOV W4, RPOR6
-25:                    RPOR4bits.RP42R=0x09;       //SCK2 on RP42
-00729A  803446     MOV RPOR4, W6
-00729C  600206     AND W0, W6, W4
-00729E  B30094     IOR #0x9, W4
-0072A0  883444     MOV W4, RPOR4
-26:                    RPINR22bits.SCK2R=0x2A;     //SCK2 on RP42
-0072A2  280FF4     MOV #0x80FF, W4
-0072A4  803665     MOV RPINR22, W5
-0072A6  620305     AND W4, W5, W6
-0072A8  22A005     MOV #0x2A00, W5
-0072AA  728286     IOR W5, W6, W5
-0072AC  883665     MOV W5, RPINR22
-27:                    RPINR22bits.SDI2R=0x2D;     //SDI2 on RPI45
-0072AE  803666     MOV RPINR22, W6
-0072B0  608286     AND W1, W6, W5
-0072B2  B302D5     IOR #0x2D, W5
-0072B4  883665     MOV W5, RPINR22
-28:                    RPOR3bits.RP40R=0x0C;       //DCI clock
-0072B6  B60686     AND RPOR3, WREG
-0072B8  B300C0     IOR #0xC, W0
-0072BA  883430     MOV W0, RPOR3
-29:                    RPOR2bits.RP39R=0x0D;       //DCI frame sync
-0072BC  2C0FF0     MOV #0xC0FF, W0
-0072BE  803425     MOV RPOR2, W5
-0072C0  600305     AND W0, W5, W6
-0072C2  20D005     MOV #0xD00, W5
-0072C4  728286     IOR W5, W6, W5
-0072C6  883425     MOV W5, RPOR2
-30:                    RPOR3bits.RP41R=0x0B;       //DCI output
-0072C8  803435     MOV RPOR3, W5
-0072CA  600305     AND W0, W5, W6
-0072CC  20B005     MOV #0xB00, W5
-0072CE  728286     IOR W5, W6, W5
-0072D0  883435     MOV W5, RPOR3
-31:                    RPINR7bits.IC1R=0x5F;       //Capture input on pin 95 re15
-0072D2  803576     MOV RPINR7, W6
-0072D4  608086     AND W1, W6, W1
-0072D6  B305F1     IOR #0x5F, W1
-0072D8  883571     MOV W1, RPINR7
-32:                    RPINR29bits.SCK3R=0x39;      //SCK3 input on pin 84
-0072DA  8036D1     MOV RPINR29, W1
-0072DC  620201     AND W4, W1, W4
-0072DE  239001     MOV #0x3900, W1
-0072E0  708084     IOR W1, W4, W1
-0072E2  8836D1     MOV W1, RPINR29
-33:                    RPOR7bits.RP57R=0x20;        //SCK3 output on pin 84
-0072E4  803474     MOV RPOR7, W4
-0072E6  600084     AND W0, W4, W1
-0072E8  A0D001     BSET W1, #13
-0072EA  883471     MOV W1, RPOR7
-34:                    RPOR8bits.RP70R=0x1F;       //SDO3 on pin 83
-0072EC  B60690     AND RPOR8, WREG
-0072EE  21F001     MOV #0x1F00, W1
-0072F0  708080     IOR W1, W0, W1
-0072F2  883481     MOV W1, RPOR8
-35:                    //RPOR8bits.RP69R=0x21;       //SS3 on pin 82
-36:                	__builtin_write_OSCCONL(OSCCON | (1<<6));       // Lock Registers
-0072F4  803A10     MOV OSCCON, W0
-0072F6  A06000     BSET W0, #6
-0072F8  207421     MOV #0x742, W1
-0072FA  784882     MOV.B W2, [W1]
-0072FC  784883     MOV.B W3, [W1]
-0072FE  784880     MOV.B W0, [W1]
-37:                    //enable disable peripherals:
-38:                    PMD1=0x06C6;
-007300  206C60     MOV #0x6C6, W0
-007302  883B00     MOV W0, PMD1
-39:                    PMD2=0x00FF;
-007304  200FF0     MOV #0xFF, W0
-007306  883B10     MOV W0, PMD2
-40:                    PMD3=0x0FFF;
-007308  20FFF0     MOV #0xFFF, W0
-00730A  883B20     MOV W0, PMD3
-41:                    PMD4=0xFFFF;
-00730C  EB8000     SETM W0
-00730E  883B30     MOV W0, PMD4
-42:                    PMD6=0xFFFE;
-007310  2FFFE1     MOV #0xFFFE, W1
-007312  883B51     MOV W1, PMD6
-43:                    PMD7=0xFFEF;
-007314  2FFEF1     MOV #0xFFEF, W1
-007316  883B61     MOV W1, PMD7
-44:                    //set analog ports
-45:                    ANSELA=0x0003; 
-007318  200031     MOV #0x3, W1
-00731A  887071     MOV W1, ANSELA
-46:                    ANSELB=0x0003;
-00731C  8870F1     MOV W1, ANSELB
-47:                    ANSELC=0x0000;
-00731E  EF2E2E     CLR ANSELC
-48:                    ANSELD=0x0000;
-007320  EF2E3E     CLR ANSELD
-49:                    ANSELE=0x0000;
-007322  EF2E4E     CLR ANSELE
-50:                    ANSELF=0x0000;  //0400
-007324  EF2E5E     CLR ANSELF
-51:                    ANSELG=0x0000;
-007326  EF2E6E     CLR ANSELG
-52:                    //set digital i/o direction
-53:                    TRISA=0x0203;
-007328  202031     MOV #0x203, W1
-00732A  887001     MOV W1, TRISA
-54:                    TRISB=0x2003;
-00732C  220031     MOV #0x2003, W1
-00732E  887081     MOV W1, TRISB
-55:                    TRISC=0x0080;
-007330  200801     MOV #0x80, W1
-007332  887101     MOV W1, TRISC
-56:                    TRISD=0x0000;
-007334  EF2E30     CLR TRISD
-57:                    TRISE=0x8000;
-007336  280001     MOV #0x8000, W1
-007338  887201     MOV W1, TRISE
-58:                    TRISF=0x0000;
-00733A  EF2E50     CLR TRISF
-59:                    TRISG=0xFFFF;
-00733C  887300     MOV W0, TRISG
-60:                    //set digital outputs
-61:                    PORTA=0x0000;
-00733E  EF2E02     CLR PORTA
-62:                    PORTB=0x0800;
-007340  208001     MOV #0x800, W1
-007342  887091     MOV W1, PORTB
-63:                    PORTC=0x0000;
-007344  EF2E22     CLR PORTC
-64:                    PORTD=0x0000;
-007346  EF2E32     CLR PORTD
-65:                    PORTE=0x0000;
-007348  EF2E42     CLR PORTE
-66:                    PORTF=0x0000;
-00734A  EF2E52     CLR PORTF
-67:                    PORTG=0x0000;
-00734C  EF2E62     CLR PORTG
-68:                    //weak internal pull ups
-69:                    CNPUG=0xFFFF;       //weak pull ups on G
-00734E  887350     MOV W0, CNPUG
-70:                }
-007350  060000     RETURN
-71:                
-72:                //Description: Initializes UART1 device & interrupts
-73:                //Prereq: NONE
-74:                //Dependencies: NONE
-75:                void initUART1(void){
-76:                    IFS0bits.U1TXIF = 0;        //clear flag
-007352  A98801     BCLR 0x801, #4
-77:                    IFS0bits.U1RXIF = 0;        //clear flag
-007354  A96801     BCLR 0x801, #3
-78:                    U1STA=0x1510;               //enable tx & rx
-007356  215100     MOV #0x1510, W0
-007358  881110     MOV W0, U1STA
-79:                    U1BRG=BRGVAL;               //baud rate
-00735A  200400     MOV #0x40, W0
-00735C  881140     MOV W0, U1BRG
-80:                    U1MODEbits.PDSEL=1;         //8 bit data, even parity
-00735E  2FFF90     MOV #0xFFF9, W0
-007360  B60220     AND U1MODE, WREG
-007362  A01000     BSET W0, #1
-007364  881100     MOV W0, U1MODE
-81:                    IPC2bits.U1RXIP = 7;        //interrupt priority 3 (low)
-007366  270000     MOV #0x7000, W0
-007368  B72844     IOR IPC2
-82:                    IPC3bits.U1TXIP = 7;        //interrupt priority 3 (low)
-00736A  200070     MOV #0x7, W0
-00736C  B72846     IOR IPC3
-83:                    IEC0bits.U1TXIE = 1;        //enable tx interrupt
-00736E  A88821     BSET 0x821, #4
-84:                    IEC0bits.U1RXIE = 1;        //enable rx interrupt
-007370  A86821     BSET 0x821, #3
-85:                    U1MODEbits.UARTEN = 1;      //start uart
-007372  A8E221     BSET 0x221, #7
-86:                    UART_ON = TRUE;
-007374  EFF01B     SETM.B UART_ON
-87:                    
-88:                }
-007376  060000     RETURN
-89:                
-90:                //Description: Initializes onboard ADC 
-91:                //Prereq: NONE
-92:                //Dependencies: NONE
-93:                void initADC1(void){
-94:                    AD1CON1bits.ASAM = 1;       //enable simultaneous sample
-007378  A84320     BSET AD1CON1, #2
-95:                    AD1CON1bits.SIMSAM = 1;     //enable simultaneous sample
-00737A  A86320     BSET AD1CON1, #3
-96:                    AD1CON1bits.FORM=2;         //signed fractional format
-00737C  2FCFF0     MOV #0xFCFF, W0
-00737E  B60320     AND AD1CON1, WREG
-007380  A09000     BSET W0, #9
-007382  881900     MOV W0, AD1CON1
-97:                    AD1CON2bits.CHPS = 0b11;    //sample channels 0-3
-007384  203000     MOV #0x300, W0
-007386  B72322     IOR AD1CON2
-98:                    AD1CON3bits.ADCS = 0x3B;    //tad ~ 1us
-007388  B3C3B0     MOV.B #0x3B, W0
-00738A  B7E324     MOV.B WREG, AD1CON3
-99:                    AD1CHS0bits.CH0SA = 0x03;   //ch0->an3 (no use an0)
-00738C  2FFC00     MOV #0xFFC0, W0
-00738E  B60328     AND AD1CHS0, WREG
-007390  B30030     IOR #0x3, W0
-007392  881940     MOV W0, AD1CHS0
-100:                   AD1CON1bits.ADON = 1;       //start ADC module
-007394  A8E321     BSET 0x321, #7
-101:               }
-007396  060000     RETURN
-102:               
-103:               //Description: Initializes 16 bit SPI ADC 
-104:               //Prereq: NONE
-105:               //Dependencies: NONE
-106:               void initSPI2_ADC(void){
-107:                   ADC_CONV=1;                 //prevent shift as per errata
-007398  A86E15     BSET 0xE15, #3
-108:                   PORTBbits.RB10=1;           //prevent shift as per errata
-00739A  A84E13     BSET 0xE13, #2
-109:                   IFS2bits.SPI2IF = 0;        // Clear the Interrupt flag
-00739C  A92804     BCLR IFS2, #1
-110:                   IEC2bits.SPI2IE = 0;        // Disable the interrupt
-00739E  A92824     BCLR IEC2, #1
-111:                   SPI2CON1bits.MSTEN=1;       //master mode
-0073A0  A8A262     BSET SPI2CON1, #5
-112:                   SPI2CON1bits.DISSCK = 0;    //Internal serial clock is enabled
-0073A2  A98263     BCLR 0x263, #4
-113:                   SPI2CON1bits.MODE16=1;      //16 bit
-0073A4  A84263     BSET 0x263, #2
-114:                   SPI2CON1bits.DISSDO=1;      //no SDO 
-0073A6  A86263     BSET 0x263, #3
-115:                   SPI2CON1bits.SSEN=0;        //no use SS
-0073A8  A9E262     BCLR SPI2CON1, #7
-116:                   SPI2CON2bits.FRMEN=0;       //no enable framed mode
-0073AA  A9E265     BCLR 0x265, #7
-117:                   SPI2CON2bits.SPIBEN=1;      //enhanced buffer mode
-0073AC  A80264     BSET SPI2CON2, #0
-118:                   SPI2STATbits.SISEL=5;       //interrupt when done sending
-0073AE  2FFE30     MOV #0xFFE3, W0
-0073B0  801302     MOV SPI2STAT, W2
-0073B2  600082     AND W0, W2, W1
-0073B4  B30141     IOR #0x14, W1
-0073B6  881301     MOV W1, SPI2STAT
-119:                   SPI2CON1bits.SMP=1;         //data sampled at end of output time
-0073B8  A82263     BSET 0x263, #1
-120:                   SPI2CON1bits.CKP=1;         //idle clock is high
-0073BA  A8C262     BSET SPI2CON1, #6
-121:                   SPI2CON1bits.CKE=1;         //data changes from H to L
-0073BC  A80263     BSET 0x263, #0
-122:                   SPI2CON1bits.PPRE=2;        //4:1 primary prescale
-0073BE  2FFFC1     MOV #0xFFFC, W1
-0073C0  801312     MOV SPI2CON1, W2
-0073C2  608082     AND W1, W2, W1
-0073C4  A01001     BSET W1, #1
-0073C6  881311     MOV W1, SPI2CON1
-123:                   SPI2CON1bits.SPRE=0;        //8:1 secondary
-0073C8  B62262     AND SPI2CON1
-124:                   SPI2STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
-0073CA  A9C260     BCLR SPI2STAT, #6
-125:                   IPC8bits.SPI2IP = 5;        // Interrupt priority
-0073CC  2FF8F0     MOV #0xFF8F, W0
-0073CE  B60850     AND IPC8, WREG
-0073D0  B30500     IOR #0x50, W0
-0073D2  884280     MOV W0, IPC8
-126:                   IFS2bits.SPI2IF = 0;        // Clear the Interrupt flag
-0073D4  A92804     BCLR IFS2, #1
-127:                   IEC2bits.SPI2IE = 1;        // Enable the interrupt
-0073D6  A82824     BSET IEC2, #1
-128:                   SPI2STATbits.SPIEN = 1;     //start SPI module
-0073D8  A8E261     BSET 0x261, #7
-129:               }
-0073DA  060000     RETURN
-130:               
-131:               void initSPI3_SEG(void){
-132:                   SEG_SEL = 1;
-0073DC  A8AE34     BSET LATD, #5
-133:                   IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
-0073DE  A9680B     BCLR 0x80B, #3
-134:                   IEC5bits.SPI3IE = 0;        // Disable the interrupt
-0073E0  A9682B     BCLR 0x82B, #3
-135:                   SPI3CON1bits.MSTEN=1;       //master mode
-0073E2  A8A2A2     BSET SPI3CON1, #5
-136:                   SPI3CON1bits.DISSCK = 0;    //Internal serial clock is enabled
-0073E4  A982A3     BCLR 0x2A3, #4
-137:                   SPI3CON1bits.MODE16=1;      //16 bit
-0073E6  A842A3     BSET 0x2A3, #2
-138:                   SPI3CON1bits.DISSDO=0;      //enable SDO 
-0073E8  A962A3     BCLR 0x2A3, #3
-139:                   SPI3CON1bits.SSEN=0;        //use SS
-0073EA  A9E2A2     BCLR SPI3CON1, #7
-140:                   SPI3CON2bits.FRMEN=0;       //no enable framed mode
-0073EC  A9E2A5     BCLR 0x2A5, #7
-141:                   SPI3CON2bits.SPIBEN=1;      //enhanced buffer mode
-0073EE  A802A4     BSET SPI3CON2, #0
-142:                   SPI2STATbits.SISEL=5;       //interrupt when done sending
-0073F0  2FFE30     MOV #0xFFE3, W0
-0073F2  801302     MOV SPI2STAT, W2
-0073F4  600082     AND W0, W2, W1
-0073F6  B30141     IOR #0x14, W1
-0073F8  881301     MOV W1, SPI2STAT
-143:                   SPI3CON1bits.SMP=0;         //data sampled at end of output time
-0073FA  A922A3     BCLR 0x2A3, #1
-144:                   SPI3CON1bits.CKP=0;         //idle clock is high
-0073FC  A9C2A2     BCLR SPI3CON1, #6
-145:                   SPI3CON1bits.CKE=1;         //data changes from H to L
-0073FE  A802A3     BSET 0x2A3, #0
-146:                   SPI3CON1bits.PPRE=2;        //4:1 primary prescale
-007400  2FFFC1     MOV #0xFFFC, W1
-007402  801512     MOV SPI3CON1, W2
-007404  608082     AND W1, W2, W1
-007406  A01001     BSET W1, #1
-007408  881511     MOV W1, SPI3CON1
-147:                   SPI3CON1bits.SPRE=0;        //8:1 secondary
-00740A  B622A2     AND SPI3CON1
-148:                   SPI3STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
-00740C  A9C2A0     BCLR SPI3STAT, #6
-149:                   IPC22bits.SPI3IP = 5;        // Interrupt priority
-00740E  28FFF1     MOV #0x8FFF, W1
-007410  804360     MOV IPC22, W0
-007412  608080     AND W1, W0, W1
-007414  250000     MOV #0x5000, W0
-007416  700001     IOR W0, W1, W0
-007418  884360     MOV W0, IPC22
-150:                   IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
-00741A  A9680B     BCLR 0x80B, #3
-151:                   IEC5bits.SPI3IE = 1;        // Enable the interrupt
-00741C  A8682B     BSET 0x82B, #3
-152:                   SPI3STATbits.SPIEN = 1;     //start SPI module
-00741E  A8E2A1     BSET 0x2A1, #7
-153:               }
-007420  060000     RETURN
-154:               
-155:               //Description: Initializes timer for LED's UART and display
-156:               //Prereq: initUART1()
-157:               //Dependencies: _T1Interrupt(void)
-158:               //Frequency: 60Hz
-159:               void initT1(void){          //16 bit timer
-160:                   TMR1 = 0x0000;          //clear timer 4
-007422  EF2100     CLR TMR1
-161:                   T1CONbits.TCKPS = 3;    //prescale 1:256
-007424  200300     MOV #0x30, W0
-007426  B72104     IOR T1CON
-162:                   T1CONbits.TCS = 0;      //use internal clock
-007428  A92104     BCLR T1CON, #1
-163:                   T1CONbits.TGATE = 0;    //gate accumulation disabled
-00742A  A9C104     BCLR T1CON, #6
-164:                   PR1 = Fcy/(256*Fdisp);    //period register
-00742C  23CF00     MOV #0x3CF0, W0
-00742E  880810     MOV W0, PR1
-165:                   //PR1=0x7FFF;
-166:                   IFS0bits.T1IF = 0;      //clear timer 1 interrupt flag
-007430  A96800     BCLR IFS0, #3
-167:                   IEC0bits.T1IE = 1;      //enable timer 1 interrupt
-007432  A86820     BSET IEC0, #3
-168:                   IPC0bits.T1IP = 2;      //interrupt priority 2 (low)
-007434  28FFF0     MOV #0x8FFF, W0
-007436  B60840     AND IPC0, WREG
-007438  A0D000     BSET W0, #13
-00743A  884200     MOV W0, IPC0
-169:                   T1CONbits.TON = 1;      //start timer
-00743C  A8E105     BSET 0x105, #7
-170:               }
-00743E  060000     RETURN
-171:               
-172:               //Description:  Initializes timer handles polling button input
-173:               //Prereq: initADC1() 
-174:               //Dependencies: _T2Interrupt(void)
-175:               //Frequency: 512Hz
-176:               void initT2(void){          //16/32 bit timer
-177:                   TMR2 = 0x0000;          //clear timer 4
-007440  EF2106     CLR TMR2
-178:                   T2CONbits.T32 = 0;      //16 bit mode
-007442  A96110     BCLR T2CON, #3
-179:                   T2CONbits.TCKPS = 1;    //prescale 1:8
-007444  2FFCF0     MOV #0xFFCF, W0
-007446  B60110     AND T2CON, WREG
-007448  A04000     BSET W0, #4
-00744A  880880     MOV W0, T2CON
-180:                   T2CONbits.TCS = 0;      //use internal clock
-00744C  A92110     BCLR T2CON, #1
-181:                   T2CONbits.TGATE = 0;    //gate accumulation disabled
-00744E  A9C110     BCLR T2CON, #6
-182:                   PR2 = Fcy/(8*Fscan);      //period register about 512hz, PR2 = 0x3938 
-007450  239210     MOV #0x3921, W0
-007452  880860     MOV W0, PR2
-183:                   IFS0bits.T2IF = 0;      //clear timer 2 interrupt flag
-007454  A9E800     BCLR IFS0, #7
-184:                   IEC0bits.T2IE = 1;      //enable timer 2 interrupt
-007456  A8E820     BSET IEC0, #7
-185:                   IPC1bits.T2IP = 2;      //interrupt priority 2 (low)
-007458  28FFF0     MOV #0x8FFF, W0
-00745A  B60842     AND IPC1, WREG
-00745C  A0D000     BSET W0, #13
-00745E  884210     MOV W0, IPC1
-186:                   T2CONbits.TON = 1;      //start timer
-007460  A8E111     BSET 0x111, #7
-187:               }
-007462  060000     RETURN
-188:               
-189:               //Description: Initialize timer handling ADC sampling
-190:               //Prereq: initSPI_ADC()
-191:               //Dependencies: _T3Interrupt(void)
-192:               //Frequency: 44.1kHz
-193:               //*Note: Currently unused as readDac is chained to DCI interrupt*
-194:               void initT3(void){          //16/32 bit timer
-195:                   TMR3 = 0x0000;          //clear timer 3
-007464  EF210A     CLR TMR3
-196:                   T3CONbits.TCKPS = 3;    //prescale 256:1
-007466  200300     MOV #0x30, W0
-007468  B72112     IOR T3CON
-197:                   T3CONbits.TCS = 0;      //use internal clock
-00746A  A92112     BCLR T3CON, #1
-198:                   T3CONbits.TGATE = 0;    //gate accumulation disabled
-00746C  A9C112     BCLR T3CON, #6
-199:                   PR3 = Fcy/(256*Fsamp);           //period register
-00746E  200050     MOV #0x5, W0
-007470  880870     MOV W0, PR3
-200:                   //PR3 = 0xFFFF;
-201:                   IFS0bits.T3IF = 0;      //clear timer 3 interrupt flag
-007472  A90801     BCLR 0x801, #0
-202:                   IEC0bits.T3IE = 1;      //enable timer 3 interrupt
-007474  A80821     BSET 0x821, #0
-203:                   IPC2bits.T3IP = 2;      //interrupt priority 3 (low)
-007476  2FFF80     MOV #0xFFF8, W0
-007478  B60844     AND IPC2, WREG
-00747A  A01000     BSET W0, #1
-00747C  884220     MOV W0, IPC2
-204:                   T3CONbits.TON = 1;      //start timer
-00747E  A8E113     BSET 0x113, #7
-205:               }
-007480  060000     RETURN
-206:               
-207:               //Description: Initializes & starts 16 bit DCI I2S DAC
-208:               //Prereq: initSPI_ADC(void)
-209:               //Dependencies: readDAC(void)
-210:               void initDCI_DAC(void){
-211:                   DCICON1bits.CSCKD=0;
-007482  A94281     BCLR 0x281, #2
-212:                   DCICON3bits.BCG=(Fcy/(64*Fout)-1);  //calculate baud rate (WILL TRUNCATE)
-007484  2F0000     MOV #0xF000, W0
-007486  B60284     AND DCICON3, WREG
-007488  B30140     IOR #0x14, W0
-00748A  881420     MOV W0, DCICON3
-213:                   DCICON1bits.COFSM=1;    //i2s mode
-00748C  2FFFC0     MOV #0xFFFC, W0
-00748E  B60280     AND DCICON1, WREG
-007490  A00000     BSET W0, #0
-007492  881400     MOV W0, DCICON1
-214:                   DCICON1bits.CSCKE=1;    //sample on rising edge
-007494  A82281     BSET 0x281, #1
-215:                   DCICON2bits.WS=0xF;     //16 bit data word
-007496  2000F0     MOV #0xF, W0
-007498  B72282     IOR DCICON2
-216:                   DCICON2bits.COFSG=0;    //data frame has 1 words
-00749A  2FE1F0     MOV #0xFE1F, W0
-00749C  B62282     AND DCICON2
-217:                   TSCONbits.TSE0 = 1;     // Transmit on Time Slot 0     
-00749E  A80288     BSET TSCON, #0
-218:                   TSCONbits.TSE1 = 1;     // Transmit on Time Slot 0     
-0074A0  A82288     BSET TSCON, #1
-219:                   DCICON1bits.DJST=1;     //align data
-0074A2  A8A280     BSET DCICON1, #5
-220:                   DCICON2bits.BLEN=1;     //2 words buffer btwn interrupts
-0074A4  2F3FF0     MOV #0xF3FF, W0
-0074A6  B60282     AND DCICON2, WREG
-0074A8  A0A000     BSET W0, #10
-0074AA  881410     MOV W0, DCICON2
-221:                   IPC15bits.DCIIP = 6;    // Interrput priority
-0074AC  2FFF80     MOV #0xFFF8, W0
-0074AE  B6085E     AND IPC15, WREG
-0074B0  B30060     IOR #0x6, W0
-0074B2  8842F0     MOV W0, IPC15
-222:                   IFS3bits.DCIIF=0;
-0074B4  A98807     BCLR 0x807, #4
-223:                   IEC3bits.DCIIE=1; 
-0074B6  A88827     BSET 0x827, #4
-224:                   TXBUF0=0;
-0074B8  EF2298     CLR TXBUF0
-225:                   TXBUF1=0;   
-0074BA  EF229A     CLR TXBUF1
-226:                   DCICON1bits.DCIEN=1;    //ENABLE
-0074BC  A8E281     BSET 0x281, #7
-227:               }
-0074BE  060000     RETURN
-228:               
-229:               void initCAP_BPM(void){
-230:                   IFS0bits.IC1IF=0;
-0074C0  A92800     BCLR IFS0, #1
-231:                   IPC0bits.IC1IP=3;
-0074C2  2FF8F0     MOV #0xFF8F, W0
-0074C4  B60840     AND IPC0, WREG
-0074C6  B30300     IOR #0x30, W0
-0074C8  884200     MOV W0, IPC0
-232:                   IC1CON1bits.ICTSEL=0;   //Fp is clock source (7))
-0074CA  2E3FF0     MOV #0xE3FF, W0
-0074CC  B62140     AND IC1CON1
-233:                   IC1CON1bits.ICM=2;      //capture every falling edge
-0074CE  2FFF80     MOV #0xFFF8, W0
-0074D0  B60140     AND IC1CON1, WREG
-0074D2  A01000     BSET W0, #1
-0074D4  880A00     MOV W0, IC1CON1
-234:                   IC1CON2bits.ICTRIG=1;
-0074D6  A8E142     BSET IC1CON2, #7
-235:                   IC1CON2bits.SYNCSEL=0xD;
-0074D8  2FFE00     MOV #0xFFE0, W0
-0074DA  B60142     AND IC1CON2, WREG
-0074DC  B300D0     IOR #0xD, W0
-0074DE  880A10     MOV W0, IC1CON2
-236:                   IEC0bits.IC1IE=1;
-0074E0  A82820     BSET IEC0, #1
-237:               }
-0074E2  060000     RETURN
----  D:/sampler_0.43/audio.c  ---------------------------------------------------------------------------
+7:                 #include <libpic30.h>
+8:                 #include "common.h"
+9:                 #include "devInits.h"
+10:                #include "plcd.h"
+11:                
+12:                extern unsigned char UART_ON;
+13:                
+14:                //Description: Responsible i/o, clock, & RP pin config setup
+15:                //Prereq: NONE
+16:                //Dependencies: NONE
+17:                //*Note: This is ALWAYS the first function called in main*
+18:                void initPorts(void){
+19:                    //CLOCK CONFIG
+20:                    CLKDIVbits.PLLPOST=0;
+0071BE  2FF3F0     MOV #0xFF3F, W0
+0071C0  B62744     AND CLKDIV
+21:                    CLKDIVbits.PLLPRE=0;
+0071C2  2FFE00     MOV #0xFFE0, W0
+0071C4  B62744     AND CLKDIV
+22:                    PLLFBDbits.PLLDIV = 0x49;       //d_73 for ~140Mhz
+0071C6  2FE000     MOV #0xFE00, W0
+0071C8  B60746     AND PLLFBD, WREG
+0071CA  B30490     IOR #0x49, W0
+0071CC  883A30     MOV W0, PLLFBD
+23:                    while(OSCCONbits.LOCK!=1) {};   //wait for PLL to lock
+0071CE  200201     MOV #0x20, W1
+0071D0  803A12     MOV OSCCON, W2
+0071D2  608002     AND W1, W2, W0
+0071D4  32FFFD     BRA Z, 0x71D0
+24:                    //RP pin config
+25:                	__builtin_write_OSCCONL(OSCCON & ~(1<<6));      // Unlock Registers
+0071D6  803A10     MOV OSCCON, W0
+0071D8  A16000     BCLR W0, #6
+0071DA  200461     MOV #0x46, W1
+0071DC  200572     MOV #0x57, W2
+0071DE  207423     MOV #0x742, W3
+0071E0  784981     MOV.B W1, [W3]
+0071E2  784982     MOV.B W2, [W3]
+0071E4  784980     MOV.B W0, [W3]
+26:                    //RPINR18bits.U1RXR = 0x37; //U1 rx on RP55
+27:                    //RPOR6bits.RP54R=0x1;          //U1 tx on RP54
+28:                    RPOR2bits.RP38R = 0x1;
+0071E6  2FFC00     MOV #0xFFC0, W0
+0071E8  803424     MOV RPOR2, W4
+0071EA  600184     AND W0, W4, W3
+0071EC  A00003     BSET W3, #0
+0071EE  883423     MOV W3, RPOR2
+29:                    RPINR24bits.CSDIR=0x3D;     //DCI IN on RPI61           
+0071F0  2FF803     MOV #0xFF80, W3
+0071F2  803685     MOV RPINR24, W5
+0071F4  618205     AND W3, W5, W4
+0071F6  B303D4     IOR #0x3D, W4
+0071F8  883684     MOV W4, RPINR24
+30:                    RPOR3bits.RP40R=0x0C;       //DCI clock
+0071FA  B60686     AND RPOR3, WREG
+0071FC  B300C0     IOR #0xC, W0
+0071FE  883430     MOV W0, RPOR3
+31:                    RPOR2bits.RP39R=0x0D;       //DCI frame sync
+007200  2C0FF0     MOV #0xC0FF, W0
+007202  803424     MOV RPOR2, W4
+007204  600284     AND W0, W4, W5
+007206  20D004     MOV #0xD00, W4
+007208  720205     IOR W4, W5, W4
+00720A  883424     MOV W4, RPOR2
+32:                    RPOR3bits.RP41R=0x0B;       //DCI output
+00720C  803434     MOV RPOR3, W4
+00720E  600284     AND W0, W4, W5
+007210  20B004     MOV #0xB00, W4
+007212  720205     IOR W4, W5, W4
+007214  883434     MOV W4, RPOR3
+33:                    RPINR7bits.IC1R=0x5F;       //Capture input on pin 95 re15
+007216  803575     MOV RPINR7, W5
+007218  618185     AND W3, W5, W3
+00721A  B305F3     IOR #0x5F, W3
+00721C  883573     MOV W3, RPINR7
+34:                    RPINR29bits.SCK3R=0x39;      //SCK3 input on pin 84
+00721E  280FF4     MOV #0x80FF, W4
+007220  8036D3     MOV RPINR29, W3
+007222  620203     AND W4, W3, W4
+007224  239003     MOV #0x3900, W3
+007226  718184     IOR W3, W4, W3
+007228  8836D3     MOV W3, RPINR29
+35:                    RPOR7bits.RP57R=0x20;        //SCK3 output on pin 84
+00722A  803474     MOV RPOR7, W4
+00722C  600184     AND W0, W4, W3
+00722E  A0D003     BSET W3, #13
+007230  883473     MOV W3, RPOR7
+36:                    RPOR8bits.RP70R=0x1F;       //SDO3 on pin 83
+007232  B60690     AND RPOR8, WREG
+007234  21F003     MOV #0x1F00, W3
+007236  718180     IOR W3, W0, W3
+007238  883483     MOV W3, RPOR8
+37:                	__builtin_write_OSCCONL(OSCCON | (1<<6));       // Lock Registers
+00723A  803A10     MOV OSCCON, W0
+00723C  A06000     BSET W0, #6
+00723E  207423     MOV #0x742, W3
+007240  784981     MOV.B W1, [W3]
+007242  784982     MOV.B W2, [W3]
+007244  784980     MOV.B W0, [W3]
+38:                    /*PERIPHERAL ENABLE (0) - DISABLE (1)*/
+39:                    PMD1=PMD2=PMD3=PMD4=PMD6=PMD7=0xFFFF;
+007246  EB8000     SETM W0
+007248  883B60     MOV W0, PMD7
+00724A  F8076C     PUSH PMD7
+00724C  F9076A     POP PMD6
+00724E  F8076A     PUSH PMD6
+007250  F90766     POP PMD4
+007252  F80766     PUSH PMD4
+007254  F90764     POP PMD3
+007256  F80764     PUSH PMD3
+007258  F90762     POP PMD2
+00725A  F80762     PUSH PMD2
+00725C  F90760     POP PMD1
+40:                    PMD1bits.AD1MD=0;
+00725E  A90760     BCLR PMD1, #0
+41:                    PMD1bits.SPI1MD=0;
+007260  A96760     BCLR PMD1, #3
+42:                    PMD1bits.SPI2MD=0;
+007262  A98760     BCLR PMD1, #4
+43:                    PMD1bits.U1MD=0;
+007264  A9A760     BCLR PMD1, #5
+44:                    PMD1bits.U2MD=0;
+007266  A9C760     BCLR PMD1, #6
+45:                    PMD1bits.DCIMD=0;
+007268  A90761     BCLR 0x761, #0
+46:                    PMD1bits.T1MD=0;
+00726A  A96761     BCLR 0x761, #3
+47:                    PMD1bits.T2MD=0;
+00726C  A98761     BCLR 0x761, #4
+48:                    PMD1bits.T3MD=0;
+00726E  A9A761     BCLR 0x761, #5
+49:                    PMD1bits.T4MD=0;
+007270  A9C761     BCLR 0x761, #6
+50:                    PMD3bits.PMPMD=0;
+007272  A90765     BCLR 0x765, #0
+51:                    PMD3bits.CMPMD=0;
+007274  A94765     BCLR 0x765, #2
+52:                    PMD6bits.SPI3MD=0;
+007276  A9076A     BCLR PMD6, #0
+53:                    PMD7bits.DMA0MD=0;
+007278  A9876C     BCLR PMD7, #4
+54:                    
+55:                    /* ANALOG PINS (1 = analog) */
+56:                    ANSELA=ANSELB=ANSELC=ANSELD=ANSELE=ANSELF=ANSELG=0x0000;
+00727A  EF2E6E     CLR ANSELG
+00727C  F80E6E     PUSH ANSELG
+00727E  F90E5E     POP ANSELF
+007280  F80E5E     PUSH ANSELF
+007282  F90E4E     POP ANSELE
+007284  F80E4E     PUSH ANSELE
+007286  F90E3E     POP ANSELD
+007288  F80E3E     PUSH ANSELD
+00728A  F90E2E     POP ANSELC
+00728C  F80E2E     PUSH ANSELC
+00728E  F90E1E     POP ANSELB
+007290  F80E1E     PUSH ANSELB
+007292  F90E0E     POP ANSELA
+57:                    ANSELBbits.ANSB0 = 1; // Ensure AN0/RB0 is analog
+007294  A80E1E     BSET ANSELB, #0
+58:                    ANSELBbits.ANSB1 = 1; // Ensure AN1/RB1 is analog
+007296  A82E1E     BSET ANSELB, #1
+59:                    ANSELBbits.ANSB2 = 1; // Ensure AN2/RB2 is analog
+007298  A84E1E     BSET ANSELB, #2
+60:                    ANSELBbits.ANSB3 = 1; // Ensure AN5/RB5 is analog
+00729A  A86E1E     BSET ANSELB, #3
+61:                    
+62:                    /* IO DIRECTION (1 = input) */
+63:                    TRISA=TRISB=TRISC=TRISD=TRISE=TRISF=TRISG=0x0000;
+00729C  EF2E60     CLR TRISG
+00729E  F80E60     PUSH TRISG
+0072A0  F90E50     POP TRISF
+0072A2  F80E50     PUSH TRISF
+0072A4  F90E40     POP TRISE
+0072A6  F80E40     PUSH TRISE
+0072A8  F90E30     POP TRISD
+0072AA  F80E30     PUSH TRISD
+0072AC  F90E20     POP TRISC
+0072AE  F80E20     PUSH TRISC
+0072B0  F90E10     POP TRISB
+0072B2  F80E10     PUSH TRISB
+0072B4  F90E00     POP TRISA
+64:                    TRISA=0x0603;
+0072B6  206031     MOV #0x603, W1
+0072B8  887001     MOV W1, TRISA
+65:                    TRISB=0x0003;
+0072BA  200031     MOV #0x3, W1
+0072BC  887081     MOV W1, TRISB
+66:                    TRISC=0x2080;
+0072BE  220801     MOV #0x2080, W1
+0072C0  887101     MOV W1, TRISC
+67:                    TRISE=0x7000;
+0072C2  270001     MOV #0x7000, W1
+0072C4  887201     MOV W1, TRISE
+68:                    TRISG=0xFFFF;   //PORTG all inputs
+0072C6  887300     MOV W0, TRISG
+69:                    
+70:                    /* DIGITAL OUTPUT LATCH */
+71:                    LATA=LATB=LATC=LATD=LATE=LATF=LATG=0x0000;
+0072C8  EF2E64     CLR LATG
+0072CA  F80E64     PUSH LATG
+0072CC  F90E54     POP LATF
+0072CE  F80E54     PUSH LATF
+0072D0  F90E44     POP LATE
+0072D2  F80E44     PUSH LATE
+0072D4  F90E34     POP LATD
+0072D6  F80E34     PUSH LATD
+0072D8  F90E24     POP LATC
+0072DA  F80E24     PUSH LATC
+0072DC  F90E14     POP LATB
+0072DE  F80E14     PUSH LATB
+0072E0  F90E04     POP LATA
+72:                    LATA=0x0040;
+0072E2  200401     MOV #0x40, W1
+0072E4  887021     MOV W1, LATA
+73:                    
+74:                    //weak internal pull ups
+75:                    CNPUG=0xFFFF;       //weak pull ups on all of G
+0072E6  887350     MOV W0, CNPUG
+76:                }
+0072E8  060000     RETURN
+77:                
+78:                //Description: Initializes UART1 device & interrupts
+79:                //Prereq: NONE
+80:                //Dependencies: NONE
+81:                void initUART1(void){
+82:                    IFS0bits.U1TXIF = 0;        //clear flag
+0072EA  A98801     BCLR 0x801, #4
+83:                    IFS0bits.U1RXIF = 0;        //clear flag
+0072EC  A96801     BCLR 0x801, #3
+84:                    U1STA=0x1510;               //enable tx & rx
+0072EE  215100     MOV #0x1510, W0
+0072F0  881110     MOV W0, U1STA
+85:                    U1BRG=BRGVAL;               //baud rate
+0072F2  2004A0     MOV #0x4A, W0
+0072F4  881140     MOV W0, U1BRG
+86:                    U1MODEbits.PDSEL=1;         //8 bit data, even parity
+0072F6  2FFF90     MOV #0xFFF9, W0
+0072F8  B60220     AND U1MODE, WREG
+0072FA  A01000     BSET W0, #1
+0072FC  881100     MOV W0, U1MODE
+87:                    IPC2bits.U1RXIP = 7;        //interrupt priority 3 (low)
+0072FE  270000     MOV #0x7000, W0
+007300  B72844     IOR IPC2
+88:                    IPC3bits.U1TXIP = 7;        //interrupt priority 3 (low)
+007302  200070     MOV #0x7, W0
+007304  B72846     IOR IPC3
+89:                    //IEC0bits.U1TXIE = 1;        //enable tx interrupt
+90:                    //IEC0bits.U1RXIE = 1;        //enable rx interrupt
+91:                    U1MODEbits.UARTEN = 1;      //start uart
+007306  A8E221     BSET 0x221, #7
+92:                    UART_ON = TRUE;
+007308  EFF01B     SETM.B UART_ON
+93:                    
+94:                }
+00730A  060000     RETURN
+95:                
+96:                //Description: Initializes onboard ADC 
+97:                //Prereq: NONE
+98:                //Dependencies: NONE
+99:                void initADC1(void){
+100:                   AD1CON1bits.ASAM = 1;       //enable simultaneous sample
+0073F2  A84320     BSET AD1CON1, #2
+101:                   AD1CON1bits.SIMSAM = 0;     //enable simultaneous sample
+0073F4  A96320     BCLR AD1CON1, #3
+102:                   AD1CON1bits.FORM=2;         //signed fractional format
+0073F6  2FCFF0     MOV #0xFCFF, W0
+0073F8  801902     MOV AD1CON1, W2
+0073FA  600082     AND W0, W2, W1
+0073FC  A09001     BSET W1, #9
+0073FE  881901     MOV W1, AD1CON1
+103:                   AD1CON2bits.CHPS = 0b01;    //sample channels 0-3
+007400  B60322     AND AD1CON2, WREG
+007402  A08000     BSET W0, #8
+007404  881910     MOV W0, AD1CON2
+104:                   AD1CON3bits.ADCS = 0x3F;    //tad ~ 1us
+007406  B3C3F0     MOV.B #0x3F, W0
+007408  B7E324     MOV.B WREG, AD1CON3
+105:                   //AD1CHS0bits.CH0SA = 0x03;   //ch0->an3 (no use an0)
+106:                   AD1CHS0bits.CH0NA = 0; // Select Vref- for CH0 -ve input
+00740A  A9E328     BCLR AD1CHS0, #7
+107:                   AD1CHS123bits.CH123NA = 0; // Select Vref- for CH1/CH2/CH3 -ve input
+00740C  2FFF90     MOV #0xFFF9, W0
+00740E  B62326     AND AD1CHS123
+108:                   AD1CON1bits.ADON = 1;       //start ADC module
+007410  A8E321     BSET 0x321, #7
+109:                   Delay_us(20);
+007412  200140     MOV #0x14, W0
+007414  07FFE5     RCALL Delay_us
+110:               }
+007416  060000     RETURN
+111:               
+112:               void initPMP(void){
+113:                   /*
+114:                    Data is clocked on falling edge of E
+115:                    *  RS = 44 = PMAO (H = display data, L = display instruction)
+116:                    *  E = 72 = CS1 (pulse width 450ns MIN, data triggers from H to L) 
+117:                    */
+118:                   PMMODEbits.MODE=3;  //master mode 1 
+00730C  203000     MOV #0x300, W0
+00730E  B72602     IOR PMMODE
+119:                   PMCONbits.PTWREN = 1;
+007310  A82601     BSET 0x601, #1
+120:                   PMCONbits.PTRDEN = 1;
+007312  A80601     BSET 0x601, #0
+121:                   PMCONbits.WRSP=1;   //write strobe active high
+007314  A82600     BSET PMCON, #1
+122:                   PMCONbits.RDSP=1;   //read strobe active high
+007316  A80600     BSET PMCON, #0
+123:                   //PMCONbits.CS1P = 1; //active high CS1
+124:                   PMMODEbits.WAITB = 3;
+007318  200C00     MOV #0xC0, W0
+00731A  B72602     IOR PMMODE
+125:                   PMMODEbits.WAITM = 0x08;
+00731C  2FFC30     MOV #0xFFC3, W0
+00731E  B60602     AND PMMODE, WREG
+007320  A05000     BSET W0, #5
+007322  883010     MOV W0, PMMODE
+126:                   PMMODEbits.WAITE = 3;
+007324  200030     MOV #0x3, W0
+007326  B72602     IOR PMMODE
+127:                   PMAEN=1;
+007328  200010     MOV #0x1, W0
+00732A  883060     MOV W0, PMAEN
+128:                   //PMCONbits.CSF=2;     //pmcs1 & pmcs2 as CS
+129:               
+130:                   PMCONbits.PMPEN = 1;
+00732C  A8E601     BSET 0x601, #7
+131:                   
+132:                   /* INIT DEVICE */
+133:                   /*
+134:                   Delay_us(100);
+135:                   lcdWrite(0x30);   //function set, 8 bits, 1 line disp, 5x8
+136:                   Delay_us(400);    //39 uS required
+137:                   lcdWrite(0x30);   //entry mode
+138:                   Delay_us(400);     //39 uS required
+139:                   lcdWrite(0x30);   //entry mode
+140:                   Delay_us(400);     //39 uS required
+141:                   lcdClear();  
+142:                   Delay_us(1640);     //1.64mS required
+143:                   lcdPwr(1);
+144:                   Delay_us(400);
+145:                   */
+146:               }
+00732E  060000     RETURN
+147:               
+148:               
+149:               //Description: Initializes timer for LED's UART and display
+150:               //Prereq: initUART1()
+151:               //Dependencies: _T1Interrupt(void)
+152:               //Frequency: 15Hz
+153:               void initT1(void){          //16 bit timer
+154:                   TMR1 = 0x0000;          //clear timer 4
+007330  EF2100     CLR TMR1
+155:                   T1CONbits.TCKPS = 3;    //prescale 1:256
+007332  200300     MOV #0x30, W0
+007334  B72104     IOR T1CON
+156:                   T1CONbits.TCS = 0;      //use internal clock
+007336  A92104     BCLR T1CON, #1
+157:                   T1CONbits.TGATE = 0;    //gate accumulation disabled
+007338  A9C104     BCLR T1CON, #6
+158:                   PR1 = Fcy/(256*Fdisp);    //period register
+00733A  223280     MOV #0x2328, W0
+00733C  880810     MOV W0, PR1
+159:                   //PR1=0x7FFF;
+160:                   IFS0bits.T1IF = 0;      //clear timer 1 interrupt flag
+00733E  A96800     BCLR IFS0, #3
+161:                   IEC0bits.T1IE = 1;      //enable timer 1 interrupt
+007340  A86820     BSET IEC0, #3
+162:                   IPC0bits.T1IP = 2;      //interrupt priority 2 (low)
+007342  28FFF0     MOV #0x8FFF, W0
+007344  B60840     AND IPC0, WREG
+007346  A0D000     BSET W0, #13
+007348  884200     MOV W0, IPC0
+163:                   T1CONbits.TON = 1;      //start timer
+00734A  A8E105     BSET 0x105, #7
+164:               }
+00734C  060000     RETURN
+165:               
+166:               //Description:  Initializes timer handles polling button input
+167:               //Prereq: initADC1() 
+168:               //Dependencies: _T2Interrupt(void)
+169:               //Frequency: 512Hz
+170:               void initT2(void){          //16/32 bit timer
+171:                   TMR2 = 0x0000;          //clear timer 4
+00734E  EF2106     CLR TMR2
+172:                   T2CONbits.T32 = 0;      //16 bit mode
+007350  A96110     BCLR T2CON, #3
+173:                   T2CONbits.TCKPS = 1;    //prescale 1:8
+007352  2FFCF0     MOV #0xFFCF, W0
+007354  B60110     AND T2CON, WREG
+007356  A04000     BSET W0, #4
+007358  880880     MOV W0, T2CON
+174:                   T2CONbits.TCS = 0;      //use internal clock
+00735A  A92110     BCLR T2CON, #1
+175:                   T2CONbits.TGATE = 0;    //gate accumulation disabled
+00735C  A9C110     BCLR T2CON, #6
+176:                   PR2 = Fcy/(8*Fscan);      //period register about 512hz, PR2 = 0x3938 
+00735E  241EB0     MOV #0x41EB, W0
+007360  880860     MOV W0, PR2
+177:                   IFS0bits.T2IF = 0;      //clear timer 2 interrupt flag
+007362  A9E800     BCLR IFS0, #7
+178:                   IEC0bits.T2IE = 1;      //enable timer 2 interrupt
+007364  A8E820     BSET IEC0, #7
+179:                   IPC1bits.T2IP = 2;      //interrupt priority 2 (low)
+007366  28FFF0     MOV #0x8FFF, W0
+007368  B60842     AND IPC1, WREG
+00736A  A0D000     BSET W0, #13
+00736C  884210     MOV W0, IPC1
+180:                   T2CONbits.TON = 1;      //start timer
+00736E  A8E111     BSET 0x111, #7
+181:               }
+007370  060000     RETURN
+182:               
+183:               //Description: Initialize timer handling ADC sampling
+184:               //Prereq: initSPI_ADC()
+185:               //Dependencies: _T3Interrupt(void)
+186:               //Frequency: 44.1kHz
+187:               //*Note: Currently unused as readDac is chained to DCI interrupt*
+188:               void initT3(void){          //16/32 bit timer
+189:                   TMR3 = 0x0000;          //clear timer 3
+007372  EF210A     CLR TMR3
+190:                   T3CONbits.TCKPS = 3;    //prescale 256:1
+007374  200300     MOV #0x30, W0
+007376  B72112     IOR T3CON
+191:                   T3CONbits.TCS = 0;      //use internal clock
+007378  A92112     BCLR T3CON, #1
+192:                   T3CONbits.TGATE = 0;    //gate accumulation disabled
+00737A  A9C112     BCLR T3CON, #6
+193:                   PR3 = Fcy/(256*T3freq);           //period register
+00737C  200060     MOV #0x6, W0
+00737E  880870     MOV W0, PR3
+194:                   //PR3 = 0xFFFF;
+195:                   IFS0bits.T3IF = 0;      //clear timer 3 interrupt flag
+007380  A90801     BCLR 0x801, #0
+196:                   IEC0bits.T3IE = 1;      //enable timer 3 interrupt
+007382  A80821     BSET 0x821, #0
+197:                   IPC2bits.T3IP = 2;      //interrupt priority 3 (low)
+007384  2FFF80     MOV #0xFFF8, W0
+007386  B60844     AND IPC2, WREG
+007388  A01000     BSET W0, #1
+00738A  884220     MOV W0, IPC2
+198:                   T3CONbits.TON = 1;      //start timer
+00738C  A8E113     BSET 0x113, #7
+199:               }
+00738E  060000     RETURN
+200:               
+201:               //Description: Initializes & starts 16 bit DCI I2S DAC
+202:               //Prereq: initSPI_ADC(void)
+203:               //Dependencies: readDAC(void)
+204:               void initDCI_DAC(void){
+205:                   DCICON1bits.CSCKD=0;
+007390  A94281     BCLR 0x281, #2
+206:                   DCICON3bits.BCG=(Fcy/(64*Fout)-1);  //calculate baud rate (WILL TRUNCATE)
+007392  2F0000     MOV #0xF000, W0
+007394  B60284     AND DCICON3, WREG
+007396  B30170     IOR #0x17, W0
+007398  881420     MOV W0, DCICON3
+207:                   DCICON1bits.COFSM=1;    //i2s mode
+00739A  2FFFC0     MOV #0xFFFC, W0
+00739C  B60280     AND DCICON1, WREG
+00739E  A00000     BSET W0, #0
+0073A0  881400     MOV W0, DCICON1
+208:                   DCICON1bits.CSCKE=1;    //sample on rising edge
+0073A2  A82281     BSET 0x281, #1
+209:                   DCICON2bits.WS=0xF;     //16 bit data word
+0073A4  2000F0     MOV #0xF, W0
+0073A6  B72282     IOR DCICON2
+210:                   DCICON2bits.COFSG=0;    //data frame has 1 words
+0073A8  2FE1F0     MOV #0xFE1F, W0
+0073AA  B62282     AND DCICON2
+211:                   TSCONbits.TSE0 = 1;     // Transmit on Time Slot 0     
+0073AC  A80288     BSET TSCON, #0
+212:                   TSCONbits.TSE1 = 1;     // Transmit on Time Slot 1   
+0073AE  A82288     BSET TSCON, #1
+213:                   RSCONbits.RSE0 = 1;     // rcv on Time Slot 0     
+0073B0  A8028C     BSET RSCON, #0
+214:                   RSCONbits.RSE1 = 1;     // rcv on Time Slot 1 
+0073B2  A8228C     BSET RSCON, #1
+215:                   DCICON1bits.DJST=0;     //align data
+0073B4  A9A280     BCLR DCICON1, #5
+216:                   DCICON2bits.BLEN=1;     //2 words buffer btwn interrupts
+0073B6  2F3FF0     MOV #0xF3FF, W0
+0073B8  B60282     AND DCICON2, WREG
+0073BA  A0A000     BSET W0, #10
+0073BC  881410     MOV W0, DCICON2
+217:                   IPC15bits.DCIIP = 6;    // Interrput priority
+0073BE  2FFF80     MOV #0xFFF8, W0
+0073C0  B6085E     AND IPC15, WREG
+0073C2  B30060     IOR #0x6, W0
+0073C4  8842F0     MOV W0, IPC15
+218:                   IFS3bits.DCIIF=0;
+0073C6  A98807     BCLR 0x807, #4
+219:                   IEC3bits.DCIIE=1; 
+0073C8  A88827     BSET 0x827, #4
+220:                   TXBUF0=0;
+0073CA  EF2298     CLR TXBUF0
+221:                   TXBUF1=0;   
+0073CC  EF229A     CLR TXBUF1
+222:                   DCICON1bits.DCIEN=1;    //ENABLE
+0073CE  A8E281     BSET 0x281, #7
+223:                   
+224:                   
+225:                       static int ij=0;
+226:                   if (ij<8)
+0073D0  808200     MOV ij, W0
+0073D2  500FE7     SUB W0, #0x7, [W15]
+0073D4  3C0003     BRA GT, 0x73DC
+227:                       ij++;
+0073D6  E80000     INC W0, W0
+0073D8  888200     MOV W0, ij
+0073DA  370001     BRA 0x73DE
+228:                   else ij=0;
+0073DC  EF3040     CLR ij
+229:                   //seg_display(ij);
+230:               }
+0073DE  060000     RETURN
+231:               
+232:               /*
+233:               void initCAP_BPM(void){
+234:                   IFS0bits.IC1IF=0;
+235:                   IPC0bits.IC1IP=3;
+236:                   IC1CON1bits.ICTSEL=0;   //Fp is clock source (7))
+237:                   IC1CON1bits.ICM=2;      //capture every falling edge
+238:                   IC1CON2bits.ICTRIG=1;
+239:                   IC1CON2bits.SYNCSEL=0xD;
+240:                   IEC0bits.IC1IE=1;
+241:               }
+242:               
+243:               //Description: Initializes 16 bit SPI ADC 
+244:               //Prereq: NONE
+245:               //Dependencies: NONE
+246:               void initSPI2_ADC(void){
+247:                   //ADC_CONV=1;                 //prevent shift as per errata
+248:                   PORTBbits.RB10=1;           //prevent shift as per errata
+249:                   IFS2bits.SPI2IF = 0;        // Clear the Interrupt flag
+250:                   IEC2bits.SPI2IE = 0;        // Disable the interrupt
+251:                   SPI2CON1bits.MSTEN=1;       //master mode
+252:                   SPI2CON1bits.DISSCK = 0;    //Internal serial clock is enabled
+253:                   SPI2CON1bits.MODE16=1;      //16 bit
+254:                   SPI2CON1bits.DISSDO=1;      //no SDO 
+255:                   SPI2CON1bits.SSEN=0;        //no use SS
+256:                   SPI2CON2bits.FRMEN=0;       //no enable framed mode
+257:                   SPI2CON2bits.SPIBEN=1;      //enhanced buffer mode
+258:                   SPI2STATbits.SISEL=5;       //interrupt when done sending
+259:                   SPI2CON1bits.SMP=1;         //data sampled at end of output time
+260:                   SPI2CON1bits.CKP=1;         //idle clock is high
+261:                   SPI2CON1bits.CKE=1;         //data changes from H to L
+262:                   SPI2CON1bits.PPRE=2;        //4:1 primary prescale
+263:                   SPI2CON1bits.SPRE=0;        //8:1 secondary
+264:                   SPI2STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
+265:                   IPC8bits.SPI2IP = 5;        // Interrupt priority
+266:                   IFS2bits.SPI2IF = 0;        // Clear the Interrupt flag
+267:                   IEC2bits.SPI2IE = 1;        // Enable the interrupt
+268:                   SPI2STATbits.SPIEN = 1;     //start SPI module
+269:               }
+270:               
+271:               void initSPI3_SEG(void){
+272:                   SEG_SEL = 1;
+273:                   IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
+274:                   IEC5bits.SPI3IE = 0;        // Disable the interrupt
+275:                   SPI3CON1bits.MSTEN=1;       //master mode
+276:                   SPI3CON1bits.DISSCK = 0;    //Internal serial clock is enabled
+277:                   SPI3CON1bits.MODE16=1;      //16 bit
+278:                   SPI3CON1bits.DISSDO=0;      //enable SDO 
+279:                   SPI3CON1bits.SSEN=0;        //use SS
+280:                   SPI3CON2bits.FRMEN=0;       //no enable framed mode
+281:                   SPI3CON2bits.SPIBEN=0;      //enhanced buffer mode
+282:                   SPI2STATbits.SISEL=5;       //interrupt when done sending
+283:                   SPI3CON1bits.SMP=0;         //data sampled at end of output time
+284:                   SPI3CON1bits.CKP=0;         //idle clock is low
+285:                   SPI3CON1bits.CKE=1;         //data changes from H to L
+286:                   SPI3CON1bits.PPRE=1;        //4:1 primary prescale
+287:                   SPI3CON1bits.SPRE=7;        //1:1 secondary
+288:                   SPI3STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
+289:                   IPC22bits.SPI3IP = 3;        // Interrupt priority
+290:                   IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
+291:                   IEC5bits.SPI3IE = 0;        // Enable the interrupt
+292:                   SPI3STATbits.SPIEN = 1;     //start SPI module
+293:                   __delay32(40);
+294:                   MAX7219_Init();
+295:               }
+296:               */
+297:               
+298:               void Delay_us(unsigned int delay)
+299:               {
+300:                   int i;
+301:                   for (i = 0; i < delay; i++)
+0073E0  E00000     CP0 W0
+0073E2  320006     BRA Z, 0x73F0
+0073E4  EB0080     CLR W1
+0073EA  E80081     INC W1, W1
+0073EC  500F81     SUB W0, W1, [W15]
+0073EE  3EFFFB     BRA GTU, 0x73E6
+302:                   {
+303:                       __asm__ volatile ("repeat #39");
+0073E6  090027     REPEAT #0x27
+304:                       __asm__ volatile ("nop");
+0073E8  000000     NOP
+305:                   }
+306:               }
+0073F0  060000     RETURN
+---  /home/fbuga/Documents/ps-040/audio.c  --------------------------------------------------------------
 1:                 #include "xc.h"
 2:                 #include "common.h"
 3:                 #include <dsp.h>
-4:                 //CONTROL VARIABLES
-5:                 extern char pad[8];
+4:                 
+5:                 extern char pad[8];                                                             //CONTROL VARIABLES//
 6:                 extern fractional pots[4];
 7:                 extern fractional pots_scaled[4];
 8:                 
-9:                 //FX FLAGS & VARS
-10:                volatile unsigned int loop_ptr = 0;
-11:                unsigned int loop_lim=0;
-12:                unsigned int tremelo_ptr=0, tremelo_length=0, trem_var=0;
-13:                extern unsigned char hard_clipped, tremelo, looper, lpf;
-14:                volatile fractional loop[LOOP_BUF_SIZE]={0};
-15:                unsigned int delay_samples=0;
-16:                fractional lpf_alpha=Q15(0.5), lpf_inv_alpha=Q15(0.5);
-17:                fractional tremelo_depth=Q15(1.0);
-18:                
-19:                //misc.
-20:                extern fractional sintab[1024];
-21:                
-22:                //SAMPLES//
-23:                extern unsigned char kick_playing;
-24:                extern unsigned int kick_max, kick_ptr;
-25:                extern fractional kick[5552];
-26:                //extern unsigned char kick_mode;
-27:                /*
-28:                extern unsigned char hat_playing;
-29:                extern unsigned int hat_max, hat_ptr;
-30:                extern fractional hat[5552];
-31:                 */ 
-32:                extern unsigned char snare_playing;
-33:                extern unsigned int snare_max, snare_ptr;
-34:                extern fractional snare[5552];
-35:                
-36:                
-37:                fractional mixer(fractional sample){
-0076B6  F80022     PUSH ACCA
-0076B8  F80024     PUSH ACCAH
-0076BA  F80026     PUSH ACCAU
-38:                    volatile register int result1 asm("A");
-39:                    if(pad[3]==0&&kick_playing==FALSE){                                         //kick
-0076BC  266671     MOV #0x6667, W1
-0076BE  784091     MOV.B [W1], W1
-0076C0  E00401     CP0.B W1
-0076C2  3A0006     BRA NZ, 0x76D0
-0076C4  E25030     CP0.B kick_playing
-0076C6  3A0004     BRA NZ, 0x76D0
-40:                        kick_playing=TRUE;
-0076C8  EBC100     SETM.B W2
-0076CA  210303     MOV #0x1030, W3
-0076CC  784982     MOV.B W2, [W3]
-0076CE  370004     BRA 0x76D8
-41:                    }
-42:                    if(kick_playing==TRUE&&kick_ptr<kick_max){
-0076D0  210302     MOV #0x1030, W2
-0076D2  784112     MOV.B [W2], W2
-0076D4  414FE1     ADD.B W2, #0x1, [W15]
-0076D6  3A0011     BRA NZ, 0x76FA
-0076D8  875253     MOV 0xEA4A, W3
-0076DA  808195     MOV kick_ptr, W5
-0076DC  528F83     SUB W5, W3, [W15]
-0076DE  31000D     BRA C, 0x76FA
-43:                        result1 =__builtin_mpy(sample,Q15(0.85), NULL, NULL, 0, NULL, NULL, 0);
-0076E0  780200     MOV W0, W4
-0076E2  26CCC5     MOV #0x6CCC, W5
-0076E4  C00113     MPY W4*W5, A
-44:                        result1 = __builtin_add(result1,kick[kick_ptr++],0);
-0076E6  808190     MOV kick_ptr, W0
-0076E8  400080     ADD W0, W0, W1
-0076EA  2938A2     MOV #0x938A, W2
-0076EC  410081     ADD W2, W1, W1
-0076EE  780091     MOV [W1], W1
-0076F0  E80000     INC W0, W0
-0076F2  888190     MOV W0, kick_ptr
-0076F4  C90001     ADD W1, A
-45:                        sample=__builtin_sac(result1, 0);
-0076F6  CC0000     SAC A, W0
-0076F8  37000A     BRA 0x770E
-46:                    }
-47:                    else if (pad[3]==1&&kick_playing==TRUE&&kick_ptr==kick_max){
-0076FA  50CFE1     SUB.B W1, #0x1, [W15]
-0076FC  3A0008     BRA NZ, 0x770E
-0076FE  414FE1     ADD.B W2, #0x1, [W15]
-007700  3A0006     BRA NZ, 0x770E
-007702  875251     MOV 0xEA4A, W1
-007704  808192     MOV kick_ptr, W2
-007706  510F81     SUB W2, W1, [W15]
-007708  3A0002     BRA NZ, 0x770E
-48:                        kick_playing=FALSE;
-00770A  EF7030     CLR.B kick_playing
-49:                        kick_ptr=0;
-00770C  EF3032     CLR kick_ptr
-50:                    }
-51:                    
-52:                    /*
-53:                    if(pad[2]==0&&hat_playing==FALSE){                                          //hat
-54:                        hat_playing=TRUE;
-55:                    }
-56:                    if(hat_playing==TRUE&&hat_ptr<hat_max){
-57:                        result1 =__builtin_mpy(sample,Q15(0.85), NULL, NULL, 0, NULL, NULL, 0);
-58:                        result1 = __builtin_add(result1,hat[hat_ptr++],0);
-59:                        sample=__builtin_sac(result1, 0);
-60:                    }
-61:                    else if (pad[2]==1&&hat_playing==TRUE&&hat_ptr==hat_max){
-62:                        hat_playing=FALSE;
-63:                        hat_ptr=0;
-64:                    }
-65:                    */
-66:                    if(pad[2]==0&&snare_playing==FALSE){                                        //snare
-00770E  266661     MOV #0x6666, W1
-007710  784091     MOV.B [W1], W1
-007712  E00401     CP0.B W1
-007714  3A0006     BRA NZ, 0x7722
-007716  E25034     CP0.B snare_playing
-007718  3A0004     BRA NZ, 0x7722
-67:                        snare_playing=TRUE;
-00771A  EBC100     SETM.B W2
-00771C  210343     MOV #0x1034, W3
-00771E  784982     MOV.B W2, [W3]
-007720  370004     BRA 0x772A
-68:                    }
-69:                    if(snare_playing==TRUE&&snare_ptr<snare_max){
-007722  210342     MOV #0x1034, W2
-007724  784112     MOV.B [W2], W2
-007726  414FE1     ADD.B W2, #0x1, [W15]
-007728  3A0011     BRA NZ, 0x774C
-00772A  875263     MOV 0xEA4C, W3
-00772C  8081B5     MOV snare_ptr, W5
-00772E  528F83     SUB W5, W3, [W15]
-007730  31000D     BRA C, 0x774C
-70:                        result1 =__builtin_mpy(sample,Q15(0.85), NULL, NULL, 0, NULL, NULL, 0);
-007732  780200     MOV W0, W4
-007734  26CCC5     MOV #0x6CCC, W5
-007736  C00113     MPY W4*W5, A
-71:                        result1 = __builtin_add(result1,snare[snare_ptr++],0);
-007738  8081B0     MOV snare_ptr, W0
-00773A  400080     ADD W0, W0, W1
-00773C  2BEEA2     MOV #0xBEEA, W2
-00773E  410081     ADD W2, W1, W1
-007740  780091     MOV [W1], W1
-007742  E80000     INC W0, W0
-007744  8881B0     MOV W0, snare_ptr
-007746  C90001     ADD W1, A
-72:                        sample=__builtin_sac(result1, 0);
-007748  CC0000     SAC A, W0
-00774A  37000A     BRA 0x7760
-73:                    }
-74:                    else if (pad[2]==1&&snare_playing==TRUE&&snare_ptr==snare_max){
-00774C  50CFE1     SUB.B W1, #0x1, [W15]
-00774E  3A0008     BRA NZ, 0x7760
-007750  414FE1     ADD.B W2, #0x1, [W15]
-007752  3A0006     BRA NZ, 0x7760
-007754  875261     MOV 0xEA4C, W1
-007756  8081B2     MOV snare_ptr, W2
-007758  510F81     SUB W2, W1, [W15]
-00775A  3A0002     BRA NZ, 0x7760
-75:                        snare_playing=FALSE;
-00775C  EF7034     CLR.B snare_playing
-76:                        snare_ptr=0;
-00775E  EF3036     CLR snare_ptr
-77:                    }
+9:                 volatile unsigned int loop_ptr = 0;                                             //FX FLAGS & VARS//
+10:                unsigned int loop_lim=0;
+11:                unsigned int tremelo_ptr=0, tremelo_length=0, trem_var=0;
+12:                extern unsigned char hard_clipped, tremelo, looper, lpf;
+13:                volatile fractional loop[LOOP_BUF_SIZE]={0};
+14:                unsigned int delay_samples=0;
+15:                fractional lpf_alpha=Q15(0.5), lpf_inv_alpha=Q15(0.5);
+16:                fractional tremelo_depth=Q15(1.0);
+17:                
+18:                extern fractional sintab[1024];     //misc//
+19:                extern unsigned char TEST_SIN;
+20:                
+21:                extern unsigned char kick_playing;                                              //SAMPLES//
+22:                extern unsigned int kick_max, kick_ptr;
+23:                extern fractional kick[5552];
+24:                //extern unsigned char kick_mode;
+25:                /*
+26:                extern unsigned char hat_playing;
+27:                extern unsigned int hat_max, hat_ptr;
+28:                extern fractional hat[5552];
+29:                 */
+30:                extern unsigned char snare_playing;
+31:                extern unsigned int snare_max, snare_ptr;
+32:                extern fractional snare[5552];
+33:                
+34:                fractional mixer(fractional sample){
+007602  F80022     PUSH ACCA
+007604  F80024     PUSH ACCAH
+007606  F80026     PUSH ACCAU
+35:                    volatile register int result1 asm("A");
+36:                    static int i=0;
+37:                    
+38:                    if(pad[3]==0&&kick_playing==FALSE){                                         //kick
+007608  2666D1     MOV #0x666D, W1
+00760A  784091     MOV.B [W1], W1
+00760C  E00401     CP0.B W1
+00760E  3A0006     BRA NZ, 0x761C
+007610  E25032     CP0.B kick_playing
+007612  3A0004     BRA NZ, 0x761C
+39:                        kick_playing=TRUE;
+007614  EBC100     SETM.B W2
+007616  210323     MOV #0x1032, W3
+007618  784982     MOV.B W2, [W3]
+00761A  370004     BRA 0x7624
+40:                    }
+41:                    if(kick_playing==TRUE&&kick_ptr<kick_max){
+00761C  210322     MOV #0x1032, W2
+00761E  784112     MOV.B [W2], W2
+007620  414FE1     ADD.B W2, #0x1, [W15]
+007622  3A0011     BRA NZ, 0x7646
+007624  874D23     MOV 0xE9A4, W3
+007626  8081A5     MOV kick_ptr, W5
+007628  528F83     SUB W5, W3, [W15]
+00762A  31000D     BRA C, 0x7646
+42:                        result1 =__builtin_mpy(sample,Q15(0.90), NULL, NULL, 0, NULL, NULL, 0);
+00762C  780200     MOV W0, W4
+00762E  273325     MOV #0x7332, W5
+007630  C00113     MPY W4*W5, A
+43:                        result1 = __builtin_add(result1,kick[kick_ptr++],0);
+007632  8081A0     MOV kick_ptr, W0
+007634  400080     ADD W0, W0, W1
+007636  292E42     MOV #0x92E4, W2
+007638  410081     ADD W2, W1, W1
+00763A  780091     MOV [W1], W1
+00763C  E80000     INC W0, W0
+00763E  8881A0     MOV W0, kick_ptr
+007640  C90001     ADD W1, A
+44:                        sample=__builtin_sac(result1, 0);
+007642  CC0000     SAC A, W0
+007644  37000A     BRA 0x765A
+45:                    }
+46:                    else if (pad[3]==1&&kick_playing==TRUE&&kick_ptr==kick_max){
+007646  50CFE1     SUB.B W1, #0x1, [W15]
+007648  3A0008     BRA NZ, 0x765A
+00764A  414FE1     ADD.B W2, #0x1, [W15]
+00764C  3A0006     BRA NZ, 0x765A
+00764E  874D21     MOV 0xE9A4, W1
+007650  8081A2     MOV kick_ptr, W2
+007652  510F81     SUB W2, W1, [W15]
+007654  3A0002     BRA NZ, 0x765A
+47:                        kick_playing=FALSE;
+007656  EF7032     CLR.B kick_playing
+48:                        kick_ptr=0;
+007658  EF3034     CLR kick_ptr
+49:                    }
+50:                    
+51:                    /*
+52:                    if(pad[2]==0&&hat_playing==FALSE){                                          //hat
+53:                        hat_playing=TRUE;
+54:                    }
+55:                    if(hat_playing==TRUE&&hat_ptr<hat_max){
+56:                        result1 =__builtin_mpy(sample,Q15(0.85), NULL, NULL, 0, NULL, NULL, 0);
+57:                        result1 = __builtin_add(result1,hat[hat_ptr++],0);
+58:                        sample=__builtin_sac(result1, 0);
+59:                    }
+60:                    else if (pad[2]==1&&hat_playing==TRUE&&hat_ptr==hat_max){
+61:                        hat_playing=FALSE;
+62:                        hat_ptr=0;
+63:                    }
+64:                    */
+65:                    if(pad[2]==0&&snare_playing==FALSE){                                        //snare
+00765A  2666C1     MOV #0x666C, W1
+00765C  784091     MOV.B [W1], W1
+00765E  E00401     CP0.B W1
+007660  3A0006     BRA NZ, 0x766E
+007662  E25036     CP0.B snare_playing
+007664  3A0004     BRA NZ, 0x766E
+66:                        snare_playing=TRUE;
+007666  EBC100     SETM.B W2
+007668  210363     MOV #0x1036, W3
+00766A  784982     MOV.B W2, [W3]
+00766C  370004     BRA 0x7676
+67:                    }
+68:                    if(snare_playing==TRUE&&snare_ptr<snare_max){
+00766E  210362     MOV #0x1036, W2
+007670  784112     MOV.B [W2], W2
+007672  414FE1     ADD.B W2, #0x1, [W15]
+007674  3A0011     BRA NZ, 0x7698
+007676  874D33     MOV 0xE9A6, W3
+007678  8081C5     MOV snare_ptr, W5
+00767A  528F83     SUB W5, W3, [W15]
+00767C  31000D     BRA C, 0x7698
+69:                        result1 =__builtin_mpy(sample,Q15(0.85), NULL, NULL, 0, NULL, NULL, 0);
+00767E  780200     MOV W0, W4
+007680  26CCC5     MOV #0x6CCC, W5
+007682  C00113     MPY W4*W5, A
+70:                        result1 = __builtin_add(result1,snare[snare_ptr++],0);
+007684  8081C0     MOV snare_ptr, W0
+007686  400080     ADD W0, W0, W1
+007688  2BE442     MOV #0xBE44, W2
+00768A  410081     ADD W2, W1, W1
+00768C  780091     MOV [W1], W1
+00768E  E80000     INC W0, W0
+007690  8881C0     MOV W0, snare_ptr
+007692  C90001     ADD W1, A
+71:                        sample=__builtin_sac(result1, 0);
+007694  CC0000     SAC A, W0
+007696  37000A     BRA 0x76AC
+72:                    }
+73:                    else if (pad[2]==1&&snare_playing==TRUE&&snare_ptr==snare_max){
+007698  50CFE1     SUB.B W1, #0x1, [W15]
+00769A  3A0008     BRA NZ, 0x76AC
+00769C  414FE1     ADD.B W2, #0x1, [W15]
+00769E  3A0006     BRA NZ, 0x76AC
+0076A0  874D31     MOV 0xE9A6, W1
+0076A2  8081C2     MOV snare_ptr, W2
+0076A4  510F81     SUB W2, W1, [W15]
+0076A6  3A0002     BRA NZ, 0x76AC
+74:                        snare_playing=FALSE;
+0076A8  EF7036     CLR.B snare_playing
+75:                        snare_ptr=0;
+0076AA  EF3038     CLR snare_ptr
+76:                    }
+77:                    
 78:                    
-79:                    
-80:                    //VOLUME CONTROL
+79:                    //VOLUME CONTROL
+80:                    /*
 81:                    if(pots[0]==0x001F)
-007760  808004     MOV pots, W4
-007762  520FFF     SUB W4, #0x1F, [W15]
-007764  320006     BRA Z, 0x7772
 82:                        sample=0;
-007772  EB0000     CLR W0
 83:                    else if(pots[0]>0xFFF0);
-007766  420FF0     ADD W4, #0x10, [W15]
-007768  3E0005     BRA GTU, 0x7774
 84:                    else{
 85:                        result1 =__builtin_mpy(sample,pots[0], NULL, NULL, 0, NULL, NULL, 0);
-00776A  780280     MOV W0, W5
-00776C  C00113     MPY W4*W5, A
 86:                        sample=__builtin_sac(result1, 0);
-00776E  CC0000     SAC A, W0
-007770  370001     BRA 0x7774
 87:                    }
-88:                    return sample;
-89:                }
-007774  F90026     POP ACCAU
-007776  F90024     POP ACCAH
-007778  F90022     POP ACCA
-00777A  060000     RETURN
-90:                
-91:                fractional fx(fractional sample){
-00777C  F80022     PUSH ACCA
-00777E  F80024     PUSH ACCAH
-007780  F80026     PUSH ACCAU
-007782  F80028     PUSH ACCB
-007784  F8002A     PUSH ACCBH
-007786  F8002C     PUSH ACCBU
-92:                    volatile register int result1 asm("A");
-93:                    volatile register int result2 asm("B");
-94:                    static fractional delayed_sample;
-95:                    static fractional trem_mod;
-96:                    if(tremelo==TRUE){                                                          //TREMELO//
-007788  2101C1     MOV #0x101C, W1
-00778A  784091     MOV.B [W1], W1
-00778C  40CFE1     ADD.B W1, #0x1, [W15]
-00778E  3A0027     BRA NZ, 0x77DE
-97:                        if (trem_var<=pots_scaled[2]){
-007790  808141     MOV trem_var, W1
-007792  808062     MOV 0x100C, W2
-007794  510F81     SUB W2, W1, [W15]
-007796  39000F     BRA NC, 0x77B6
-98:                            trem_var++;
-007798  E80081     INC W1, W1
-00779A  888141     MOV W1, trem_var
-99:                            result1 =__builtin_mpy(tremelo_depth,sintab[tremelo_ptr], NULL, NULL, 0, NULL, NULL, 0);
-00779C  808121     MOV tremelo_ptr, W1
-00779E  408081     ADD W1, W1, W1
-0077A0  2EA4E2     MOV #0xEA4E, W2
-0077A2  410081     ADD W2, W1, W1
-0077A4  780291     MOV [W1], W5
-0077A6  8081E4     MOV 0x103C, W4
-0077A8  C00113     MPY W4*W5, A
-100:                           trem_mod=__builtin_sac(result1, 0);
-0077AA  CC0004     SAC A, W4
-0077AC  888164     MOV W4, trem_mod
-101:                           result2 =__builtin_mpy(trem_mod,sample, NULL, NULL, 0, NULL, NULL, 0);
-0077AE  780280     MOV W0, W5
-0077B0  C08113     MPY W4*W5, B
-102:                           sample=__builtin_sac(result2, 0);
-0077B2  CC8000     SAC B, W0
-0077B4  370014     BRA 0x77DE
-103:                       }
-104:                       else{
-105:                           trem_var=0;
-0077B6  EF3028     CLR trem_var
-106:                           if(tremelo_ptr==1024)
-0077B8  204001     MOV #0x400, W1
-0077BA  808122     MOV tremelo_ptr, W2
-0077BC  510F81     SUB W2, W1, [W15]
-0077BE  3A0001     BRA NZ, 0x77C2
-107:                               tremelo_ptr=0;
-0077C0  EF3024     CLR tremelo_ptr
-108:                           result1 =__builtin_mpy(tremelo_depth,sintab[tremelo_ptr++], NULL, NULL, 0, NULL, NULL, 0);
-0077C2  808121     MOV tremelo_ptr, W1
-0077C4  408101     ADD W1, W1, W2
-0077C6  2EA4E3     MOV #0xEA4E, W3
-0077C8  418102     ADD W3, W2, W2
-0077CA  780292     MOV [W2], W5
-0077CC  E80081     INC W1, W1
-0077CE  888121     MOV W1, tremelo_ptr
-0077D0  8081E4     MOV 0x103C, W4
-0077D2  C00113     MPY W4*W5, A
+88:                    */
+89:                    if (TEST_SIN==FALSE){
+0076AC  E2501C     CP0.B TEST_SIN
+0076AE  32000B     BRA Z, 0x76C6
+90:                        return sample;
+91:                    }
+92:                    else {
+93:                        i++;
+0076B0  EC1030     INC i, WREG
+0076B2  888180     MOV W0, i
+94:                        if(i==1024)
+0076B4  204001     MOV #0x400, W1
+0076B6  500F81     SUB W0, W1, [W15]
+0076B8  3A0001     BRA NZ, 0x76BC
+95:                            i=0;
+0076BA  EF3030     CLR i
+96:                        return sintab[i];
+0076BC  808180     MOV i, W0
+0076BE  400000     ADD W0, W0, W0
+0076C0  2E9A81     MOV #0xE9A8, W1
+0076C2  408000     ADD W1, W0, W0
+0076C4  780010     MOV [W0], W0
+97:                    }
+98:                }
+0076C6  F90026     POP ACCAU
+0076C8  F90024     POP ACCAH
+0076CA  F90022     POP ACCA
+0076CC  060000     RETURN
+99:                
+100:               fractional fx(fractional sample){
+0076CE  F80022     PUSH ACCA
+0076D0  F80024     PUSH ACCAH
+0076D2  F80026     PUSH ACCAU
+0076D4  F80028     PUSH ACCB
+0076D6  F8002A     PUSH ACCBH
+0076D8  F8002C     PUSH ACCBU
+101:                   volatile register int result1 asm("A");
+102:                   volatile register int result2 asm("B");
+103:                   static fractional delayed_sample;
+104:                   static fractional trem_mod;
+105:                   if(tremelo==TRUE){                                                          //TREMELO//
+0076DA  2101D1     MOV #0x101D, W1
+0076DC  784091     MOV.B [W1], W1
+0076DE  40CFE1     ADD.B W1, #0x1, [W15]
+0076E0  3A0027     BRA NZ, 0x7730
+106:                       if (trem_var<=pots_scaled[1]){
+0076E2  808141     MOV trem_var, W1
+0076E4  808052     MOV 0x100A, W2
+0076E6  510F81     SUB W2, W1, [W15]
+0076E8  39000F     BRA NC, 0x7708
+107:                           trem_var++;
+0076EA  E80081     INC W1, W1
+0076EC  888141     MOV W1, trem_var
+108:                           result1 =__builtin_mpy(tremelo_depth,sintab[tremelo_ptr], NULL, NULL, 0, NULL, NULL, 0);
+0076EE  808121     MOV tremelo_ptr, W1
+0076F0  408081     ADD W1, W1, W1
+0076F2  2E9A82     MOV #0xE9A8, W2
+0076F4  410081     ADD W2, W1, W1
+0076F6  780291     MOV [W1], W5
+0076F8  8081F4     MOV 0x103E, W4
+0076FA  C00113     MPY W4*W5, A
 109:                           trem_mod=__builtin_sac(result1, 0);
-0077D4  CC0004     SAC A, W4
-0077D6  888164     MOV W4, trem_mod
+0076FC  CC0004     SAC A, W4
+0076FE  888164     MOV W4, trem_mod
 110:                           result2 =__builtin_mpy(trem_mod,sample, NULL, NULL, 0, NULL, NULL, 0);
-0077D8  780280     MOV W0, W5
-0077DA  C08113     MPY W4*W5, B
+007700  780280     MOV W0, W5
+007702  C08113     MPY W4*W5, B
 111:                           sample=__builtin_sac(result2, 0);
-0077DC  CC8000     SAC B, W0
+007704  CC8000     SAC B, W0
+007706  370014     BRA 0x7730
 112:                       }
-113:                   }
-114:                   
-115:                   if(looper==TRUE){                                                           //LOOPER// 
-0077DE  2101D1     MOV #0x101D, W1
-0077E0  784091     MOV.B [W1], W1
-0077E2  40CFE1     ADD.B W1, #0x1, [W15]
-0077E4  3A0019     BRA NZ, 0x7818
-116:                       if(loop_lim>=LOOP_BUF_SIZE)
-0077E6  22B100     MOV #0x2B10, W0
-0077E8  E31022     CP loop_lim
-0077EA  360002     BRA LEU, 0x77F0
-117:                           loop_lim=LOOP_BUF_SIZE;
-0077EC  E80000     INC W0, W0
-0077EE  888110     MOV W0, loop_lim
-118:                       if(loop_ptr<loop_lim){
-0077F0  808110     MOV loop_lim, W0
-0077F2  E31020     CP loop_ptr
-0077F4  310008     BRA C, 0x7806
-119:                           sample = (loop[loop_ptr++]);
-0077F6  808101     MOV loop_ptr, W1
-0077F8  408001     ADD W1, W1, W0
-0077FA  210422     MOV #0x1042, W2
-0077FC  410000     ADD W2, W0, W0
-0077FE  780010     MOV [W0], W0
-007800  E80081     INC W1, W1
-007802  888101     MOV W1, loop_ptr
-007804  37001D     BRA 0x7840
-120:                       }
-121:                       else {
-122:                           loop_ptr=0;
-007806  EF3020     CLR loop_ptr
-123:                           sample = (loop[loop_ptr++]);
-007808  808101     MOV loop_ptr, W1
-00780A  408001     ADD W1, W1, W0
-00780C  210422     MOV #0x1042, W2
-00780E  410000     ADD W2, W0, W0
-007810  780010     MOV [W0], W0
-007812  E80081     INC W1, W1
-007814  888101     MOV W1, loop_ptr
-007816  370014     BRA 0x7840
-124:                       }
-125:                   }                                                                           
-126:                   else {                                                                      //buffer
-127:                       if(loop_ptr<LOOP_BUF_SIZE)
-007818  22B101     MOV #0x2B10, W1
-00781A  808102     MOV loop_ptr, W2
-00781C  510F81     SUB W2, W1, [W15]
-00781E  3E0008     BRA GTU, 0x7830
-128:                           loop[loop_ptr++]=sample;
-007820  808101     MOV loop_ptr, W1
-007822  408101     ADD W1, W1, W2
-007824  210423     MOV #0x1042, W3
-007826  418102     ADD W3, W2, W2
-007828  780900     MOV W0, [W2]
-00782A  E80081     INC W1, W1
-00782C  888101     MOV W1, loop_ptr
-00782E  370008     BRA 0x7840
-129:                       else {
-130:                           loop_ptr=0;
-007830  EF3020     CLR loop_ptr
-131:                           loop[loop_ptr++]=sample;
-007832  808101     MOV loop_ptr, W1
-007834  408101     ADD W1, W1, W2
-007836  210423     MOV #0x1042, W3
-007838  418102     ADD W3, W2, W2
-00783A  780900     MOV W0, [W2]
-00783C  E80081     INC W1, W1
-00783E  888101     MOV W1, loop_ptr
-132:                       }
-133:                   }
-134:                   
-135:                                                                                               //LPF-EMA//   y(i)= ??x(i)+(1-?)?y(i-1)
-136:                   if(lpf==TRUE){
-007840  2101E1     MOV #0x101E, W1
-007842  784091     MOV.B [W1], W1
-007844  40CFE1     ADD.B W1, #0x1, [W15]
-007846  3A0008     BRA NZ, 0x7858
-137:                       result2 =__builtin_mpy(sample,lpf_alpha, NULL, NULL, 0, NULL, NULL, 0);
-007848  8081C4     MOV 0x1038, W4
-00784A  780280     MOV W0, W5
-00784C  C08113     MPY W4*W5, B
-138:                       result2 =__builtin_mac(result2, delayed_sample, lpf_inv_alpha, NULL, NULL, 0, NULL, NULL, 0, 0, result2);
-00784E  8081D4     MOV 0x103A, W4
-007850  808175     MOV delayed_sample, W5
-007852  C08112     MAC W4*W5, B
-139:                       delayed_sample=__builtin_sac(result2, 0);
-007854  CC8000     SAC B, W0
-007856  888170     MOV W0, delayed_sample
-140:                       sample=delayed_sample;
-141:                   }
-142:                   return sample;
-143:               }
-007858  F9002C     POP ACCBU
+113:                       else{
+114:                           trem_var=0;
+007708  EF3028     CLR trem_var
+115:                           if(tremelo_ptr==1024)
+00770A  204001     MOV #0x400, W1
+00770C  808122     MOV tremelo_ptr, W2
+00770E  510F81     SUB W2, W1, [W15]
+007710  3A0001     BRA NZ, 0x7714
+116:                               tremelo_ptr=0;
+007712  EF3024     CLR tremelo_ptr
+117:                           result1 =__builtin_mpy(tremelo_depth,sintab[tremelo_ptr++], NULL, NULL, 0, NULL, NULL, 0);
+007714  808121     MOV tremelo_ptr, W1
+007716  408101     ADD W1, W1, W2
+007718  2E9A83     MOV #0xE9A8, W3
+00771A  418102     ADD W3, W2, W2
+00771C  780292     MOV [W2], W5
+00771E  E80081     INC W1, W1
+007720  888121     MOV W1, tremelo_ptr
+007722  8081F4     MOV 0x103E, W4
+007724  C00113     MPY W4*W5, A
+118:                           trem_mod=__builtin_sac(result1, 0);
+007726  CC0004     SAC A, W4
+007728  888164     MOV W4, trem_mod
+119:                           result2 =__builtin_mpy(trem_mod,sample, NULL, NULL, 0, NULL, NULL, 0);
+00772A  780280     MOV W0, W5
+00772C  C08113     MPY W4*W5, B
+120:                           sample=__builtin_sac(result2, 0);
+00772E  CC8000     SAC B, W0
+121:                       }
+122:                   }
+123:                   
+124:                   if(looper==TRUE){                                                           //LOOPER// 
+007730  2101E1     MOV #0x101E, W1
+007732  784091     MOV.B [W1], W1
+007734  40CFE1     ADD.B W1, #0x1, [W15]
+007736  3A0019     BRA NZ, 0x776A
+125:                       if(loop_lim>=LOOP_BUF_SIZE)
+007738  22B100     MOV #0x2B10, W0
+00773A  E31022     CP loop_lim
+00773C  360002     BRA LEU, 0x7742
+126:                           loop_lim=LOOP_BUF_SIZE;
+00773E  E80000     INC W0, W0
+007740  888110     MOV W0, loop_lim
+127:                       if(loop_ptr<loop_lim){
+007742  808110     MOV loop_lim, W0
+007744  E31020     CP loop_ptr
+007746  310008     BRA C, 0x7758
+128:                           sample = (loop[loop_ptr++]);
+007748  808101     MOV loop_ptr, W1
+00774A  408001     ADD W1, W1, W0
+00774C  210482     MOV #0x1048, W2
+00774E  410000     ADD W2, W0, W0
+007750  780010     MOV [W0], W0
+007752  E80081     INC W1, W1
+007754  888101     MOV W1, loop_ptr
+007756  37001D     BRA 0x7792
+129:                       }
+130:                       else {
+131:                           loop_ptr=0;
+007758  EF3020     CLR loop_ptr
+132:                           sample = (loop[loop_ptr++]);
+00775A  808101     MOV loop_ptr, W1
+00775C  408001     ADD W1, W1, W0
+00775E  210482     MOV #0x1048, W2
+007760  410000     ADD W2, W0, W0
+007762  780010     MOV [W0], W0
+007764  E80081     INC W1, W1
+007766  888101     MOV W1, loop_ptr
+007768  370014     BRA 0x7792
+133:                       }
+134:                   }                                                                           
+135:                   else {                                                                      //buffer
+136:                       if(loop_ptr<LOOP_BUF_SIZE)
+00776A  22B101     MOV #0x2B10, W1
+00776C  808102     MOV loop_ptr, W2
+00776E  510F81     SUB W2, W1, [W15]
+007770  3E0008     BRA GTU, 0x7782
+137:                           loop[loop_ptr++]=sample;
+007772  808101     MOV loop_ptr, W1
+007774  408101     ADD W1, W1, W2
+007776  210483     MOV #0x1048, W3
+007778  418102     ADD W3, W2, W2
+00777A  780900     MOV W0, [W2]
+00777C  E80081     INC W1, W1
+00777E  888101     MOV W1, loop_ptr
+007780  370008     BRA 0x7792
+138:                       else {
+139:                           loop_ptr=0;
+007782  EF3020     CLR loop_ptr
+140:                           loop[loop_ptr++]=sample;
+007784  808101     MOV loop_ptr, W1
+007786  408101     ADD W1, W1, W2
+007788  210483     MOV #0x1048, W3
+00778A  418102     ADD W3, W2, W2
+00778C  780900     MOV W0, [W2]
+00778E  E80081     INC W1, W1
+007790  888101     MOV W1, loop_ptr
+141:                       }
+142:                   }
+143:                   
+144:                                                                                               //LPF-EMA//   y(i)= ??x(i)+(1-?)?y(i-1)
+145:                   if(lpf==TRUE){
+007792  2101F1     MOV #0x101F, W1
+007794  784091     MOV.B [W1], W1
+007796  40CFE1     ADD.B W1, #0x1, [W15]
+007798  3A0008     BRA NZ, 0x77AA
+146:                       result2 =__builtin_mpy(sample,lpf_alpha, NULL, NULL, 0, NULL, NULL, 0);
+00779A  8081D4     MOV 0x103A, W4
+00779C  780280     MOV W0, W5
+00779E  C08113     MPY W4*W5, B
+147:                       result2 =__builtin_mac(result2, delayed_sample, lpf_inv_alpha, NULL, NULL, 0, NULL, NULL, 0, 0, result2);
+0077A0  8081E4     MOV 0x103C, W4
+0077A2  808175     MOV delayed_sample, W5
+0077A4  C08112     MAC W4*W5, B
+148:                       delayed_sample=__builtin_sac(result2, 0);
+0077A6  CC8000     SAC B, W0
+0077A8  888170     MOV W0, delayed_sample
+149:                       sample=delayed_sample;
+150:                   }
+151:                   return sample;
+152:               }
+0077AA  F9002C     POP ACCBU
+0077AC  F9002A     POP ACCBH
+0077AE  F90028     POP ACCB
+0077B0  F90026     POP ACCAU
+0077B2  F90024     POP ACCAH
+0077B4  F90022     POP ACCA
+0077B6  060000     RETURN
+153:               
+154:               //test

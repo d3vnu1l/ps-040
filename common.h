@@ -25,6 +25,7 @@
 #define RLED _LATC0
 #define HARD_CLIP_LED _LATC1            //Clip indicator LED
 #define TREMELO_LED _LATD15
+#define LCD_RS _LATE15
 
 #define p3 PORTGbits.RG0                //raw button inputs
 #define p2 PORTGbits.RG1

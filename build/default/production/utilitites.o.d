@@ -3,4 +3,6 @@ utilitites.c  \
 utilities.h  \
 common.h  \
  sounds.h  \
-audio.h 
+audio.h  \
+plcd.h  \
+devInits.h 

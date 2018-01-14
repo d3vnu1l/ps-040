@@ -7,7 +7,7 @@
 #include <libpic30.h>
 #include "common.h"
 #include "devInits.h"
-#include "max7219.h"
+#include "plcd.h"
 
 extern unsigned char UART_ON;
 
@@ -113,21 +113,40 @@ void initPMP(void){
     /*
      Data is clocked on falling edge of E
      *  RS = 44 = PMAO (H = display data, L = display instruction)
-     *  E = 72 = CS1 (pulse width 450ns MIN, data triggers from H to L) 
+     *  E = 81 = PMWR (pulse width 450ns MIN, data triggers from H to L) 
      */
     PMMODEbits.MODE=3;  //master mode 1 
     PMCONbits.PTWREN = 1;
     PMCONbits.PTRDEN = 1;
     PMCONbits.WRSP=1;   //write strobe active high
     PMCONbits.RDSP=1;   //read strobe active high
+    //PMCONbits.CS1P = 1; //active high CS1
     PMMODEbits.WAITB = 3;
     PMMODEbits.WAITM = 0x08;
     PMMODEbits.WAITE = 3;
-    PMAEN=1;
-    //PMCONbits.CSF=2;
+    //PMAEN=1;
+    PMCONbits.CSF=2;     //pmcs1 & pmcs2 as CS
+    
+    PMMODEbits.WAITB = 0;
+    PMMODEbits.WAITM = 0xC;
+    PMMODEbits.WAITE = 0;
+
     PMCONbits.PMPEN = 1;
-    Delay_us(10);
-    //PMDIN1=;
+    LCD_RS=0;
+    Delay_us(1000);
+    
+    /* INIT DEVICE */
+    Delay_us(100);
+    lcdWrite(0x30);   //function set, 8 bits, 1 line disp, 5x8
+    Delay_us(400);    //39 uS required
+    lcdWrite(0x30);   //entry mode
+    Delay_us(400);     //39 uS required
+    lcdWrite(0x30);   //entry mode
+    Delay_us(400);     //39 uS required
+    lcdClear();  
+    Delay_us(1640);     //1.64mS required
+    lcdPwr(1);
+    Delay_us(400);
 }
 
 
@@ -280,12 +299,13 @@ void initSPI3_SEG(void){
 }
 */
 
+//A blocking delay function. Not very accurate but good enough.
 void Delay_us(unsigned int delay)
 {
     int i;
     for (i = 0; i < delay; i++)
     {
-        __asm__ volatile ("repeat #39");
+        __asm__ volatile ("repeat #50");
         __asm__ volatile ("nop");
     }
 }

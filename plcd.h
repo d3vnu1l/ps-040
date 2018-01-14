@@ -10,8 +10,10 @@
 
 void lcdWrite(unsigned int);
 void lcdClear(void);
-void lcdPower(signed int);
-void lcdCursor(void);
+void lcdReturn(void);
+void lcdPwr(signed int);
+void lcdCursorPwr(void);
+void lcdCursorBlink(signed int);
 
 
 #endif	/* XC_HEADER_TEMPLATE_H */

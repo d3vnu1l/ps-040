@@ -11,6 +11,8 @@
 #include "audio.h"
 #include "plcd.h"
 
+#include "devInits.h"
+
 
 //CONTROL VARIABLES//
 extern char pad[8];
@@ -139,11 +141,8 @@ void readPots(void){
 }
 
 void display(void){
-   static char fonts[] = {'A','B','C','D','E','F','0','1','2'};
-   
-   char i = 0, temp; 
-   //char seventByte = j[6];
-   writeLCD();
+    
+   lcdWrite(0xFF);
    
    if(hard_clipped==TRUE){                                                     //CLIP CONTROL    
         HARD_CLIP_LED=1;
@@ -159,5 +158,6 @@ void display(void){
         //printf("%d\r\n", sample);  //check input ADC
         //printf("%d, pot1 %x, pot2 %x, avg %x\r\n", sample, pots[1], pots[2], average);  //check input ADC
     }
+   
    SLED=~SLED;
 }
