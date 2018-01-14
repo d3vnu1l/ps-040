@@ -134,21 +134,22 @@ void initPMP(void){
 
     
     /* INIT DEVICE */
-    Delay_us(15000);
+    Delay_us(40000);
     lcdWrite(0x30);   //function set, 8 bits, 1 line disp, 5x8
     Delay_us(4500);    //>4.1 mS required
-    lcdWrite(0x30);   //entry mode
+/*    lcdWrite(0x30);   //entry mode
     Delay_us(200);     //>100 uS required
     lcdWrite(0x30);   //entry mode
     Delay_us(200);     //>100 uS required
     lcdWrite(0x0C);
     Delay_us(200);
-    lcdPwr(0);
-    Delay_us(200);
-    lcdClear();  
+*/  lcdPwr(0x0F);     // Display ON/OFF Control
+    Delay_us(100);
+    lcdClear(0x01);     // Display Clear  
     Delay_us(1800);     //>1.64mS required
-    lcdPwr(1);
-    Delay_us(200);
+//    lcdPwr(1);
+    lcdWrite(0x07)      // entry Mode Set
+  //  Delay_us(200);
 }
 
 
