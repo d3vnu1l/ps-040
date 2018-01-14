@@ -7,6 +7,7 @@
 #include <libpic30.h>
 #include "common.h"
 #include "devInits.h"
+#include "utilities.h"
 #include "plcd.h"
 
 extern unsigned char UART_ON;
@@ -120,30 +121,22 @@ void initPMP(void){
     PMCONbits.PTRDEN = 1;
     PMCONbits.WRSP=1;   //write strobe active high
     PMCONbits.RDSP=1;   //read strobe active high
-    //PMCONbits.CS1P = 1; //active high CS1
     PMMODEbits.WAITB = 3;
     PMMODEbits.WAITM = 0x08;
     PMMODEbits.WAITE = 3;
-    //PMAEN=1;
-    
     PMMODEbits.WAITB = 0;
     PMMODEbits.WAITM = 0xC;
     PMMODEbits.WAITE = 0;
     LCD_RS=0;
     PMCONbits.PMPEN = 1;
-
+    
     
     /* INIT DEVICE */
     Delay_us(40000);
-    lcdWrite(0x38);   //function set, 8 bits, 1 line disp, 5x8
-    Delay_us(4500);    //>4.1 mS required
-    if(PMMODEbits.BUSY);  PMDIN1=0x0F;
-    Delay_us(4500);
-    lcdClear();     // Display Clear  
-    Delay_us(1800);     //>1.64mS required
-    lcdWrite(0x07);      // entry Mode Set
-    Delay_us(200);
-    LCD_RS=1;
+    lcdInit();
+    
+    /* SETUP SCREEN */
+    lcdSetupPots();
 }
 
 
@@ -296,13 +289,3 @@ void initSPI3_SEG(void){
 }
 */
 
-//A blocking delay function. Not very accurate but good enough.
-void Delay_us(unsigned int delay)
-{
-    int i;
-    for (i = 0; i < delay; i++)
-    {
-        __asm__ volatile ("repeat #50");
-        __asm__ volatile ("nop");
-    }
-}

@@ -26,15 +26,7 @@
 #define HARD_CLIP_LED _LATC1            //Clip indicator LED
 #define TREMELO_LED _LATD15
 #define LCD_RS _LATE15
-
-#define p3 PORTGbits.RG0                //raw button inputs
-#define p2 PORTGbits.RG1
-#define p5 PORTGbits.RG3
-#define p1 PORTGbits.RG10
-#define p6 PORTGbits.RG11
-#define p4 PORTGbits.RG12
-#define p7 PORTGbits.RG13
-#define p0 PORTGbits.RG14
+#define PADS PORTG
 
 //#define ADC_CONV _LATB11             //was originally for adc conv, now unused
 //spi1 (SD-card) manula CS
@@ -43,7 +35,6 @@
 //misc
 #define TRUE 0xFF
 #define FALSE 0x00
-
 
 #endif	/* COMMON_H */
 

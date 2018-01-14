@@ -15,7 +15,7 @@
 
 
 //CONTROL VARIABLES//
-extern char pad[8];
+extern unsigned char pad[8];
 extern fractional pots[4];
 extern fractional pots_scaled[4];
 extern unsigned char UART_ON;
@@ -35,15 +35,10 @@ extern fractional tremelo_depth;
 
 void scanMatrix(void){
     static unsigned char pad_last[8] = {1,1,1,1,1,1,1,1};
+    unsigned int portrd = PADS;
+    //
     
-    pad[0]=p0;
-    pad[1]=p1;
-    pad[2]=p2;
-    pad[3]=p3;
-    pad[4]=p4;
-    pad[5]=p5;
-    pad[6]=p6;
-    pad[7]=p7;
+    pad[0]=PORTGbits.RG15;
     
     if(pad[7]==0&&pad_last[7]==1){                                              //TREMELO CONTROL
         pad_last[7]=0;
@@ -142,7 +137,7 @@ void readPots(void){
 
 void display(void){
     
-   lcdWrite(0x41);
+   if(!pad[0]) lcdWrite(0x41);
    
    if(hard_clipped==TRUE){                                                     //CLIP CONTROL    
         HARD_CLIP_LED=1;
@@ -159,5 +154,16 @@ void display(void){
         //printf("%d, pot1 %x, pot2 %x, avg %x\r\n", sample, pots[1], pots[2], average);  //check input ADC
     }
    
-   SLED=~SLED;
+   SLED=pad[0];
+}
+
+//A blocking delay function. Not very accurate but good enough.
+void Delay_us(unsigned int delay)
+{
+    int i;
+    for (i = 0; i < delay; i++)
+    {
+        __asm__ volatile ("repeat #50");
+        __asm__ volatile ("nop");
+    }
 }

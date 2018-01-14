@@ -17,7 +17,7 @@
 #pragma config OSCIOFNC = ON   //OSC2 is clock output
 #pragma config FNOSC = FRCPLL   //clock source
 
-char pad[8]={0};                                                                //CONTROL VARIABLES//
+unsigned char pad[8]={0};                                                                //CONTROL VARIABLES//
 fractional pots[4]={0};
 fractional pots_scaled[4]={0};
 fractional output=0;
@@ -50,6 +50,7 @@ int main(void) {
     initADC1();                     //configure & enable internal ADC
     //initSPI2_ADC();                  //configure & enable SPI ADC !!!DEFUNCT!!!
     initPMP();
+    //||||||||----
     initDCI_DAC();                  //configure & enable DAC
     initT1();                       //configure & start T1 
     initT2();                       //configure & start T2 
