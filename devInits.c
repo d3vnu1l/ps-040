@@ -125,28 +125,30 @@ void initPMP(void){
     PMMODEbits.WAITM = 0x08;
     PMMODEbits.WAITE = 3;
     //PMAEN=1;
-    PMCONbits.CSF=2;     //pmcs1 & pmcs2 as CS
     
     PMMODEbits.WAITB = 0;
     PMMODEbits.WAITM = 0xC;
     PMMODEbits.WAITE = 0;
-
-    PMCONbits.PMPEN = 1;
     LCD_RS=0;
-    Delay_us(1000);
+    PMCONbits.PMPEN = 1;
+
     
     /* INIT DEVICE */
-    Delay_us(100);
+    Delay_us(15000);
     lcdWrite(0x30);   //function set, 8 bits, 1 line disp, 5x8
-    Delay_us(400);    //39 uS required
+    Delay_us(4500);    //>4.1 mS required
     lcdWrite(0x30);   //entry mode
-    Delay_us(400);     //39 uS required
+    Delay_us(200);     //>100 uS required
     lcdWrite(0x30);   //entry mode
-    Delay_us(400);     //39 uS required
+    Delay_us(200);     //>100 uS required
+    lcdWrite(0x0C);
+    Delay_us(200);
+    lcdPwr(0);
+    Delay_us(200);
     lcdClear();  
-    Delay_us(1640);     //1.64mS required
+    Delay_us(1800);     //>1.64mS required
     lcdPwr(1);
-    Delay_us(400);
+    Delay_us(200);
 }
 
 
