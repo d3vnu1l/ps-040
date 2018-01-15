@@ -20,5 +20,6 @@ void initDCI_DAC(void);
 void initCAP_BPM(void);
 void initPMP(void);
 void Delay_us(unsigned int);
+void initDMA0(void);
 
 #endif	/* DEVINITS_H */

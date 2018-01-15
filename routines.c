@@ -75,8 +75,12 @@ void __attribute__ ((interrupt, auto_psv)) _SPI3Interrupt(void){
     //SEG_SEL=1;
     int trash=SPI3BUF;
     SPI3STATbits.SPIROV = 0;                                //Clear SPI1 receive overflow flag if set
-    IFS5bits.SPI3IF=0;
-    
+    IFS5bits.SPI3IF=0;   
+}
+
+void __attribute__((interrupt, no_auto_psv)) _DMA0Interrupt(void)
+{
+    IFS0bits.DMA0IF = 0;			// Clear the DMA0 Interrupt Flag
 }
 
 /*
