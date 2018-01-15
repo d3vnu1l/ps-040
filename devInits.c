@@ -12,27 +12,6 @@
 
 extern unsigned char UART_ON;
 
-// Linker will allocate these buffers from the bottom of DMA RAM.
-struct
-{
-unsigned int Adc1Ch0[1];
-unsigned int Adc1Ch1[1];
-unsigned int Adc1Ch2[1];
-unsigned int Adc1Ch3[1];
-unsigned int Adc1Ch4[1];
-unsigned int Adc1Ch5[1];
-
-} BufferA __attribute__((space(dma)));
-struct
-{
-unsigned int Adc1Ch0[1];
-unsigned int Adc1Ch1[1];
-unsigned int Adc1Ch2[1];
-unsigned int Adc1Ch3[1];
-unsigned int Adc1Ch4[1];
-unsigned int Adc1Ch5[1];
-} BufferB __attribute__((space(dma)));
-
 //Description: Responsible i/o, clock, & RP pin config setup
 //Prereq: NONE
 //Dependencies: NONE
@@ -242,19 +221,6 @@ void initDCI_DAC(void){
         ij++;
     else ij=0;
     //seg_display(ij);
-}
-
-void initDMA0(void){
-    DMA0CONbits.AMODE = 2; // Configure DMA for Peripheral indirect mode
-    DMA0CONbits.MODE = 0; // Configure DMA for Continuous no Ping-Pong mode
-    DMA0PAD =  0X0608; // Point DMA to PMP
-    DMA0CNT = 2; //2 // 3 DMA request (3 buffers, each with 1 words)
-    DMA0REQ = 13; // Select ADC1 as DMA Request source
-    DMA0STA = __builtin_dmaoffset(&BufferA);
-    DMA0STB = __builtin_dmaoffset(&BufferB);
-    IFS0bits.DMA0IF = 0; //Clear the DMA interrupt flag bit
-    IEC0bits.DMA0IE = 1; //Set the DMA interrupt enable bit
-    DMA0CONbits.CHEN=1; // Enable DMA
 }
 
 /*
