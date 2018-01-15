@@ -19,6 +19,7 @@
 
 void lcdInit(void);
 void lcdWrite(unsigned char);
+void lcdCommand(unsigned char);
 void lcdClear(void);
 void lcdReturn(void);
 void lcdPwr(signed int);

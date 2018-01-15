@@ -137,7 +137,9 @@ void readPots(void){
 
 void display(void){
     
-   if(!pad[0]) lcdWrite(0x41);
+    lcdSetCursor(6,1);
+    if(pad[0])lcdWriteString("OFF");
+    else lcdWriteString("ON ");
    
    if(hard_clipped==TRUE){                                                     //CLIP CONTROL    
         HARD_CLIP_LED=1;

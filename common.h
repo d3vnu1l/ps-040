@@ -26,6 +26,7 @@
 #define HARD_CLIP_LED _LATC1            //Clip indicator LED
 #define TREMELO_LED _LATD15
 #define LCD_RS _LATE15
+#define LCD_RS_P PORTEbits.RE15
 #define PADS PORTG
 
 //#define ADC_CONV _LATB11             //was originally for adc conv, now unused

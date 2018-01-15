@@ -16,17 +16,32 @@ unsigned int statusReg = 0x0C;  //internal copy of pwr reg
 char lcdBuf[80];
 
 void lcdWrite(unsigned char data){
+    if(!LCD_RS_P)LCD_RS=1;
+    if(!PMMODEbits.BUSY) PMDIN1=data; //(!skips if busy!)
+}
+
+void lcdCommand(unsigned char data){
+    if(LCD_RS_P)LCD_RS=0;
     if(!PMMODEbits.BUSY) PMDIN1=data; //(!skips if busy!)
 }
 
 void lcdClear(void){
-    lcdWrite(LCD_CLEARDISPLAY);
+    lcdCommand(LCD_CLEARDISPLAY);
 }
 
 void lcdReturn(void){
-    lcdWrite(LCD_RETURNHOME);
+    lcdCommand(LCD_RETURNHOME);
 }
 
+void lcdSetCursor(unsigned char col, unsigned char row) {
+  static unsigned char offsets[] = { 0x00, 0x40, 0x14, 0x54 };
+
+  if (row > 3) {
+    row = 3;
+  }
+  lcdCommand(LCD_SETDDRAMADDR | (col + offsets[row]));
+  Delay_us(50);
+}
 
 void lcdPwr(signed int pwr){
     //lcd soft power on/off, does not reset device
@@ -34,7 +49,7 @@ void lcdPwr(signed int pwr){
         statusReg&=0x04;
     else __builtin_btg(&statusReg, 2);
     
-    lcdWrite(statusReg);
+    lcdCommand(statusReg);
 }
 
 void lcdCursorEn(signed int pwr){
@@ -43,7 +58,7 @@ void lcdCursorEn(signed int pwr){
         statusReg&=0x0A;
     else __builtin_btg(&statusReg, 1);
     
-    lcdWrite(statusReg);
+    lcdCommand(statusReg);
 }
 
 void lcdCursorBlink(signed int pwr){
@@ -51,7 +66,7 @@ void lcdCursorBlink(signed int pwr){
         statusReg&=0x09;
     else __builtin_btg(&statusReg, 0);
     
-    lcdWrite(statusReg);
+    lcdCommand(statusReg);
 }
 
 //BLOCKING!
@@ -61,38 +76,44 @@ void lcdWriteString(char *string) {
     lcdWrite(*it);
     Delay_us(50);
   }
+    Delay_us(40);
 }
 
 void lcdSetupPots(){
-    char *message = "Pot#1:    "
-                    "Pot#2:    "
-                    "          "
-                    "          "
-                    "Pot#3:    " 
-                    "Pot#4:    ";
-    lcdWriteString(message);
+    lcdSetCursor(0,0);
+    lcdWriteString("Pot#1:");
+    lcdSetCursor(11,0);
+    lcdWriteString("Pot#2:");
+    lcdSetCursor(0,1);
+    lcdWriteString("Pot#3:");
+    lcdSetCursor(11,1);
+    lcdWriteString("Pot#4:");
+    lcdSetCursor(6,0);
+    lcdWriteString("1234");
+    lcdSetCursor(0,2);
+    lcdWriteString("TEST______");
+    lcdSetCursor(10,3);
+    lcdWriteString("TEST______");
 }
 
 void lcdCustomSymbols(void){
     int i=0;
-    lcdWrite(0x40);
-    LCD_RS=1;
+    lcdCommand(0x40);
     Delay_us(200);
    // for(; i<8; i++)lcdWriteString(loadingOne[i]);
     //lcdWriteString(loadingTwo);
     //lcdWriteString(loadingThree);
     //lcdWriteString(loadingFour);
-    LCD_RS=0;
 }
 
 void lcdInit(void){
-    lcdWrite(0x38);                     //function set, 8 bits, 2 line disp, 5x8
-    Delay_us(4500);                     //>4.1 mS required
-    if(PMMODEbits.BUSY);  PMDIN1=0x0F;  //display on, cursor on, blink on
+    lcdCommand(0x38);              //function set, 8 bits, 2 line disp, 5x8
+    Delay_us(4500);                //>4.1 mS required
+    lcdCommand(0x0C);              //display on, cursor on, blink on   (0f for blink+cursor)
     Delay_us(4500);
-    lcdClear();                         //Display Clear  
-    Delay_us(1800);                     //>1.64mS required
-    lcdWrite(0x06);                     // entry Mode Set
+    lcdClear();                    //Display Clear  
+    Delay_us(1800);                //>1.64mS required
+    lcdCommand(0x06);               // entry Mode Set
     Delay_us(200);
     lcdReturn();
     Delay_us(1500);
@@ -103,18 +124,8 @@ void lcdInit(void){
     Delay_us(1500);
     lcdReturn();
     Delay_us(200);
-    LCD_RS=1;
 }
 
-void lcdSetCursor(unsigned char col, unsigned char row) {
-  static unsigned char offsets[] = { 0x00, 0x40, 0x14, 0x54 };
-
-  if (row > 1) {
-    row = 1;
-  }
-
-  lcdWrite(LCD_SETDDRAMADDR | (col + offsets[row]));
-}
 /*
  char loadingOne[8] = {
 	0b10000,
