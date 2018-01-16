@@ -35,6 +35,7 @@ extern unsigned int tremelo_ptr, tremelo_length, trem_var;
 extern unsigned int loop_lim;
 extern fractional lpf_alpha, lpf_inv_alpha;
 extern fractional tremelo_depth;
+extern unsigned char kick_playing, snare_playing;   
 
 void scanMatrix(void){
     static unsigned char pad_last[8] = {1,1,1,1,1,1,1,1};
@@ -73,6 +74,20 @@ void scanMatrix(void){
     }
     else{
         pad_last[0]=pad[0];
+    }
+    
+    
+    /* SAMPLE TRIGGERS */
+    if(pad[0]==0&&kick_playing==FALSE){                                         //kick
+        kick_playing=TRUE;
+    }
+    /*
+    if(pad[2]==0&&hat_playing==FALSE){                                          //hat
+        hat_playing=TRUE;
+    }
+    */
+    if(pad[2]==0&&snare_playing==FALSE){                                        //snare
+        snare_playing=TRUE;
     }
     
     //lpf=TRUE;
@@ -170,7 +185,7 @@ void display(void){
    SLED=~SLED;
 }
 
-void processRxData(fractional * sourceBuffer, fractional * targetBuffer){
+void processRxData(fractional *sourceBuffer, fractional *targetBuffer){
     /* This procedure loops back the received data to the*/
     /* the codec output. The user application could process*/
     /* this data as per application requirements.*/
@@ -181,16 +196,16 @@ void processRxData(fractional * sourceBuffer, fractional * targetBuffer){
     }
 }
 
-void processData(int in[][STREAMBUF], int out[][STREAMBUF]){
+void processData(int *in, int *out){
     fractional temp;
     int writePtr=0;
     for(writePtr; writePtr<STREAMBUF; writePtr++){
-        temp=in[!rw][writePtr];
+        temp=in[writePtr]; //!rw
             
         if(temp<=-32766||temp>=32766)
             hard_clipped=TRUE;
         temp=fx(temp);    //run fx on latest sample
-        out[rw][writePtr]=mixer(temp);
+        out[writePtr]=mixer(temp); //rw
     }
     
     frameReady=0;

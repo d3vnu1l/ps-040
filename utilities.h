@@ -13,7 +13,7 @@ void scanMatrix(void);
 void readPots(void);
 void display(void);
 void processRxData(int *, int *);
-void processData(int[2][STREAMBUF], int[2][STREAMBUF]);
+void processData(int *, int *);
 
 #endif	/* UTILITIES_H */
 
