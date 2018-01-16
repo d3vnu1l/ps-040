@@ -29,6 +29,8 @@ void lcdSetupPots(void);
 void lcdWriteString(char *);
 void lcdCustomSymbols(void);
 void lcdSetCursor(unsigned char, unsigned char);
+void lcdWriteWord(int);
+void lcdVU(unsigned char, unsigned char, int);
 
 
 #endif	/* XC_HEADER_TEMPLATE_H */
