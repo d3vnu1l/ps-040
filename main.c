@@ -20,8 +20,8 @@
 unsigned char pad[8]={0};                                                                //CONTROL VARIABLES//
 fractional pots[4]={0};
 fractional pots_scaled[4]={0};
-fractional output[2][STREAMBUF];
-fractional stream[2][STREAMBUF];
+fractional outputA[STREAMBUF], outputB[STREAMBUF];
+fractional streamA[STREAMBUF], streamB[STREAMBUF];
 
 /* DMA BUFFERS */
 fractional txBufferA[STREAMBUF]__attribute__((space(eds)));
@@ -46,8 +46,8 @@ volatile unsigned char lpf=FALSE;
 void initBuffer(void){
     int i=0;
     for(; i<STREAMBUF; i++){
-        stream[0][i]=0;
-        stream[1][i]=0;
+        streamA[i]=0;
+        streamB[i]=0;
         txBufferA[i]=0;
         txBufferB[i]=0;
         rxBufferA[i]=0;
@@ -74,7 +74,8 @@ int main(void) {
     while(1){   
         unsigned int temp;
         if(frameReady) {
-            processData(stream, output);
+            if(rw) processData(streamA, outputB);
+            else processData(streamB, outputA);
             temp = 8*idle/STREAMBUF;
             cycle=temp;
             idle=0;
