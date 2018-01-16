@@ -22,6 +22,13 @@ fractional pots[4]={0};
 fractional pots_scaled[4]={0};
 fractional output=0;
 fractional stream[2][STREAMBUF];
+
+/* DMA BUFFERS */
+fractional txBufferA[STREAMBUF]__attribute__((space(eds)));
+fractional txBufferB[STREAMBUF] __attribute__((space(eds)));
+fractional rxBufferA[STREAMBUF] __attribute__((space(eds)));
+fractional rxBufferB[STREAMBUF] __attribute__((space(eds)));
+
 unsigned int bpm=0, write_ptr=0, rw=0;
 
 unsigned char hard_clipped=FALSE;                                               //STATUS VARIABLES//
@@ -40,6 +47,10 @@ void initBuffer(void){
     for(; i<STREAMBUF; i++){
         stream[0][i]=0;
         stream[1][i]=0;
+        txBufferA[i]=0;
+        txBufferB[i]=0;
+        rxBufferA[i]=0;
+        rxBufferB[i]=0;
     }
 }
 
@@ -51,6 +62,7 @@ int main(void) {
     //initSPI2_ADC();                  //configure & enable SPI ADC !!!DEFUNCT!!!
     initPMP();
     //||||||||----
+    //initDMA0();
     initDCI_DAC();                  //configure & enable DAC
     initT1();                       //configure & start T1 
     initT2();                       //configure & start T2 

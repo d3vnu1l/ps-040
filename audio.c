@@ -35,7 +35,7 @@ fractional mixer(fractional sample){
     volatile register int result1 asm("A");
     static int i=0;
     
-    if(pad[3]==0&&kick_playing==FALSE){                                         //kick
+    if(pad[0]==0&&kick_playing==FALSE){                                         //kick
         kick_playing=TRUE;
     }
     if(kick_playing==TRUE&&kick_ptr<kick_max){
@@ -43,7 +43,7 @@ fractional mixer(fractional sample){
         result1 = __builtin_add(result1,kick[kick_ptr++],0);
         sample=__builtin_sac(result1, 0);
     }
-    else if (pad[3]==1&&kick_playing==TRUE&&kick_ptr==kick_max){
+    else if (pad[0]==1&&kick_playing==TRUE&&kick_ptr==kick_max){
         kick_playing=FALSE;
         kick_ptr=0;
     }

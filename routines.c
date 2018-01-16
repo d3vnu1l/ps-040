@@ -78,11 +78,19 @@ void __attribute__ ((interrupt, auto_psv)) _SPI3Interrupt(void){
     IFS5bits.SPI3IF=0;   
 }
 
-void __attribute__((interrupt, no_auto_psv)) _DMA0Interrupt(void)
-{
-    IFS0bits.DMA0IF = 0;			// Clear the DMA0 Interrupt Flag
+void __attribute__((__interrupt__,no_auto_psv)) _DMA2Interrupt(void){
+    _DMA2IF = 0; /* Received one frame of data*/    
+    /*
+    if(rxBufferIndicator == 0)
+    {
+         processRxData(int *)rxBufferA, (int*)txBufferA);
+    }
+    else
+    {
+         processRxData(int *)rxBufferB, (int*)txBufferB);
+    }
+    rxBufferIndicator ^= 1; /* Toggle the indicator*/    
 }
-
 /*
 //Description: This interrupt handles polling button input
 //Dependencies: initADC1(); 

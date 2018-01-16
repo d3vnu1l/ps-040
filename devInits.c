@@ -11,28 +11,8 @@
 #include "plcd.h"
 
 extern unsigned char UART_ON;
-
-// Linker will allocate these buffers from the bottom of DMA RAM.
-struct
-{
-unsigned int Adc1Ch0[1];
-unsigned int Adc1Ch1[1];
-unsigned int Adc1Ch2[1];
-unsigned int Adc1Ch3[1];
-unsigned int Adc1Ch4[1];
-unsigned int Adc1Ch5[1];
-
-} BufferA __attribute__((space(dma)));
-struct
-{
-unsigned int Adc1Ch0[1];
-unsigned int Adc1Ch1[1];
-unsigned int Adc1Ch2[1];
-unsigned int Adc1Ch3[1];
-unsigned int Adc1Ch4[1];
-unsigned int Adc1Ch5[1];
-} BufferB __attribute__((space(dma)));
-
+extern int txBufferA[STREAMBUF], txBufferB[STREAMBUF], rxBufferA[STREAMBUF], rxBufferB[STREAMBUF];  //doesnt work as fractional
+ 
 //Description: Responsible i/o, clock, & RP pin config setup
 //Prereq: NONE
 //Dependencies: NONE
@@ -231,7 +211,7 @@ void initDCI_DAC(void){
     DCICON2bits.BLEN=1;     //2 words buffer btwn interrupts
     IPC15bits.DCIIP = 6;    // Interrput priority
     IFS3bits.DCIIF=0;
-    IEC3bits.DCIIE=1; 
+    IEC3bits.DCIIE=0;       //let dma handle interrupt
     TXBUF0=0;
     TXBUF1=0;   
     DCICON1bits.DCIEN=1;    //ENABLE
@@ -245,16 +225,62 @@ void initDCI_DAC(void){
 }
 
 void initDMA0(void){
+    unsigned long address;
+    
+    /*
     DMA0CONbits.AMODE = 2; // Configure DMA for Peripheral indirect mode
     DMA0CONbits.MODE = 0; // Configure DMA for Continuous no Ping-Pong mode
     DMA0PAD =  0X0608; // Point DMA to PMP
     DMA0CNT = 2; //2 // 3 DMA request (3 buffers, each with 1 words)
     DMA0REQ = 13; // Select ADC1 as DMA Request source
-    DMA0STA = __builtin_dmaoffset(&BufferA);
-    DMA0STB = __builtin_dmaoffset(&BufferB);
+    //DMA0STA = __builtin_dmaoffset(&BufferA);
+    //DMA0STB = __builtin_dmaoffset(&BufferB);
     IFS0bits.DMA0IF = 0; //Clear the DMA interrupt flag bit
     IEC0bits.DMA0IE = 1; //Set the DMA interrupt enable bit
     DMA0CONbits.CHEN=1; // Enable DMA
+    */
+    
+    DMA0CONbits.SIZE = 0; /* Word transfers*/
+    DMA0CONbits.DIR = 1; /* From RAM to DCI*/
+    DMA0CONbits.AMODE = 0; /* Register Indirect with post-increment mode*/
+    DMA0CONbits.MODE = 2; /* Continuous ping pong mode enabled*/
+    DMA0CONbits.HALF = 0; /* Interrupt when all the data has been moved*/
+    DMA0CONbits.NULLW = 0;
+    DMA0REQbits.FORCE = 0; /* Automatic transfer*/
+    DMA0REQbits.IRQSEL = 0x3C;/* Codec transfer done*/
+    address =__builtin_edsoffset(txBufferA) & 0x7FFF;
+    address +=__builtin_edspage(txBufferA) << 15;
+    DMA0STAL = address & 0xFFFF;
+    DMA0STAH = address >>16;
+    address =__builtin_edsoffset(txBufferB) & 0x7FFF;
+    address +=__builtin_edspage(txBufferB) << 15;
+    DMA0STBL = address & 0xFFFF;
+    DMA0STBH = address >>16;
+    DMA0PAD = (int)&TXBUF0;
+    DMA0CNT = STREAMBUF-1;
+    /* DMA 2 - DCI to DPSRAM*/
+    DMA2CONbits.SIZE = 0; /* Word transfers*/
+    DMA2CONbits.DIR = 0; /* From DCI to DPSRAM */
+    DMA2CONbits.HALF = 0; /* Interrupt when all the data has been moved*/
+    DMA2CONbits.NULLW = 0; /* No NULL writes - Normal Operation*/
+    DMA2CONbits.AMODE = 0; /* Register Indirect with post-increment mode*/
+    DMA2CONbits.MODE = 2; /* Continuous mode ping pong mode enabled*/
+    DMA2REQbits.FORCE = 0; /* Automatic transfer*/
+    DMA2REQbits.IRQSEL = 0x3C;/* Codec transfer done*/
+    address =__builtin_edsoffset(rxBufferA) & 0x7FFF;
+    address +=__builtin_edspage(rxBufferA) << 15;
+    DMA2STAL = address & 0xFFFF;
+    DMA2STAH = address >>16;
+    address =__builtin_edsoffset(rxBufferB) & 0x7FFF;
+    address +=__builtin_edspage(rxBufferB) << 15;
+    DMA2STBL = address & 0xFFFF;
+    DMA2STBH = address >>16;
+    DMA2PAD = (int)&RXBUF0;
+    DMA2CNT = STREAMBUF-1;
+    _DMA2IP = 5;
+    _DMA2IE = 1;
+    DMA0CONbits.CHEN = 1; /* Enable the channel*/
+    DMA2CONbits.CHEN = 1;
 }
 
 /*
