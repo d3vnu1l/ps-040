@@ -30,6 +30,7 @@ fractional rxBufferA[STREAMBUF] __attribute__((space(eds)));
 fractional rxBufferB[STREAMBUF] __attribute__((space(eds)));
 
 unsigned int bpm=0, write_ptr=0, rw=0, frameReady=0;
+unsigned int idle=0, cycle=0;
 
 unsigned char hard_clipped=FALSE;                                               //STATUS VARIABLES//
 volatile unsigned char t1flag=FALSE;
@@ -71,7 +72,13 @@ int main(void) {
     //initCAP_BPM();                  //configure bpm capture
     //initT3();                       //configure & start T3
     while(1){   
-        if(frameReady) processData(stream, output);
+        unsigned int temp;
+        if(frameReady) {
+            processData(stream, output);
+            temp = 8*idle/STREAMBUF;
+            cycle=temp;
+            idle=0;
+        }
         if(t2flag==TRUE){
             scanMatrix();                   //read button matrix
             readPots();                     //read control pots
@@ -80,8 +87,8 @@ int main(void) {
         if(t1flag==TRUE){
             display();
             t1flag=FALSE; 
-            
         }
+        if(idle<0xFFFF) idle++; //999
     }
     return 0;
 }
