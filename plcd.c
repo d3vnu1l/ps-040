@@ -100,6 +100,8 @@ void lcdSetupPots(){
     lcdWriteString("O:");
     lcdSetCursor(0,3);
     lcdWriteString("B:");
+    lcdSetCursor(6,3);
+    lcdWriteString("Cyc:");
     lcdSetCursor(15,3);
     if(TEST_SIN==TRUE)lcdWriteString("SINE");
     else lcdWriteString("PASS");

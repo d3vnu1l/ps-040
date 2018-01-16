@@ -23,7 +23,7 @@ extern unsigned char UART_ON;
 //STATUS VARIABLES//
 extern unsigned char hard_clipped;
 extern unsigned char UART_EN;
-extern unsigned int rw, frameReady;
+extern unsigned int rw, frameReady, cycle;
 
 extern fractional sampin;
 extern fractional sampout;
@@ -70,7 +70,6 @@ void scanMatrix(void){
         if(lpf==FALSE)
             lpf=TRUE;
         else lpf=FALSE;
-        GLED=lpf;
     }
     else{
         pad_last[0]=pad[0];
@@ -149,6 +148,8 @@ void display(void){
    lcdWriteWord(sampin);
    lcdSetCursor(10,2);
    lcdWriteWord(sampout);
+    lcdSetCursor(9,3);
+    lcdWriteWord(cycle);
  
    
    if(hard_clipped==TRUE){                                                     //CLIP CONTROL    
@@ -185,7 +186,7 @@ void processData(int in[][STREAMBUF], int out[][STREAMBUF]){
     int writePtr=0;
     for(writePtr; writePtr<STREAMBUF; writePtr++){
         temp=in[!rw][writePtr];
-        __builtin_btg(&temp, 15);                             //convert to Q1.15 compatible format        
+            
         if(temp<=-32766||temp>=32766)
             hard_clipped=TRUE;
         temp=fx(temp);    //run fx on latest sample

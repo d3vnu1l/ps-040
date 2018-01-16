@@ -48,7 +48,7 @@ void __attribute__ ((interrupt, auto_psv)) _DCIInterrupt(void){
     TXBUF0=TXBUF1=sampout;                                    //output buffered sample to DAC
     sampin=RXBUF1;
     int trash=RXBUF0;
-    
+    __builtin_btg(&sampin, 15);                             //convert to Q1.15 compatible format    
     if(write_ptr==(STREAMBUF-1)){                       //reset pointer when out of bounds
         write_ptr=0;
         __builtin_btg(&rw,0);
