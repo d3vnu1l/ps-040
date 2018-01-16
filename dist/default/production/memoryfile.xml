@@ -5,19 +5,14 @@
     <memory name="data">
       <units>bytes</units>
       <length>49152</length>
-      <used>23194</used>
-      <free>25958</free>
+      <used>23452</used>
+      <free>25700</free>
     </memory>
     <memory name="program">
       <units>bytes</units>
       <length>524514</length>
-<<<<<<< HEAD
-      <used>46542</used>
-      <free>477972</free>
-=======
-      <used>46413</used>
-      <free>478101</free>
->>>>>>> 153500b... Add audio i/o print on lcd. LCD write int function
+      <used>46830</used>
+      <free>477684</free>
     </memory>
   </executable>
 </project>

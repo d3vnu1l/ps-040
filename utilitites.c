@@ -18,14 +18,16 @@
 extern unsigned char pad[8];
 extern fractional pots[4];
 extern fractional pots_scaled[4];
-extern unsigned char UART_ON;
+extern unsigned char UART_ON; 
 
 //STATUS VARIABLES//
 extern unsigned char hard_clipped;
 extern unsigned char UART_EN;
+extern unsigned int rw, frameReady;
 
-extern fractional sample;
-extern fractional output;
+extern fractional sampin;
+extern fractional sampout;
+
 
 //FX FLAGS & VARS
 extern unsigned char tremelo, looper, lpf;
@@ -144,9 +146,9 @@ void display(void){
     else lcdWriteString("ON ");
     
    lcdSetCursor(2,2);
-   lcdWriteWord(sample);
+   lcdWriteWord(sampin);
    lcdSetCursor(10,2);
-   lcdWriteWord(output);
+   lcdWriteWord(sampout);
  
    
    if(hard_clipped==TRUE){                                                     //CLIP CONTROL    
@@ -165,6 +167,32 @@ void display(void){
     }
    
    SLED=~SLED;
+}
+
+void processRxData(fractional * sourceBuffer, fractional * targetBuffer){
+    /* This procedure loops back the received data to the*/
+    /* the codec output. The user application could process*/
+    /* this data as per application requirements.*/
+    int index;
+    for(index = 0;index < STREAMBUF;index ++)
+    {
+        targetBuffer[index] = sourceBuffer[index];
+    }
+}
+
+void processData(int in[][STREAMBUF], int out[][STREAMBUF]){
+    fractional temp;
+    int writePtr=0;
+    for(writePtr; writePtr<STREAMBUF; writePtr++){
+        temp=in[!rw][writePtr];
+        __builtin_btg(&temp, 15);                             //convert to Q1.15 compatible format        
+        if(temp<=-32766||temp>=32766)
+            hard_clipped=TRUE;
+        temp=fx(temp);    //run fx on latest sample
+        out[rw][writePtr]=mixer(temp);
+    }
+    
+    frameReady=0;
 }
 
 //A blocking delay function. Not very accurate but good enough.

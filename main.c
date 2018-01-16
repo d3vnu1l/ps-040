@@ -20,7 +20,7 @@
 unsigned char pad[8]={0};                                                                //CONTROL VARIABLES//
 fractional pots[4]={0};
 fractional pots_scaled[4]={0};
-fractional output=0;
+fractional output[2][STREAMBUF];
 fractional stream[2][STREAMBUF];
 
 /* DMA BUFFERS */
@@ -29,7 +29,7 @@ fractional txBufferB[STREAMBUF] __attribute__((space(eds)));
 fractional rxBufferA[STREAMBUF] __attribute__((space(eds)));
 fractional rxBufferB[STREAMBUF] __attribute__((space(eds)));
 
-unsigned int bpm=0, write_ptr=0, rw=0;
+unsigned int bpm=0, write_ptr=0, rw=0, frameReady=0;
 
 unsigned char hard_clipped=FALSE;                                               //STATUS VARIABLES//
 volatile unsigned char t1flag=FALSE;
@@ -71,6 +71,7 @@ int main(void) {
     //initCAP_BPM();                  //configure bpm capture
     //initT3();                       //configure & start T3
     while(1){   
+        if(frameReady) processData(stream, output);
         if(t2flag==TRUE){
             scanMatrix();                   //read button matrix
             readPots();                     //read control pots
