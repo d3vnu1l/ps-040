@@ -11,6 +11,8 @@
 #include "common.h"
 #include "utilities.h"
 
+extern unsigned char TEST_SIN;
+
 unsigned int statusReg = 0x0C;  //internal copy of pwr reg
                                 // 0b_0 0 0 0 - 1 D C B (display, cursor, blink)
 char lcdBuf[80];
@@ -81,19 +83,27 @@ void lcdWriteString(char *string) {
 
 void lcdSetupPots(){
     lcdSetCursor(0,0);
-    lcdWriteString("Pot#1:");
-    lcdSetCursor(11,0);
-    lcdWriteString("Pot#2:");
-    lcdSetCursor(0,1);
-    lcdWriteString("Pot#3:");
-    lcdSetCursor(11,1);
-    lcdWriteString("Pot#4:");
+    lcdWriteString("P1:");
     lcdSetCursor(6,0);
-    lcdWriteString("1234");
+    lcdWriteString("P2:");
+    lcdSetCursor(12,0);
+    lcdWriteString("P3:");
+    lcdSetCursor(0,1);
+    lcdWriteString("P4:");
+    lcdSetCursor(6,1);
+    lcdWriteString("P5:");
+    lcdSetCursor(12,1);
+    lcdWriteString("P6:");
     lcdSetCursor(0,2);
-    lcdWriteString("TEST______");
-    lcdSetCursor(10,3);
-    lcdWriteString("TEST______");
+    lcdWriteString("I:");
+    lcdSetCursor(8,2);
+    lcdWriteString("O:");
+    lcdSetCursor(0,3);
+    lcdWriteString("B:");
+    lcdSetCursor(15,3);
+    if(TEST_SIN==TRUE)lcdWriteString("SINE");
+    else lcdWriteString("PASS");
+    
 }
 
 void lcdCustomSymbols(void){
@@ -126,6 +136,40 @@ void lcdInit(void){
     Delay_us(200);
 }
 
+void lcdWriteWord(int word){
+    int i;
+    char inchar[4];
+    
+    if(word<0) {
+        lcdWrite('-');
+        word=~word+1;
+    }else lcdWrite(' ');
+   Delay_us(40);
+   
+   inchar[0] = word&0x000F; 
+   if (inchar[0] > 9) 
+       inchar[0]+=55;
+   else inchar[0]+=48;
+   
+   for(i=1; i<4; i++){ 
+      inchar[i] = ((word>>(i*4))&0x0000F); 
+      if (inchar[i] > 9) 
+          inchar[i]+=55;
+      else inchar[i]+=48;
+   } 
+   lcdWrite(inchar[3]);
+   Delay_us(50);
+   lcdWrite(inchar[2]);
+    Delay_us(50);
+   lcdWrite(inchar[1]);
+   Delay_us(50);
+   lcdWrite(inchar[0]);
+   Delay_us(50);
+}
+
+void lcdVUvertical(unsigned char col, unsigned char row, int data){
+    lcdSetCursor(col,row);
+}
 /*
  char loadingOne[8] = {
 	0b10000,

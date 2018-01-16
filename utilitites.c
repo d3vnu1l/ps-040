@@ -25,6 +25,7 @@ extern unsigned char hard_clipped;
 extern unsigned char UART_EN;
 
 extern fractional sample;
+extern fractional output;
 
 //FX FLAGS & VARS
 extern unsigned char tremelo, looper, lpf;
@@ -39,6 +40,8 @@ void scanMatrix(void){
     //
     
     pad[0]=PORTGbits.RG15;
+    pad[4]=1;
+    pad[7]=1;
     
     if(pad[7]==0&&pad_last[7]==1){                                              //TREMELO CONTROL
         pad_last[7]=0;
@@ -136,10 +139,15 @@ void readPots(void){
 }
 
 void display(void){
-    
-    lcdSetCursor(6,1);
+    lcdSetCursor(2,3);
     if(pad[0])lcdWriteString("OFF");
     else lcdWriteString("ON ");
+    
+   lcdSetCursor(2,2);
+   lcdWriteWord(sample);
+   lcdSetCursor(10,2);
+   lcdWriteWord(output);
+ 
    
    if(hard_clipped==TRUE){                                                     //CLIP CONTROL    
         HARD_CLIP_LED=1;
@@ -156,7 +164,7 @@ void display(void){
         //printf("%d, pot1 %x, pot2 %x, avg %x\r\n", sample, pots[1], pots[2], average);  //check input ADC
     }
    
-   SLED=pad[0];
+   SLED=~SLED;
 }
 
 //A blocking delay function. Not very accurate but good enough.
