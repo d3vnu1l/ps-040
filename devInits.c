@@ -211,17 +211,10 @@ void initDCI_DAC(void){
     DCICON2bits.BLEN=1;     //2 words buffer btwn interrupts
     IPC15bits.DCIIP = 6;    // Interrput priority
     IFS3bits.DCIIF=0;
-    IEC3bits.DCIIE=0;       //let dma handle interrupt
+    IEC3bits.DCIIE=1;       //=0 to let dma handle interrupt
     TXBUF0=0;
     TXBUF1=0;   
     DCICON1bits.DCIEN=1;    //ENABLE
-    
-    
-        static int ij=0;
-    if (ij<8)
-        ij++;
-    else ij=0;
-    //seg_display(ij);
 }
 
 void initDMA0(void){
