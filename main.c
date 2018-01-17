@@ -30,7 +30,7 @@ fractional txBufferB[STREAMBUF] __attribute__((space(eds)));
 fractional rxBufferA[STREAMBUF] __attribute__((space(eds)));
 fractional rxBufferB[STREAMBUF] __attribute__((space(eds)));
 
-unsigned int bpm=0, rw=0, frameReady=0;
+unsigned int bpm=0, write_ptr=STREAMBUF, rw=0, frameReady=0;
 unsigned int idle=0, cycle=0;
 
 unsigned char hard_clipped=FALSE;                                               //STATUS VARIABLES//
