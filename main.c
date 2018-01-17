@@ -5,6 +5,7 @@
 #include "common.h"
 #include "devInits.h"
 #include "utilities.h"
+#include "audio.h"
 //#include "fatfs/src/ff.h"
 
 #pragma config ICS = PGD1       //pgeDC 1 is used
@@ -29,7 +30,7 @@ fractional txBufferB[STREAMBUF] __attribute__((space(eds)));
 fractional rxBufferA[STREAMBUF] __attribute__((space(eds)));
 fractional rxBufferB[STREAMBUF] __attribute__((space(eds)));
 
-unsigned int bpm=0, write_ptr=0, rw=0, frameReady=0;
+unsigned int bpm=0, write_ptr=STREAMBUF, rw=0, frameReady=0;
 unsigned int idle=0, cycle=0;
 
 unsigned char hard_clipped=FALSE;                                               //STATUS VARIABLES//
@@ -71,14 +72,32 @@ int main(void) {
 
     //initCAP_BPM();                  //configure bpm capture
     //initT3();                       //configure & start T3
+    fractional temp;
+    int writePtr;
+    fractional *ping, *pong;
+    
     while(1){   
-        unsigned int temp;
+        
         if(frameReady) {
-            if(rw) processData(streamA, outputB);
-            else processData(streamB, outputA);
+            writePtr=STREAMBUF-1;
+            if(rw){
+                ping = streamA+writePtr;
+                pong = outputB+writePtr;
+            }else{
+                ping = streamB+writePtr;
+                pong = outputA+writePtr;
+            }
+            for(; writePtr>=0; writePtr--){
+                temp=*ping--; //!rw
+                if(temp<=-32766||temp>=32766)hard_clipped=TRUE;
+                temp=fx(temp);    //run fx on latest sample
+                *pong--=mixer(temp); //rw
+                
+            }
             temp = 8*idle/STREAMBUF;
             cycle=temp;
             idle=0;
+            frameReady=0;
         }
         if(t2flag==TRUE){
             scanMatrix();                   //read button matrix
@@ -89,7 +108,7 @@ int main(void) {
             display();
             t1flag=FALSE; 
         }
-        if(idle<0xFFFF) idle++; //999
+        idle++; //999
     }
     return 0;
 }

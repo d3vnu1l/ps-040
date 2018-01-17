@@ -78,15 +78,15 @@ fractional mixer(fractional sample){
         sample=__builtin_sac(result1, 0);
     }
     */
-    if (TEST_SIN==FALSE){
-        return sample;
-    }
-    else {
+    if (TEST_SIN==TRUE){
         i++;
         if(i==1024)
             i=0;
         return sintab[i];
     }
+    else 
+        return sample;
+    
 }
 
 fractional fx(fractional sample){
@@ -112,7 +112,6 @@ fractional fx(fractional sample){
             sample=__builtin_sac(result2, 0);
         }
     }
-    
     if(looper==TRUE){                                                           //LOOPER// 
         if(loop_lim>=LOOP_BUF_SIZE)
             loop_lim=LOOP_BUF_SIZE;

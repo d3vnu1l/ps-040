@@ -24,7 +24,6 @@ extern unsigned char tremelo, looper;
 //misc.
 volatile fractional sampin=0;
 volatile fractional sampout=0;
-volatile fractional test[8];
 volatile int rxBufferIndicator = 0;
 
 //Description: This interrupt toggles status led, runs UART1 and handles display
@@ -48,22 +47,21 @@ void __attribute__ ((interrupt, auto_psv)) _T2Interrupt(void){
 void __attribute__ ((interrupt, auto_psv)) _DCIInterrupt(void){
     TXBUF0=TXBUF1=sampout;                                    //output buffered sample to DAC
     sampin=RXBUF1;
+    __builtin_btg(&sampin, 15);                             //convert to Q1.15 compatible format
     int trash=RXBUF0;
-    __builtin_btg(&sampin, 15);                             //convert to Q1.15 compatible format  
+      
     
-    if(write_ptr==(STREAMBUF-1)){                       //reset pointer when out of bounds
-        write_ptr=0;
+    if(write_ptr--==0){                       //reset pointer when out of bounds
+        write_ptr=STREAMBUF;
         __builtin_btg(&rw,0);
         frameReady=1;
-    }else write_ptr++;
-    
-    if(recording==TRUE){
-        if(rw)streamB[write_ptr]=sampin;                 //get input
-        else streamA[write_ptr]=sampin;                 //get input
     }
+   
+    if(rw)streamB[write_ptr]=sampin;                //get input
+    else streamA[write_ptr]=sampin;                 //get input
     
     if(rw) sampout=outputA[write_ptr];             //mix  new output
-    else sampout=outputB[write_ptr];             //mix  new output
+    else sampout=outputB[write_ptr];               //mix  new output
     
     IFS3bits.DCIIF=0;
 }
