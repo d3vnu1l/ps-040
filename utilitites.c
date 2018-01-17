@@ -23,7 +23,7 @@ extern unsigned char UART_ON;
 //STATUS VARIABLES//
 extern unsigned char hard_clipped;
 extern unsigned char UART_EN;
-extern unsigned int rw, frameReady, cycle;
+extern unsigned int cycle;
 
 extern fractional sampin;
 extern fractional sampout;
@@ -43,6 +43,7 @@ void scanMatrix(void){
     //
     
     pad[0]=PORTGbits.RG15;
+    pad[2]=1;
     pad[4]=1;
     pad[7]=1;
     
@@ -164,7 +165,7 @@ void display(void){
    lcdSetCursor(10,2);
    lcdWriteWord(sampout);
     lcdSetCursor(9,3);
-    lcdWriteWord(cycle);
+    if(pad[0])lcdWriteWord(cycle);
  
    
    if(hard_clipped==TRUE){                                                     //CLIP CONTROL    
@@ -194,21 +195,6 @@ void processRxData(fractional *sourceBuffer, fractional *targetBuffer){
     {
         targetBuffer[index] = sourceBuffer[index];
     }
-}
-
-void processData(int *in, int *out){
-    fractional temp;
-    int writePtr=0;
-    for(writePtr; writePtr<STREAMBUF; writePtr++){
-        temp=in[writePtr]; //!rw
-            
-        if(temp<=-32766||temp>=32766)
-            hard_clipped=TRUE;
-        temp=fx(temp);    //run fx on latest sample
-        out[writePtr]=mixer(temp); //rw
-    }
-    
-    frameReady=0;
 }
 
 //A blocking delay function. Not very accurate but good enough.
