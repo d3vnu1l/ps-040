@@ -1,7 +1,7 @@
 Disassembly Listing for sampler_0.49.2
 Generated From:
 C:/Users/ryan/Documents/seniorproject/ps-040/dist/default/production/ps-040.production.elf
-Jan 16, 2018 4:22:33 PM
+Jan 17, 2018 7:17:34 PM
 
 ---  C:/Users/ryan/Documents/seniorproject/ps-040/utilitites.c  -----------------------------------------
 1:                 #include "utilities.h"
@@ -47,7 +47,7 @@ Jan 16, 2018 4:22:33 PM
 41:                    static unsigned char pad_last[8] = {1,1,1,1,1,1,1,1};
 42:                    unsigned int portrd = PADS;
 0074E6  807310     MOV PORTG, W0
-43:                    //
+43:                    //PORTBbits.RB0 = (data >> 7) & 1;
 44:                    
 45:                    pad[0]=PORTGbits.RG15;
 0074E8  807311     MOV PORTG, W1
@@ -563,8 +563,8 @@ Jan 16, 2018 4:22:33 PM
 000366  888241     MOV W1, 0x1048
 000368  E00000     CP0 W0
 00036A  3A0005     BRA NZ, 0x376
-55:                        write_ptr=STREAMBUF;
-00036C  200400     MOV #0x40, W0
+55:                        write_ptr=STREAMBUF-1;
+00036C  2003F0     MOV #0x3F, W0
 00036E  888240     MOV W0, 0x1048
 56:                        __builtin_btg(&rw,0);
 000370  AA1012     BTG rw, #0
@@ -572,45 +572,48 @@ Jan 16, 2018 4:22:33 PM
 000372  200010     MOV #0x1, W0
 000374  8880A0     MOV W0, frameReady
 58:                    }
-59:                    
-60:                    if(rw)streamB[write_ptr]=sampin;                //get input
+59:                   
+60:                    if(rw){
 000376  E21012     CP0 rw
 000378  32000B     BRA Z, 0x390
+61:                        streamB[write_ptr]=sampin;
 00037A  808240     MOV 0x1048, W0
 00037C  400000     ADD W0, W0, W0
 00037E  267F81     MOV #0x67F8, W1
 000380  408080     ADD W1, W0, W1
 000382  8081E2     MOV sampin, W2
 000384  780882     MOV W2, [W1]
-61:                    else streamA[write_ptr]=sampin;                 //get input
+62:                        sampout=outputA[write_ptr]; 
+000386  266781     MOV #0x6678, W1
+000388  408000     ADD W1, W0, W0
+00038A  780010     MOV [W0], W0
+00038C  8881F0     MOV W0, sampout
+00038E  37000A     BRA 0x3A4
+63:                    }
+64:                    else {
+65:                        streamA[write_ptr]=sampin; 
 000390  808240     MOV 0x1048, W0
 000392  400000     ADD W0, W0, W0
 000394  267781     MOV #0x6778, W1
 000396  408080     ADD W1, W0, W1
 000398  8081E2     MOV sampin, W2
 00039A  780882     MOV W2, [W1]
-62:                    
-63:                    if(rw) sampout=outputA[write_ptr];             //mix  new output
-000386  266781     MOV #0x6678, W1
-000388  408000     ADD W1, W0, W0
-00038A  780010     MOV [W0], W0
-00038C  8881F0     MOV W0, sampout
-00038E  37000A     BRA 0x3A4
-64:                    else sampout=outputB[write_ptr];               //mix  new output
+66:                        sampout=outputB[write_ptr];  
 00039C  266F81     MOV #0x66F8, W1
 00039E  408000     ADD W1, W0, W0
 0003A0  780010     MOV [W0], W0
 0003A2  8881F0     MOV W0, sampout
-65:                    
-66:                    IFS3bits.DCIIF=0;
+67:                    }               //get input
+68:                    
+69:                    IFS3bits.DCIIF=0;
 0003A4  A98807     BCLR 0x807, #4
-67:                }
+70:                }
 0003A6  F90034     POP DSWPAG
 0003A8  F90032     POP DSRPAG
 0003AA  78014F     MOV [--W15], W2
 0003AC  BE004F     MOV.D [--W15], W0
 0003AE  064000     RETFIE
-68:                void __attribute__ ((interrupt, auto_psv)) _IC1Interrupt(void){
+71:                void __attribute__ ((interrupt, auto_psv)) _IC1Interrupt(void){
 0003B0  BE9F80     MOV.D W0, [W15++]
 0003B2  F80032     PUSH DSRPAG
 0003B4  F80034     PUSH DSWPAG
@@ -619,10 +622,10 @@ Jan 16, 2018 4:22:33 PM
 0003BA  202000     MOV #0x200, W0
 0003BC  880190     MOV W0, DSRPAG
 0003BE  000000     NOP
-69:                    IFS0bits.IC1IF=0;   
+72:                    IFS0bits.IC1IF=0;   
 0003C0  A92800     BCLR IFS0, #1
-70:                    //bpm=IC1BUF;
-71:                    RLED=~RLED;
+73:                    //bpm=IC1BUF;
+74:                    RLED=~RLED;
 0003C2  807120     MOV LATC, W0
 0003C4  EA8000     COM W0, W0
 0003C6  600061     AND W0, #0x1, W0
@@ -630,13 +633,13 @@ Jan 16, 2018 4:22:33 PM
 0003CA  A10001     BCLR W1, #0
 0003CC  700081     IOR W0, W1, W1
 0003CE  887121     MOV W1, LATC
-72:                }
+75:                }
 0003D0  F90034     POP DSWPAG
 0003D2  F90032     POP DSRPAG
 0003D4  BE004F     MOV.D [--W15], W0
 0003D6  064000     RETFIE
-73:                
-74:                void __attribute__ ((interrupt, auto_psv)) _SPI3Interrupt(void){
+76:                
+77:                void __attribute__ ((interrupt, auto_psv)) _SPI3Interrupt(void){
 0003D8  781F80     MOV W0, [W15++]
 0003DA  F80032     PUSH DSRPAG
 0003DC  F80034     PUSH DSWPAG
@@ -645,88 +648,88 @@ Jan 16, 2018 4:22:33 PM
 0003E2  202000     MOV #0x200, W0
 0003E4  880190     MOV W0, DSRPAG
 0003E6  000000     NOP
-75:                    //SEG_SEL=1;
-76:                    int trash=SPI3BUF;
+78:                    //SEG_SEL=1;
+79:                    int trash=SPI3BUF;
 0003E8  801540     MOV SPI3BUF, W0
-77:                    SPI3STATbits.SPIROV = 0;                                //Clear SPI1 receive overflow flag if set
+80:                    SPI3STATbits.SPIROV = 0;                                //Clear SPI1 receive overflow flag if set
 0003EA  A9C2A0     BCLR SPI3STAT, #6
-78:                    IFS5bits.SPI3IF=0;   
+81:                    IFS5bits.SPI3IF=0;   
 0003EC  A9680B     BCLR 0x80B, #3
-79:                }
+82:                }
 0003EE  F90034     POP DSWPAG
 0003F0  F90032     POP DSRPAG
 0003F2  78004F     MOV [--W15], W0
 0003F4  064000     RETFIE
-80:                
-81:                void __attribute__((__interrupt__,no_auto_psv)) _DMA2Interrupt(void){
+83:                
+84:                void __attribute__((__interrupt__,no_auto_psv)) _DMA2Interrupt(void){
 0003F6  F80036     PUSH RCOUNT
 0003F8  BE9F80     MOV.D W0, [W15++]
 0003FA  BE9F82     MOV.D W2, [W15++]
 0003FC  BE9F84     MOV.D W4, [W15++]
 0003FE  BE9F86     MOV.D W6, [W15++]
-82:                    _DMA2IF = 0; /* Received one frame of data*/    
+85:                    _DMA2IF = 0; /* Received one frame of data*/    
 000400  A90803     BCLR 0x803, #0
-83:                    
-84:                    if(rxBufferIndicator == 0)
+86:                    
+87:                    if(rxBufferIndicator == 0)
 000402  E21040     CP0 rxBufferIndicator
 000404  3A0004     BRA NZ, 0x40E
-85:                    {
-86:                         processRxData((int *)rxBufferA, (int*)txBufferA);
+88:                    {
+89:                         processRxData((int *)rxBufferA, (int*)txBufferA);
 000406  2CF801     MOV #0xCF80, W1
 000408  2CE800     MOV #0xCE80, W0
 00040A  073951     RCALL processRxData
 00040C  370003     BRA 0x414
-87:                    }
-88:                    else
-89:                    {
-90:                         processRxData((int *)rxBufferB, (int*)txBufferB);
+90:                    }
+91:                    else
+92:                    {
+93:                         processRxData((int *)rxBufferB, (int*)txBufferB);
 00040E  2CF001     MOV #0xCF00, W1
 000410  2CE000     MOV #0xCE00, W0
 000412  07394D     RCALL processRxData
-91:                    }
-92:                    rxBufferIndicator ^= 1; /* Toggle the indicator*/    
+94:                    }
+95:                    rxBufferIndicator ^= 1; /* Toggle the indicator*/    
 000414  AA1040     BTG rxBufferIndicator, #0
-93:                }
+96:                }
 000416  BE034F     MOV.D [--W15], W6
 000418  BE024F     MOV.D [--W15], W4
 00041A  BE014F     MOV.D [--W15], W2
 00041C  BE004F     MOV.D [--W15], W0
 00041E  F90036     POP RCOUNT
 000420  064000     RETFIE
-94:                
-95:                /*
-96:                //Description: This interrupt handles polling button input
-97:                //Dependencies: initADC1(); 
-98:                //Frequency: 44.1kHz
-99:                void __attribute__ ((interrupt, auto_psv)) _T3Interrupt(void){
-100:                   SEG_SEL=0;
-101:                   SPI3BUF=0x0100;
-102:                   //SEG_SEL=1;
-103:                   IFS0bits.T3IF = 0;              //clear flag, restart
-104:               }
-105:               
-106:               void __attribute__ ((interrupt, auto_psv)) _SPI2Interrupt(void){
-107:                   //GLED=~GLED;                                             //check half freq w/ RLED                                        //returns SS2 to idle state
-108:                   SPI2STATbits.SPIROV = 0;                                //Clear SPI1 receive overflow flag if set
-109:                   IFS2bits.SPI2IF = 0;                                    //reset flag & restart
-110:               }
-111:               //Description: This interrupt handles UART reception
-112:               //Dependencies: initUART1();
-113:               void __attribute__ ((interrupt, auto_psv)) _U1RXInterrupt(void){
-114:                   unsigned char trash;
-115:                   GLED=~GLED;
-116:                   trash=U1RXREG;
-117:                   printf("RECIEVED: %d\r\n", trash);
-118:                   IFS0bits.U1RXIF = 0;            //clear flag, restart
-119:               }
-120:               
-121:               //Description: This interrupt handles UART transmission
-122:               //Dependencies: initUART1();
-123:               void __attribute__ ((interrupt, auto_psv)) _U1TXInterrupt(void){
-124:                   YLED=~YLED;
-125:                   IFS0bits.U1TXIF = 0;            //clear flag, restart
-126:               } 
-127:                */
+97:                
+98:                /*
+99:                //Description: This interrupt handles polling button input
+100:               //Dependencies: initADC1(); 
+101:               //Frequency: 44.1kHz
+102:               void __attribute__ ((interrupt, auto_psv)) _T3Interrupt(void){
+103:                   SEG_SEL=0;
+104:                   SPI3BUF=0x0100;
+105:                   //SEG_SEL=1;
+106:                   IFS0bits.T3IF = 0;              //clear flag, restart
+107:               }
+108:               
+109:               void __attribute__ ((interrupt, auto_psv)) _SPI2Interrupt(void){
+110:                   //GLED=~GLED;                                             //check half freq w/ RLED                                        //returns SS2 to idle state
+111:                   SPI2STATbits.SPIROV = 0;                                //Clear SPI1 receive overflow flag if set
+112:                   IFS2bits.SPI2IF = 0;                                    //reset flag & restart
+113:               }
+114:               //Description: This interrupt handles UART reception
+115:               //Dependencies: initUART1();
+116:               void __attribute__ ((interrupt, auto_psv)) _U1RXInterrupt(void){
+117:                   unsigned char trash;
+118:                   GLED=~GLED;
+119:                   trash=U1RXREG;
+120:                   printf("RECIEVED: %d\r\n", trash);
+121:                   IFS0bits.U1RXIF = 0;            //clear flag, restart
+122:               }
+123:               
+124:               //Description: This interrupt handles UART transmission
+125:               //Dependencies: initUART1();
+126:               void __attribute__ ((interrupt, auto_psv)) _U1TXInterrupt(void){
+127:                   YLED=~YLED;
+128:                   IFS0bits.U1TXIF = 0;            //clear flag, restart
+129:               } 
+130:                */
 ---  C:/Users/ryan/Documents/seniorproject/ps-040/plcd.c  -----------------------------------------------
 1:                 /*
 2:                  * File:   plcd.c
