@@ -38,11 +38,15 @@ extern fractional tremelo_depth;
 extern unsigned char kick_playing, snare_playing;   
 
 void scanMatrix(void){
-    static unsigned char pad_last[8] = {1,1,1,1,1,1,1,1};
-    unsigned int portrd = PADS;
+    static unsigned char pad_last[17]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+    int i, portrd;
     //
     
-    pad[0]=PORTGbits.RG15;
+    portrd = PADS;
+    for(i=0; i<16; i++){
+        pad[i]=(portrd>>i)&1;
+    }
+    
     pad[2]=1;
     pad[4]=1;
     pad[7]=1;
@@ -67,19 +71,19 @@ void scanMatrix(void){
         YLED=looper;
     }
    
-    if(pad[0]==0&&pad_last[0]==1){                                              //LPF CONTROL
-        pad_last[0]=0;
+    if(pad[15]==0&&pad_last[15]==1){                                              //LPF CONTROL
+        pad_last[15]=0;
         if(lpf==FALSE)
             lpf=TRUE;
         else lpf=FALSE;
     }
     else{
-        pad_last[0]=pad[0];
+        pad_last[15]=pad[1];
     }
     
     
     /* SAMPLE TRIGGERS */
-    if(pad[0]==0&&kick_playing==FALSE){                                         //kick
+    if(pad[15]==0&&kick_playing==FALSE){                                         //kick
         kick_playing=TRUE;
     }
     /*
@@ -157,7 +161,7 @@ void readPots(void){
 
 void display(void){
     lcdSetCursor(2,3);
-    if(pad[0])lcdWriteString("OFF");
+    if(pad[15])lcdWriteString("OFF");
     else lcdWriteString("ON ");
     
    lcdSetCursor(2,2);
@@ -165,7 +169,7 @@ void display(void){
    lcdSetCursor(10,2);
    lcdWriteWord(sampout);
     lcdSetCursor(9,3);
-    if(pad[0])lcdWriteWord(cycle);
+    if(pad[14])lcdWriteWord(cycle);
  
    
    if(hard_clipped==TRUE){                                                     //CLIP CONTROL    

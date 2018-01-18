@@ -6,7 +6,7 @@
 #include "audio.h"
 #include "utilities.h"
 //CONTROL VARIABLES//
-extern char pad[8];
+extern char pad[BUTTONS];
 extern fractional pots[4]; 
 extern fractional outputA[STREAMBUF], outputB[STREAMBUF];
 extern fractional streamA[STREAMBUF], streamB[STREAMBUF];
@@ -14,17 +14,14 @@ extern unsigned int write_ptr, rw, frameReady;
 extern int txBufferA[STREAMBUF], txBufferB[STREAMBUF], rxBufferA[STREAMBUF], rxBufferB[STREAMBUF];  //doesnt work as fractional
 
 //STATUS VARIABLES
-extern unsigned char recording;
-extern const int sintab[1024];
 extern unsigned char t1flag, t2flag;
-
-//FX FLAGS
-extern unsigned char tremelo, looper;
 
 //misc.
 volatile fractional sampin=0;
 volatile fractional sampout=0;
 volatile int rxBufferIndicator = 0;
+unsigned int write_ptr=STREAMBUF;
+fractional *ping, *pong;
 
 //Description: This interrupt toggles status led, runs UART1 and handles display
 //Dependencies: initUART1();
@@ -52,16 +49,19 @@ void __attribute__ ((interrupt, auto_psv)) _DCIInterrupt(void){
       
     
     if(write_ptr--==0){                       //reset pointer when out of bounds
-        write_ptr=STREAMBUF;
+        write_ptr=STREAMBUF-1;
         __builtin_btg(&rw,0);
         frameReady=1;
     }
    
-    if(rw)streamB[write_ptr]=sampin;                //get input
-    else streamA[write_ptr]=sampin;                 //get input
-    
-    if(rw) sampout=outputA[write_ptr];             //mix  new output
-    else sampout=outputB[write_ptr];               //mix  new output
+    if(rw){
+        streamB[write_ptr]=sampin;
+        sampout=outputA[write_ptr]; 
+    }
+    else {
+        streamA[write_ptr]=sampin; 
+        sampout=outputB[write_ptr];  
+    }               //get input
     
     IFS3bits.DCIIF=0;
 }
