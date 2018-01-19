@@ -14,6 +14,7 @@ void initT2(void);
 void initT3(void);
 void initUART1(void);
 void initADC1(void);
+void initSPI1_MEM(void);
 void initSPI2_ADC(void);
 //void initSPI3_SEG(void);
 void initDCI_DAC(void);

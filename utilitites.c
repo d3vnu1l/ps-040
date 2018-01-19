@@ -18,14 +18,16 @@
 extern unsigned char pad[8];
 extern fractional pots[4];
 extern fractional pots_scaled[4];
-extern unsigned char UART_ON;
+extern unsigned char UART_ON; 
 
 //STATUS VARIABLES//
 extern unsigned char hard_clipped;
 extern unsigned char UART_EN;
+extern unsigned int cycle;
 
-extern fractional sample;
-extern fractional output;
+extern fractional sampin;
+extern fractional sampout;
+
 
 //FX FLAGS & VARS
 extern unsigned char tremelo, looper, lpf;
@@ -33,15 +35,37 @@ extern unsigned int tremelo_ptr, tremelo_length, trem_var;
 extern unsigned int loop_lim;
 extern fractional lpf_alpha, lpf_inv_alpha;
 extern fractional tremelo_depth;
+extern unsigned char kick_playing, snare_playing;   
 
 void scanMatrix(void){
-    static unsigned char pad_last[8] = {1,1,1,1,1,1,1,1};
-    unsigned int portrd = PADS;
+    static unsigned char pad_last[17]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+    int portrdG, portrdD, portrdF;
     //
+    portrdG = PORTG;
+    portrdD = PORTD;
+    portrdF = PORTF;
     
-    pad[0]=PORTGbits.RG15;
-    pad[4]=1;
-    pad[7]=1;
+   
+    pad[0]=(portrdG)&1;
+    pad[1]=(portrdG>>1)&1;
+    pad[2]=(portrdG>>2)&1;
+    pad[3]=(portrdG>>3)&1;
+    pad[11]=(portrdG>>11)&1;
+    pad[12]=(portrdG>>12)&1;
+    pad[13]=(portrdG>>13)&1;
+    pad[14]=(portrdG>>14)&1;
+    pad[15]=(portrdG>>15)&1;
+    
+    pad[4]=(portrdF>>4)&1;
+    pad[5]=(portrdF>>5)&1;
+    pad[6]=(portrdF>>6)&1;
+    pad[16]=(portrdF>>7)&1;
+    
+    pad[7]=(portrdD>>1)&1;
+    pad[8]=(portrdD>>2)&1;
+    pad[9]=(portrdD>>3)&1;
+    pad[10]=(portrdD>>4)&1;
+   
     
     if(pad[7]==0&&pad_last[7]==1){                                              //TREMELO CONTROL
         pad_last[7]=0;
@@ -63,15 +87,28 @@ void scanMatrix(void){
         YLED=looper;
     }
    
-    if(pad[0]==0&&pad_last[0]==1){                                              //LPF CONTROL
-        pad_last[0]=0;
+    if(pad[15]==0&&pad_last[15]==1){                                              //LPF CONTROL
+        pad_last[15]=0;
         if(lpf==FALSE)
             lpf=TRUE;
         else lpf=FALSE;
-        GLED=lpf;
     }
     else{
-        pad_last[0]=pad[0];
+        pad_last[15]=pad[15];
+    }
+    
+    
+    /* SAMPLE TRIGGERS */
+    if(pad[15]==0&&kick_playing==FALSE){                                         //kick
+        kick_playing=TRUE;
+    }
+    /*
+    if(pad[2]==0&&hat_playing==FALSE){                                          //hat
+        hat_playing=TRUE;
+    }
+    */
+    if(pad[2]==0&&snare_playing==FALSE){                                        //snare
+        snare_playing=TRUE;
     }
     
     //lpf=TRUE;
@@ -139,14 +176,19 @@ void readPots(void){
 }
 
 void display(void){
-    lcdSetCursor(2,3);
-    if(pad[0])lcdWriteString("OFF");
-    else lcdWriteString("ON ");
+    IFS0bits.SPI1IF=0;
+    SPI1STATbits.SPIROV = 0;
+    int trash = SPI1BUF;
+    SPI1BUF=0xFAAF;
+    
+    lcdDrawPads(16);
     
    lcdSetCursor(2,2);
-   lcdWriteWord(sample);
+   lcdWriteWord(sampin);
    lcdSetCursor(10,2);
-   lcdWriteWord(output);
+   lcdWriteWord(sampout);
+    lcdSetCursor(4,3);
+    if(pad[14])lcdWriteWord(cycle);
  
    
    if(hard_clipped==TRUE){                                                     //CLIP CONTROL    
@@ -165,6 +207,17 @@ void display(void){
     }
    
    SLED=~SLED;
+}
+
+void processRxData(fractional *sourceBuffer, fractional *targetBuffer){
+    /* This procedure loops back the received data to the*/
+    /* the codec output. The user application could process*/
+    /* this data as per application requirements.*/
+    int index;
+    for(index = 0;index < STREAMBUF;index ++)
+    {
+        targetBuffer[index] = sourceBuffer[index];
+    }
 }
 
 //A blocking delay function. Not very accurate but good enough.

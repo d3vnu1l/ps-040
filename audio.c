@@ -35,9 +35,7 @@ fractional mixer(fractional sample){
     volatile register int result1 asm("A");
     static int i=0;
     
-    if(pad[0]==0&&kick_playing==FALSE){                                         //kick
-        kick_playing=TRUE;
-    }
+
     if(kick_playing==TRUE&&kick_ptr<kick_max){
         result1 =__builtin_mpy(sample,Q15(0.90), NULL, NULL, 0, NULL, NULL, 0);
         result1 = __builtin_add(result1,kick[kick_ptr++],0);
@@ -47,11 +45,7 @@ fractional mixer(fractional sample){
         kick_playing=FALSE;
         kick_ptr=0;
     }
-    
     /*
-    if(pad[2]==0&&hat_playing==FALSE){                                          //hat
-        hat_playing=TRUE;
-    }
     if(hat_playing==TRUE&&hat_ptr<hat_max){
         result1 =__builtin_mpy(sample,Q15(0.85), NULL, NULL, 0, NULL, NULL, 0);
         result1 = __builtin_add(result1,hat[hat_ptr++],0);
@@ -61,10 +55,8 @@ fractional mixer(fractional sample){
         hat_playing=FALSE;
         hat_ptr=0;
     }
-    */
-    if(pad[2]==0&&snare_playing==FALSE){                                        //snare
-        snare_playing=TRUE;
-    }
+     */
+
     if(snare_playing==TRUE&&snare_ptr<snare_max){
         result1 =__builtin_mpy(sample,Q15(0.85), NULL, NULL, 0, NULL, NULL, 0);
         result1 = __builtin_add(result1,snare[snare_ptr++],0);
@@ -86,15 +78,15 @@ fractional mixer(fractional sample){
         sample=__builtin_sac(result1, 0);
     }
     */
-    if (TEST_SIN==FALSE){
-        return sample;
-    }
-    else {
+    if (TEST_SIN==TRUE){
         i++;
         if(i==1024)
             i=0;
         return sintab[i];
     }
+    else 
+        return sample;
+    
 }
 
 fractional fx(fractional sample){
@@ -120,7 +112,6 @@ fractional fx(fractional sample){
             sample=__builtin_sac(result2, 0);
         }
     }
-    
     if(looper==TRUE){                                                           //LOOPER// 
         if(loop_lim>=LOOP_BUF_SIZE)
             loop_lim=LOOP_BUF_SIZE;

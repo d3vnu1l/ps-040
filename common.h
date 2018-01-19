@@ -14,8 +14,9 @@
 #define T3freq 44100                    //target timer 3 frequency
 #define Fscan 512                       //target buttons & pots sampling rate
 #define Fout 44100                      //target output sampling rate (~45k last measured)
-#define STREAMBUF 256                   //input adc stack size, must be large enough to avoid SD write respond latency
-#define Fdisp 60                        //15hz display update rate
+#define STREAMBUF 64                   //input adc stack size, must be large enough to avoid SD write respond latency
+#define Fdisp 30                        //15hz display update rate
+#define BUTTONS 17
 
 #define LOOP_BUF_SIZE 11025             //about 1/4th of a second               //FX settings
 
@@ -27,7 +28,8 @@
 #define TREMELO_LED _LATD15
 #define LCD_RS _LATE15
 #define LCD_RS_P PORTEbits.RE15
-#define PADS PORTG
+#define lcd_rs_toggle {__builtin_btg(&LATE,15);}    //slower!
+
 
 //#define ADC_CONV _LATB11             //was originally for adc conv, now unused
 //spi1 (SD-card) manula CS

@@ -11,7 +11,8 @@
 #include "plcd.h"
 
 extern unsigned char UART_ON;
-
+extern int txBufferA[STREAMBUF], txBufferB[STREAMBUF], rxBufferA[STREAMBUF], rxBufferB[STREAMBUF];  //doesnt work as fractional
+ 
 //Description: Responsible i/o, clock, & RP pin config setup
 //Prereq: NONE
 //Dependencies: NONE
@@ -65,15 +66,17 @@ void initPorts(void){
     TRISA=0x0603;
     TRISB=0x0003;
     TRISC=0x2080;
+    TRISD=CNPUD=0x001E;
     TRISE=0x7000;
-    TRISG=0xFFFF;   //PORTG all inputs
+    TRISF=CNPUF=0x00F0;
+    TRISG=CNPUG=0xFFFF;   //PORTG all inputs,//weak pull ups on all of G
     
     /* DIGITAL OUTPUT LATCH */
     LATA=LATB=LATC=LATD=LATE=LATF=LATG=0x0000;
     LATA=0x0040;
     
-    //weak internal pull ups
-    CNPUG=0xFFFF;       //weak pull ups on all of G
+    
+    
 }
 
 //Description: Initializes UART1 device & interrupts
@@ -109,6 +112,27 @@ void initADC1(void){
     AD1CON1bits.ADON = 1;       //start ADC module
     Delay_us(20);
 }
+void initSPI1_MEM(void){
+    IFS0bits.SPI1IF = 0;        // Clear the Interrupt flag
+    IEC0bits.SPI1IE = 0;        // Disable the interrupt
+    SPI1CON1bits.MSTEN=1;       //master mode
+    SPI1CON1bits.DISSCK = 0;    //Internal serial clock is enabled
+    SPI1CON1bits.MODE16=1;      //16 bit
+    SPI1CON1bits.SSEN=0;        //no use SS
+    SPI1CON2bits.FRMEN=0;       //no enable framed mode
+    SPI1CON2bits.SPIBEN=0;      //enhanced buffer mode
+    SPI1STATbits.SISEL=5;       //interrupt when done sending
+    SPI1CON1bits.SMP=1;         //data sampled at end of output time
+    SPI1CON1bits.CKP=1;         //idle clock is high
+    SPI1CON1bits.CKE=1;         //data changes from H to L
+    SPI1CON1bits.PPRE=1;        //4:1 primary prescale
+    SPI1CON1bits.SPRE=1;        //8:1 secondary
+    SPI1STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
+
+    SPI1STATbits.SPIEN = 1;     //start SPI module
+}
+
+
 
 void initPMP(void){
     /*
@@ -121,9 +145,7 @@ void initPMP(void){
     PMCONbits.PTRDEN = 1;
     PMCONbits.WRSP=1;   //write strobe active high
     PMCONbits.RDSP=1;   //read strobe active high
-    PMMODEbits.WAITB = 3;
-    PMMODEbits.WAITM = 0x08;
-    PMMODEbits.WAITE = 3;
+
     PMMODEbits.WAITB = 0;
     PMMODEbits.WAITM = 0xC;
     PMMODEbits.WAITE = 0;
@@ -210,17 +232,69 @@ void initDCI_DAC(void){
     DCICON2bits.BLEN=1;     //2 words buffer btwn interrupts
     IPC15bits.DCIIP = 6;    // Interrput priority
     IFS3bits.DCIIF=0;
-    IEC3bits.DCIIE=1; 
+    IEC3bits.DCIIE=1;       //=0 to let dma handle interrupt
     TXBUF0=0;
     TXBUF1=0;   
     DCICON1bits.DCIEN=1;    //ENABLE
+}
+
+void initDMA0(void){
+    unsigned long address;
     
+    /*
+    DMA0CONbits.AMODE = 2; // Configure DMA for Peripheral indirect mode
+    DMA0CONbits.MODE = 0; // Configure DMA for Continuous no Ping-Pong mode
+    DMA0PAD =  0X0608; // Point DMA to PMP
+    DMA0CNT = 2; //2 // 3 DMA request (3 buffers, each with 1 words)
+    DMA0REQ = 13; // Select ADC1 as DMA Request source
+    //DMA0STA = __builtin_dmaoffset(&BufferA);
+    //DMA0STB = __builtin_dmaoffset(&BufferB);
+    IFS0bits.DMA0IF = 0; //Clear the DMA interrupt flag bit
+    IEC0bits.DMA0IE = 1; //Set the DMA interrupt enable bit
+    DMA0CONbits.CHEN=1; // Enable DMA
+    */
     
-        static int ij=0;
-    if (ij<8)
-        ij++;
-    else ij=0;
-    //seg_display(ij);
+    DMA0CONbits.SIZE = 0; /* Word transfers*/
+    DMA0CONbits.DIR = 1; /* From RAM to DCI*/
+    DMA0CONbits.AMODE = 0; /* Register Indirect with post-increment mode*/
+    DMA0CONbits.MODE = 2; /* Continuous ping pong mode enabled*/
+    DMA0CONbits.HALF = 0; /* Interrupt when all the data has been moved*/
+    DMA0CONbits.NULLW = 0;
+    DMA0REQbits.FORCE = 0; /* Automatic transfer*/
+    DMA0REQbits.IRQSEL = 0x3C;/* Codec transfer done*/
+    address =__builtin_edsoffset(txBufferA) & 0x7FFF;
+    address +=__builtin_edspage(txBufferA) << 15;
+    DMA0STAL = address & 0xFFFF;
+    DMA0STAH = address >>16;
+    address =__builtin_edsoffset(txBufferB) & 0x7FFF;
+    address +=__builtin_edspage(txBufferB) << 15;
+    DMA0STBL = address & 0xFFFF;
+    DMA0STBH = address >>16;
+    DMA0PAD = (int)&TXBUF0;
+    DMA0CNT = STREAMBUF-1;
+    /* DMA 2 - DCI to DPSRAM*/
+    DMA2CONbits.SIZE = 0; /* Word transfers*/
+    DMA2CONbits.DIR = 0; /* From DCI to DPSRAM */
+    DMA2CONbits.HALF = 0; /* Interrupt when all the data has been moved*/
+    DMA2CONbits.NULLW = 0; /* No NULL writes - Normal Operation*/
+    DMA2CONbits.AMODE = 0; /* Register Indirect with post-increment mode*/
+    DMA2CONbits.MODE = 2; /* Continuous mode ping pong mode enabled*/
+    DMA2REQbits.FORCE = 0; /* Automatic transfer*/
+    DMA2REQbits.IRQSEL = 0x3C;/* Codec transfer done*/
+    address =__builtin_edsoffset(rxBufferA) & 0x7FFF;
+    address +=__builtin_edspage(rxBufferA) << 15;
+    DMA2STAL = address & 0xFFFF;
+    DMA2STAH = address >>16;
+    address =__builtin_edsoffset(rxBufferB) & 0x7FFF;
+    address +=__builtin_edspage(rxBufferB) << 15;
+    DMA2STBL = address & 0xFFFF;
+    DMA2STBH = address >>16;
+    DMA2PAD = (int)&RXBUF0;
+    DMA2CNT = STREAMBUF-1;
+    _DMA2IP = 5;
+    _DMA2IE = 1;
+    DMA0CONbits.CHEN = 1; /* Enable the channel*/
+    DMA2CONbits.CHEN = 1;
 }
 
 /*

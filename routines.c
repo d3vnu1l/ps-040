@@ -4,25 +4,24 @@
 #include <stdio.h>
 #include "common.h"
 #include "audio.h"
-//#include "utilities.h"
+#include "utilities.h"
 //CONTROL VARIABLES//
-extern char pad[8];
+extern char pad[BUTTONS];
 extern fractional pots[4]; 
-extern fractional stream[2][STREAMBUF];
-extern fractional output;
-extern unsigned int write_ptr, rw;
+extern fractional outputA[STREAMBUF], outputB[STREAMBUF];
+extern fractional streamA[STREAMBUF], streamB[STREAMBUF];
+extern unsigned int write_ptr, rw, frameReady;
+extern int txBufferA[STREAMBUF], txBufferB[STREAMBUF], rxBufferA[STREAMBUF], rxBufferB[STREAMBUF];  //doesnt work as fractional
 
 //STATUS VARIABLES
-extern unsigned char hard_clipped;
-extern unsigned char recording;
-extern const int sintab[1024];
 extern unsigned char t1flag, t2flag;
 
-//FX FLAGS
-extern unsigned char tremelo, looper;
-
 //misc.
-volatile fractional sample=0;
+volatile fractional sampin=0;
+volatile fractional sampout=0;
+volatile int rxBufferIndicator = 0;
+unsigned int write_ptr=STREAMBUF;
+fractional *ping, *pong;
 
 //Description: This interrupt toggles status led, runs UART1 and handles display
 //Dependencies: initUART1();
@@ -43,28 +42,29 @@ void __attribute__ ((interrupt, auto_psv)) _T2Interrupt(void){
 //Description: This interrupt triggers at the completion of DCI output
 //Dependancies: initSPI2(); 
 void __attribute__ ((interrupt, auto_psv)) _DCIInterrupt(void){
-    TXBUF0=output;                                    //output buffered sample to DAC
-    TXBUF1=output;
-    sample=RXBUF1;
+    TXBUF0=TXBUF1=sampout;                                    //output buffered sample to DAC
+    sampin=RXBUF1;
+    __builtin_btg(&sampin, 15);                             //convert to Q1.15 compatible format
     int trash=RXBUF0;
-    __builtin_btg(&sample, 15);                             //convert to Q1.15 compatible format
-    if(sample<=-32766||sample>=32766)
-        hard_clipped=TRUE;
-    if(write_ptr==(STREAMBUF-1)){                       //reset pointer when out of bounds
-        write_ptr=0;
+      
+    
+    if(write_ptr--==0){                       //reset pointer when out of bounds
+        write_ptr=STREAMBUF-1;
         __builtin_btg(&rw,0);
+        frameReady=1;
     }
-    else write_ptr++;
-    if(recording==TRUE){
-        stream[rw][write_ptr]=sample;                 //get output
+   
+    if(rw){
+        streamB[write_ptr]=sampin;
+        sampout=outputA[write_ptr]; 
     }
-    stream[rw][write_ptr]=fx(stream[rw][write_ptr]);    //run fx on latest sample
-    if(rw==0)
-        output=mixer(stream[1][write_ptr]);             //mix  new output
-    else output = mixer(stream[0][write_ptr]);
+    else {
+        streamA[write_ptr]=sampin; 
+        sampout=outputB[write_ptr];  
+    }               //get input
+    
     IFS3bits.DCIIF=0;
 }
-
 void __attribute__ ((interrupt, auto_psv)) _IC1Interrupt(void){
     IFS0bits.IC1IF=0;   
     //bpm=IC1BUF;
@@ -77,6 +77,20 @@ void __attribute__ ((interrupt, auto_psv)) _SPI3Interrupt(void){
     SPI3STATbits.SPIROV = 0;                                //Clear SPI1 receive overflow flag if set
     IFS5bits.SPI3IF=0;
     
+}
+
+void __attribute__((__interrupt__,no_auto_psv)) _DMA2Interrupt(void){
+    _DMA2IF = 0; /* Received one frame of data*/    
+    
+    if(rxBufferIndicator == 0)
+    {
+         processRxData((int *)rxBufferA, (int*)txBufferA);
+    }
+    else
+    {
+         processRxData((int *)rxBufferB, (int*)txBufferB);
+    }
+    rxBufferIndicator ^= 1; /* Toggle the indicator*/    
 }
 
 /*
