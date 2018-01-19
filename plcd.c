@@ -12,6 +12,7 @@
 #include "utilities.h"
 
 extern unsigned char TEST_SIN;
+extern unsigned char pad[BUTTONS];
 
 unsigned int statusReg = 0x0C;  //internal copy of pwr reg
                                 // 0b_0 0 0 0 - 1 D C B (display, cursor, blink)
@@ -99,12 +100,10 @@ void lcdSetupPots(){
     lcdSetCursor(8,2);
     lcdWriteString("O:");
     lcdSetCursor(0,3);
-    lcdWriteString("B:");
-    lcdSetCursor(6,3);
     lcdWriteString("Cyc:");
-    lcdSetCursor(15,3);
+    lcdSetCursor(11,3);
     if(TEST_SIN==TRUE)lcdWriteString("SINE");
-    else lcdWriteString("PASS");
+    else lcdWriteString("THRU");
     
 }
 
@@ -172,6 +171,31 @@ void lcdWriteWord(int word){
 void lcdVUvertical(unsigned char col, unsigned char row, int data){
     lcdSetCursor(col,row);
 }
+
+//4x4 pad debug
+void lcdDrawPads(unsigned char col){
+    lcdSetCursor(col, 0);
+    if(pad[12])lcdWriteString(" "); else {lcdWrite(0xFF);Delay_us(50);}
+    if(pad[13])lcdWriteString(" "); else {lcdWrite(0xFF);Delay_us(50);}
+    if(pad[14])lcdWriteString(" "); else {lcdWrite(0xFF);Delay_us(50);}
+    if(pad[15])lcdWriteString(" "); else {lcdWrite(0xFF);Delay_us(50);}
+    lcdSetCursor(col, 1);
+    if(pad[8])lcdWriteString(" "); else {lcdWrite(0xFF);Delay_us(50);}
+    if(pad[9])lcdWriteString(" "); else {lcdWrite(0xFF);Delay_us(50);}
+    if(pad[10])lcdWriteString(" "); else {lcdWrite(0xFF);Delay_us(50);}
+    if(pad[11])lcdWriteString(" "); else {lcdWrite(0xFF);Delay_us(50);}
+    lcdSetCursor(col, 2);
+    if(pad[4])lcdWriteString(" "); else {lcdWrite(0xFF);Delay_us(50);}
+    if(pad[5])lcdWriteString(" "); else {lcdWrite(0xFF);Delay_us(50);}
+    if(pad[6])lcdWriteString(" "); else {lcdWrite(0xFF);Delay_us(50);}
+    if(pad[7])lcdWriteString(" "); else {lcdWrite(0xFF);Delay_us(50);}
+    lcdSetCursor(col, 3);
+    if(pad[0])lcdWriteString(" "); else {lcdWrite(0xFF);Delay_us(50);}
+    if(pad[1])lcdWriteString(" "); else {lcdWrite(0xFF);Delay_us(50);}
+    if(pad[2])lcdWriteString(" "); else {lcdWrite(0xFF);Delay_us(50);}
+    if(pad[3])lcdWriteString(" "); else lcdWrite(0xFF);
+}
+
 /*
  char loadingOne[8] = {
 	0b10000,

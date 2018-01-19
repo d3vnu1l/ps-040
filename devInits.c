@@ -66,15 +66,17 @@ void initPorts(void){
     TRISA=0x0603;
     TRISB=0x0003;
     TRISC=0x2080;
+    TRISD=CNPUD=0x001E;
     TRISE=0x7000;
-    TRISG=0xFFFF;   //PORTG all inputs
+    TRISF=CNPUF=0x00F0;
+    TRISG=CNPUG=0xFFFF;   //PORTG all inputs,//weak pull ups on all of G
     
     /* DIGITAL OUTPUT LATCH */
     LATA=LATB=LATC=LATD=LATE=LATF=LATG=0x0000;
     LATA=0x0040;
     
-    //weak internal pull ups
-    CNPUG=0xFFFF;       //weak pull ups on all of G
+    
+    
 }
 
 //Description: Initializes UART1 device & interrupts
@@ -122,9 +124,7 @@ void initPMP(void){
     PMCONbits.PTRDEN = 1;
     PMCONbits.WRSP=1;   //write strobe active high
     PMCONbits.RDSP=1;   //read strobe active high
-    PMMODEbits.WAITB = 3;
-    PMMODEbits.WAITM = 0x08;
-    PMMODEbits.WAITE = 3;
+
     PMMODEbits.WAITB = 0;
     PMMODEbits.WAITM = 0xC;
     PMMODEbits.WAITE = 0;

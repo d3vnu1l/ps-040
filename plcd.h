@@ -30,7 +30,8 @@ void lcdWriteString(char *);
 void lcdCustomSymbols(void);
 void lcdSetCursor(unsigned char, unsigned char);
 void lcdWriteWord(int);
-void lcdVU(unsigned char, unsigned char, int);
+void lcdVU(char, char, int);
+void lcdDrawPads(unsigned char);
 
 
 #endif	/* XC_HEADER_TEMPLATE_H */
