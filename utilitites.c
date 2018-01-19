@@ -39,17 +39,37 @@ extern unsigned char kick_playing, snare_playing;
 
 void scanMatrix(void){
     static unsigned char pad_last[17]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-    int i, portrd;
+    int portrdG, portrdD, portrdF;
     //
+    portrdG = PORTG;
+    portrdD = PORTD;
+    portrdF = PORTF;
     
-    portrd = PADS;
-    for(i=0; i<16; i++){
-        pad[i]=(portrd>>i)&1;
-    }
+   
+    pad[0]=(portrdG)&1;
+    pad[1]=(portrdG>>1)&1;
+    pad[2]=(portrdG>>2)&1;
+    pad[3]=(portrdG>>3)&1;
+    pad[11]=(portrdG>>11)&1;
+    pad[12]=(portrdG>>12)&1;
+    pad[13]=(portrdG>>13)&1;
+    pad[14]=(portrdG>>14)&1;
+    pad[15]=(portrdG>>15)&1;
     
-    pad[2]=1;
-    pad[4]=1;
-    pad[7]=1;
+    pad[4]=(portrdF>>4)&1;
+    pad[5]=(portrdF>>5)&1;
+    pad[6]=(portrdF>>6)&1;
+    pad[16]=(portrdF>>7)&1;
+    
+    pad[7]=(portrdD>>1)&1;
+    pad[8]=(portrdD>>2)&1;
+    pad[9]=(portrdD>>3)&1;
+    pad[10]=(portrdD>>4)&1;
+    
+
+    
+   
+    
     
     if(pad[7]==0&&pad_last[7]==1){                                              //TREMELO CONTROL
         pad_last[7]=0;
@@ -78,7 +98,7 @@ void scanMatrix(void){
         else lpf=FALSE;
     }
     else{
-        pad_last[15]=pad[1];
+        pad_last[15]=pad[15];
     }
     
     
@@ -160,15 +180,13 @@ void readPots(void){
 }
 
 void display(void){
-    lcdSetCursor(2,3);
-    if(pad[15])lcdWriteString("OFF");
-    else lcdWriteString("ON ");
+    lcdDrawPads(16);
     
    lcdSetCursor(2,2);
    lcdWriteWord(sampin);
    lcdSetCursor(10,2);
    lcdWriteWord(sampout);
-    lcdSetCursor(9,3);
+    lcdSetCursor(4,3);
     if(pad[14])lcdWriteWord(cycle);
  
    
