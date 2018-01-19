@@ -65,11 +65,7 @@ void scanMatrix(void){
     pad[8]=(portrdD>>2)&1;
     pad[9]=(portrdD>>3)&1;
     pad[10]=(portrdD>>4)&1;
-    
-
-    
    
-    
     
     if(pad[7]==0&&pad_last[7]==1){                                              //TREMELO CONTROL
         pad_last[7]=0;
@@ -180,6 +176,11 @@ void readPots(void){
 }
 
 void display(void){
+    IFS0bits.SPI1IF=0;
+    SPI1STATbits.SPIROV = 0;
+    int trash = SPI1BUF;
+    SPI1BUF=0xFAAF;
+    
     lcdDrawPads(16);
     
    lcdSetCursor(2,2);

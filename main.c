@@ -15,7 +15,7 @@
 #pragma config GCP = OFF        //disable general segment code protect
 #pragma config PLLKEN = ON      //wait for PLL lock
 #pragma config POSCMD = NONE    //no external oscillator
-#pragma config OSCIOFNC = ON   //OSC2 is clock output
+#pragma config OSCIOFNC = OFF   //OSC2 is clock output
 #pragma config FNOSC = FRCPLL   //clock source
 
 unsigned char pad[BUTTONS]={1};                                                                   //CONTROL VARIABLES//
@@ -61,6 +61,7 @@ int main(void) {
     //initUART1();                    //configure & enable UART
     initBuffer();
     initADC1();                     //configure & enable internal ADC
+    initSPI1_MEM();
     //initSPI2_ADC();                  //configure & enable SPI ADC !!!DEFUNCT!!!
     initPMP();
     //||||||||----

@@ -112,6 +112,27 @@ void initADC1(void){
     AD1CON1bits.ADON = 1;       //start ADC module
     Delay_us(20);
 }
+void initSPI1_MEM(void){
+    IFS0bits.SPI1IF = 0;        // Clear the Interrupt flag
+    IEC0bits.SPI1IE = 0;        // Disable the interrupt
+    SPI1CON1bits.MSTEN=1;       //master mode
+    SPI1CON1bits.DISSCK = 0;    //Internal serial clock is enabled
+    SPI1CON1bits.MODE16=1;      //16 bit
+    SPI1CON1bits.SSEN=0;        //no use SS
+    SPI1CON2bits.FRMEN=0;       //no enable framed mode
+    SPI1CON2bits.SPIBEN=0;      //enhanced buffer mode
+    SPI1STATbits.SISEL=5;       //interrupt when done sending
+    SPI1CON1bits.SMP=1;         //data sampled at end of output time
+    SPI1CON1bits.CKP=1;         //idle clock is high
+    SPI1CON1bits.CKE=1;         //data changes from H to L
+    SPI1CON1bits.PPRE=1;        //4:1 primary prescale
+    SPI1CON1bits.SPRE=1;        //8:1 secondary
+    SPI1STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
+
+    SPI1STATbits.SPIEN = 1;     //start SPI module
+}
+
+
 
 void initPMP(void){
     /*
