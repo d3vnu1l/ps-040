@@ -24,7 +24,7 @@ extern unsigned char UART_ON;
 extern unsigned char hard_clipped;
 extern unsigned char UART_EN;
 extern unsigned int cycle;
-
+extern unsigned char TEST_SIN;
 extern fractional sampin;
 extern fractional sampout;
 
@@ -187,14 +187,18 @@ void display(void){
    lcdWriteWord(sampin);
    lcdSetCursor(10,2);
    lcdWriteWord(sampout);
-    lcdSetCursor(4,3);
+   lcdSetCursor(4,3);
     if(pad[14])lcdWriteWord(cycle);
- 
-   
-   if(hard_clipped==TRUE){                                                     //CLIP CONTROL    
-        HARD_CLIP_LED=1;
-        hard_clipped=FALSE;
-    }  else HARD_CLIP_LED=0;
+
+    lcdSetCursor(11,3);
+    if(hard_clipped==TRUE){                                                     //CLIP CONTROL    
+        lcdWriteString("CLIP");
+        hard_clipped=FALSE;  
+    }
+    else if(TEST_SIN==TRUE)lcdWriteString("SINE");
+    else lcdWriteString("THRU");
+    
+
     
    if(UART_ON==TRUE){
         //IC1CON2bits.TRIGSTAT = ~pad[4]; 

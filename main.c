@@ -61,7 +61,7 @@ int main(void) {
     //initUART1();                    //configure & enable UART
     initBuffer();
     initADC1();                     //configure & enable internal ADC
-    initSPI1_MEM();
+    //initSPI1_MEM();
     //initSPI2_ADC();                  //configure & enable SPI ADC !!!DEFUNCT!!!
     initPMP();
     //||||||||----
