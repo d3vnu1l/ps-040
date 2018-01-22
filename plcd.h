@@ -18,21 +18,25 @@
 #define LCD_SETDDRAMADDR   0x80
 
 void lcdInit(void);
-void lcdWrite(unsigned char);
-void lcdCommand(unsigned char);
-void lcdClear(void);
-void lcdReturn(void);
-void lcdPwr(signed int);
-void lcdCursorPwr(void);
-void lcdCursorBlink(signed int);
+void lcdWriteQ(unsigned char);
+void lcdCommandQ(unsigned char);
+void lcdClearQ(void);
+void lcdReturnQ(void);
+void lcdPwrQ(signed int);
+void lcdCursorPwrQ(void);
+void lcdCursorBlinkQ(signed int);
 void lcdSetupPots(void);
-void lcdWriteString(char *);
+void lcdWriteStringQ(char *);
 void lcdCustomSymbols(void);
-void lcdSetCursor(unsigned char, unsigned char);
+void lcdSetCursorQ(unsigned char, unsigned char);
 void lcdWriteWord(int);
 void lcdVU(char, char, int);
 void lcdDrawPads(unsigned char);
-
+void lcdPoll(void);
+/* Blocking Functions */
+void lcdSend(unsigned char);
+void lcdClear(void);
+void lcdReturn(void);
 
 #endif	/* XC_HEADER_TEMPLATE_H */
 

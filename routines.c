@@ -14,7 +14,7 @@ extern unsigned int write_ptr, rw, frameReady;
 extern int txBufferA[STREAMBUF], txBufferB[STREAMBUF], rxBufferA[STREAMBUF], rxBufferB[STREAMBUF];  //doesnt work as fractional
 
 //STATUS VARIABLES
-extern unsigned char t1flag, t2flag;
+extern unsigned char t1flag, t2flag, t3flag;
 
 //misc.
 volatile fractional sampin=0;
@@ -93,16 +93,12 @@ void __attribute__((__interrupt__,no_auto_psv)) _DMA2Interrupt(void){
     rxBufferIndicator ^= 1; /* Toggle the indicator*/    
 }
 
+
 /*
 //Description: This interrupt handles polling button input
 //Dependencies: initADC1(); 
 //Frequency: 44.1kHz
-void __attribute__ ((interrupt, auto_psv)) _T3Interrupt(void){
-    SEG_SEL=0;
-    SPI3BUF=0x0100;
-    //SEG_SEL=1;
-    IFS0bits.T3IF = 0;              //clear flag, restart
-}
+
 
 void __attribute__ ((interrupt, auto_psv)) _SPI2Interrupt(void){
     //GLED=~GLED;                                             //check half freq w/ RLED                                        //returns SS2 to idle state

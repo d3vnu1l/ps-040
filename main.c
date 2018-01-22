@@ -44,6 +44,8 @@ volatile unsigned char tremelo=FALSE;                                           
 volatile unsigned char looper=FALSE;
 volatile unsigned char lpf=FALSE;
 
+volatile unsigned char frame=FALSE;
+
 void initBuffer(void){
     int i=0;
     for(; i<STREAMBUF; i++){
@@ -72,7 +74,7 @@ int main(void) {
     //initSPI3_SEG();                  //start segment display
 
     //initCAP_BPM();                  //configure bpm capture
-    //initT3();                       //configure & start T3
+    initT3();                       //configure & start T3 for lcd
     fractional temp;
     int writePtr;
     fractional *ping, *pong;
@@ -88,6 +90,7 @@ int main(void) {
                 ping = streamB+writePtr;
                 pong = outputA+writePtr;
             }
+            
             for(; writePtr>=0; writePtr--){
                 temp=*ping--; //!rw
                 if(temp<=-32766||temp>=32766)hard_clipped=TRUE;
@@ -109,6 +112,7 @@ int main(void) {
             display();
             t1flag=FALSE; 
         }
+        if(IFS0bits.T3IF) lcdPoll();
         idle++; //999
     }
     return 0;

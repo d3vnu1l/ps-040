@@ -11,14 +11,14 @@
 
 #define BAUDRATE 57600                  //target baud rate for *UART*           //peripheral configs
 #define BRGVAL ((Fcy/BAUDRATE)/16)-1    //calculate baud value (MAY TRUNCATE)
-#define T3freq 44100                    //target timer 3 frequency
 #define Fscan 256                       //target buttons & pots sampling rate
 #define Fout 44100                      //target output sampling rate (~45k last measured)
-#define STREAMBUF 512                   //input adc stack size, must be large enough to avoid SD write respond latency
-#define Fdisp 20                        //15hz display update rate
+#define STREAMBUF 128                   //input adc stack size, must be large enough to avoid SD write respond latency
+#define LCDBUF  100                     //lcd command buffer size
+#define Fdisp 15                        //15hz display update rate
 #define BUTTONS 17
 
-#define LOOP_BUF_SIZE 11025             //about 1/4th of a second               //FX settings
+#define LOOP_BUF_SIZE 10000             //about 1/4th of a second               //FX settings
 
 #define SLED _LATF0                                                             //various status LED's
 #define YLED _LATE1
@@ -29,11 +29,6 @@
 #define LCD_RS _LATE15
 #define LCD_RS_P PORTEbits.RE15
 #define lcd_rs_toggle {__builtin_btg(&LATE,15);}    //slower!
-
-
-//#define ADC_CONV _LATB11             //was originally for adc conv, now unused
-//spi1 (SD-card) manula CS
-#define SD_EN _LATC5
 
 //misc
 #define TRUE 0xFF

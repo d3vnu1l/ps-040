@@ -132,8 +132,6 @@ void initSPI1_MEM(void){
     SPI1STATbits.SPIEN = 1;     //start SPI module
 }
 
-
-
 void initPMP(void){
     /*
      Data is clocked on falling edge of E
@@ -196,22 +194,19 @@ void initT2(void){          //16/32 bit timer
     T2CONbits.TON = 1;      //start timer
 }
 
-//Description: Initialize timer handling ADC sampling
-//Prereq: initSPI_ADC()
+//Description: Initialize timer handling LCD sending
 //Dependencies: _T3Interrupt(void)
 //Frequency: 44.1kHz
-//*Note: Currently unused as readDac is chained to DCI interrupt*
 void initT3(void){          //16/32 bit timer
     TMR3 = 0x0000;          //clear timer 3
-    T3CONbits.TCKPS = 3;    //prescale 256:1
+    T3CONbits.TCKPS = 1;    //prescale 8:1
     T3CONbits.TCS = 0;      //use internal clock
     T3CONbits.TGATE = 0;    //gate accumulation disabled
-    PR3 = Fcy/(256*T3freq);           //period register
-    //PR3 = 0xFFFF;
-    IFS0bits.T3IF = 0;      //clear timer 3 interrupt flag
-    IEC0bits.T3IE = 1;      //enable timer 3 interrupt
-    IPC2bits.T3IP = 2;      //interrupt priority 3 (low)
-    T3CONbits.TON = 1;      //start timer
+    //PR3 = Fcy/(256*T3freq);           //period register
+    PR3 = 0x01D0;           //45uS initial delay
+    
+    T3CONbits.TON = 1;
+    
 }
 
 //Description: Initializes & starts 16 bit DCI I2S DAC

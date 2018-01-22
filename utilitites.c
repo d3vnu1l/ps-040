@@ -36,6 +36,7 @@ extern unsigned int loop_lim;
 extern fractional lpf_alpha, lpf_inv_alpha;
 extern fractional tremelo_depth;
 extern unsigned char kick_playing, snare_playing;   
+extern unsigned char frame;
 
 void scanMatrix(void){
     static unsigned char pad_last[17]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
@@ -182,21 +183,20 @@ void display(void){
     SPI1BUF=0xFAAF;
     
     lcdDrawPads(16);
-    
-   lcdSetCursor(2,2);
+   lcdSetCursorQ(2,2);
    lcdWriteWord(sampin);
-   lcdSetCursor(10,2);
+   lcdSetCursorQ(10,2);
    lcdWriteWord(sampout);
-   lcdSetCursor(4,3);
+   lcdSetCursorQ(4,3);
     if(pad[14])lcdWriteWord(cycle);
 
-    lcdSetCursor(11,3);
+    lcdSetCursorQ(11,3);
     if(hard_clipped==TRUE){                                                     //CLIP CONTROL    
-        lcdWriteString("CLIP");
+        lcdWriteStringQ("CLIP");
         hard_clipped=FALSE;  
     }
-    else if(TEST_SIN==TRUE)lcdWriteString("SINE");
-    else lcdWriteString("THRU");
+    else if(TEST_SIN==TRUE)lcdWriteStringQ("SINE");
+    else lcdWriteStringQ("THRU");
     
 
     
