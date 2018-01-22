@@ -46,6 +46,8 @@ void scanMatrix(void){
     portrdD = PORTD;
     portrdF = PORTF;
     
+    int trash=SPI3BUF;
+    SPI3BUF=0xAAAA;
    
     pad[0]=(portrdG)&1;
     pad[1]=(portrdG>>1)&1;

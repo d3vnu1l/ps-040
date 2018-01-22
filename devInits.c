@@ -112,25 +112,6 @@ void initADC1(void){
     AD1CON1bits.ADON = 1;       //start ADC module
     Delay_us(20);
 }
-void initSPI1_MEM(void){
-    IFS0bits.SPI1IF = 0;        // Clear the Interrupt flag
-    IEC0bits.SPI1IE = 0;        // Disable the interrupt
-    SPI1CON1bits.MSTEN=1;       //master mode
-    SPI1CON1bits.DISSCK = 0;    //Internal serial clock is enabled
-    SPI1CON1bits.MODE16=1;      //16 bit
-    SPI1CON1bits.SSEN=0;        //no use SS
-    SPI1CON2bits.FRMEN=0;       //no enable framed mode
-    SPI1CON2bits.SPIBEN=0;      //enhanced buffer mode
-    SPI1STATbits.SISEL=5;       //interrupt when done sending
-    SPI1CON1bits.SMP=1;         //data sampled at end of output time
-    SPI1CON1bits.CKP=1;         //idle clock is high
-    SPI1CON1bits.CKE=1;         //data changes from H to L
-    SPI1CON1bits.PPRE=1;        //4:1 primary prescale
-    SPI1CON1bits.SPRE=1;        //8:1 secondary
-    SPI1STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
-
-    SPI1STATbits.SPIEN = 1;     //start SPI module
-}
 
 void initPMP(void){
     /*
@@ -149,7 +130,6 @@ void initPMP(void){
     PMMODEbits.WAITE = 0;
     LCD_RS=0;
     PMCONbits.PMPEN = 1;
-    
     
     /* INIT DEVICE */
     Delay_us(40000);
@@ -292,6 +272,28 @@ void initDMA0(void){
     DMA2CONbits.CHEN = 1;
 }
 
+void initSPI3_MEM(void){
+    IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
+    IEC5bits.SPI3IE = 0;        // Disable the interrupt
+    SPI3CON1bits.MSTEN=1;       //master mode
+    SPI3CON1bits.DISSCK = 0;    //Internal serial clock is enabled
+    SPI3CON1bits.MODE16=1;      //16 bit
+    SPI3CON1bits.DISSDO=0;      //enable SDO 
+    SPI3CON1bits.SSEN=0;        //use SS
+    SPI3CON2bits.FRMEN=0;       //no enable framed mode
+    SPI3CON2bits.SPIBEN=0;      //enhanced buffer mode
+    SPI2STATbits.SISEL=5;       //interrupt when done sending
+    SPI3CON1bits.SMP=0;         //data sampled at end of output time
+    SPI3CON1bits.CKP=0;         //idle clock is low
+    SPI3CON1bits.CKE=1;         //data changes from H to L
+    SPI3CON1bits.PPRE=1;        //4:1 primary prescale
+    SPI3CON1bits.SPRE=7;        //1:1 secondary
+    SPI3STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
+    IPC22bits.SPI3IP = 3;        // Interrupt priority
+    IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
+    IEC5bits.SPI3IE = 0;        // Enable the interrupt
+    SPI3STATbits.SPIEN = 1;     //start SPI module
+}
 /*
 void initCAP_BPM(void){
     IFS0bits.IC1IF=0;
@@ -330,31 +332,25 @@ void initSPI2_ADC(void){
     IEC2bits.SPI2IE = 1;        // Enable the interrupt
     SPI2STATbits.SPIEN = 1;     //start SPI module
 }
+ * 
+ * void initSPI1_MEM(void){
+    IFS0bits.SPI1IF = 0;        // Clear the Interrupt flag
+    IEC0bits.SPI1IE = 0;        // Disable the interrupt
+    SPI1CON1bits.MSTEN=1;       //master mode
+    SPI1CON1bits.DISSCK = 0;    //Internal serial clock is enabled
+    SPI1CON1bits.MODE16=1;      //16 bit
+    SPI1CON1bits.SSEN=0;        //no use SS
+    SPI1CON2bits.FRMEN=0;       //no enable framed mode
+    SPI1CON2bits.SPIBEN=0;      //enhanced buffer mode
+    SPI1STATbits.SISEL=5;       //interrupt when done sending
+    SPI1CON1bits.SMP=1;         //data sampled at end of output time
+    SPI1CON1bits.CKP=1;         //idle clock is high
+    SPI1CON1bits.CKE=1;         //data changes from H to L
+    SPI1CON1bits.PPRE=1;        //4:1 primary prescale
+    SPI1CON1bits.SPRE=1;        //8:1 secondary
+    SPI1STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
 
-void initSPI3_SEG(void){
-    SEG_SEL = 1;
-    IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
-    IEC5bits.SPI3IE = 0;        // Disable the interrupt
-    SPI3CON1bits.MSTEN=1;       //master mode
-    SPI3CON1bits.DISSCK = 0;    //Internal serial clock is enabled
-    SPI3CON1bits.MODE16=1;      //16 bit
-    SPI3CON1bits.DISSDO=0;      //enable SDO 
-    SPI3CON1bits.SSEN=0;        //use SS
-    SPI3CON2bits.FRMEN=0;       //no enable framed mode
-    SPI3CON2bits.SPIBEN=0;      //enhanced buffer mode
-    SPI2STATbits.SISEL=5;       //interrupt when done sending
-    SPI3CON1bits.SMP=0;         //data sampled at end of output time
-    SPI3CON1bits.CKP=0;         //idle clock is low
-    SPI3CON1bits.CKE=1;         //data changes from H to L
-    SPI3CON1bits.PPRE=1;        //4:1 primary prescale
-    SPI3CON1bits.SPRE=7;        //1:1 secondary
-    SPI3STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
-    IPC22bits.SPI3IP = 3;        // Interrupt priority
-    IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
-    IEC5bits.SPI3IE = 0;        // Enable the interrupt
-    SPI3STATbits.SPIEN = 1;     //start SPI module
-    __delay32(40);
-    MAX7219_Init();
+    SPI1STATbits.SPIEN = 1;     //start SPI module
 }
 */
 
