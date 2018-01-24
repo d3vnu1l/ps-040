@@ -17,7 +17,8 @@ void __attribute__ ((interrupt, auto_psv)) _SPI2Interrupt(void);
 void __attribute__ ((interrupt, auto_psv)) _SPI3Interrupt(void);
 void __attribute__ ((interrupt, auto_psv)) _DCIInterrupt(void);
 void __attribute__ ((interrupt, auto_psv)) _IC1Interrupt(void);
-void __attribute__((__interrupt__,no_auto_psv)) _DMA2Interrupt(void);
+void __attribute__((__interrupt,no_auto_psv)) _DMA2Interrupt(void);
+//void __attribute__((interrupt, no_auto_psv)) _ADC1Interrupt(void);
 
 
 #endif	/* ROUTINES_H */

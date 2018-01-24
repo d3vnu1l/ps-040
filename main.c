@@ -19,8 +19,8 @@
 #pragma config FNOSC = FRCPLL   //clock source
 
 unsigned char pad[BUTTONS]={1};                                                                   //CONTROL VARIABLES//
-fractional pots[4]={0};
-fractional pots_scaled[4]={0};
+fractional pots[POTS]={0};
+fractional pots_scaled[POTS]={0};
 fractional outputA[STREAMBUF], outputB[STREAMBUF];
 fractional streamA[STREAMBUF], streamB[STREAMBUF];
 
@@ -30,7 +30,7 @@ fractional txBufferB[STREAMBUF] __attribute__((space(eds)));
 fractional rxBufferA[STREAMBUF] __attribute__((space(eds)));
 fractional rxBufferB[STREAMBUF] __attribute__((space(eds)));
 
-unsigned int bpm=0, rw=0, frameReady=0;
+unsigned int bpm=0, rw=0, frameReady=0, write_ptr=STREAMBUF;
 unsigned int idle=0, cycle=0;
 
 unsigned char hard_clipped=FALSE;                                               //STATUS VARIABLES//
@@ -45,6 +45,7 @@ volatile unsigned char looper=FALSE;
 volatile unsigned char lpf=FALSE;
 
 volatile unsigned char frame=FALSE;
+
 
 void initBuffer(void){
     int i=0;
@@ -63,8 +64,6 @@ int main(void) {
     //initUART1();                    //configure & enable UART
     initBuffer();
     initADC1();                     //configure & enable internal ADC
-    //initSPI1_MEM();
-    //initSPI2_ADC();                  //configure & enable SPI ADC !!!DEFUNCT!!!
     initPMP();
     //||||||||----
     //initDMA0();
@@ -75,12 +74,12 @@ int main(void) {
 
     //initCAP_BPM();                  //configure bpm capture
     initT3();                       //configure & start T3 for lcd
+    //initT5();
     fractional temp;
     int writePtr;
     fractional *ping, *pong;
     
-    while(1){   
-        
+    while(1){    
         if(frameReady) {
             writePtr=STREAMBUF-1;
             if(rw){
@@ -99,7 +98,7 @@ int main(void) {
                 
             }
             temp = 8*idle/STREAMBUF;
-            cycle=temp;
+            cycle=STREAMBUF/(STREAMBUF-write_ptr);
             idle=0;
             frameReady=0;
         }
@@ -113,7 +112,6 @@ int main(void) {
             t1flag=FALSE; 
         }
         if(IFS0bits.T3IF) lcdPoll();
-        idle++; //999
     }
     return 0;
 }

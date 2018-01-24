@@ -16,8 +16,8 @@
 
 //CONTROL VARIABLES//
 extern unsigned char pad[8];
-extern fractional pots[4];
-extern fractional pots_scaled[4];
+extern fractional pots[POTS];
+extern fractional pots_scaled[POTS];
 extern unsigned char UART_ON; 
 
 //STATUS VARIABLES//
@@ -37,6 +37,8 @@ extern fractional lpf_alpha, lpf_inv_alpha;
 extern fractional tremelo_depth;
 extern unsigned char kick_playing, snare_playing;   
 extern unsigned char frame;
+
+int  scanCounter=0;
 
 void scanMatrix(void){
     static unsigned char pad_last[17]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
@@ -121,61 +123,24 @@ void scanMatrix(void){
 
 void readPots(void){
     volatile register int scaled asm("A");
+    while (!_AD1IF); // Wait for all 8 conversions to complete
+    _AD1IF = 0; // Clear conversion done status bit
     
-    AD1CON1bits.SAMP = 0;      // start sampling
-    while (!_AD1IF);           //wait for conversions to complete
-    _AD1IF = 0;                //clear status bit
     pots[0]=(ADC1BUF0>>1)+0x1F;
     pots[1]=(ADC1BUF1>>1)+0x1F;
     pots[2]=(ADC1BUF2>>1)+0x1F;
     pots[3]=(ADC1BUF3>>1)+0x1F;
-    //pot scaling 
+    pots[4]=(ADC1BUF4>>1)+0x1F;
+    pots[5]=(ADC1BUF5>>1)+0x1F;
+    pots[6]=(ADC1BUF6>>1)+0x1F;
+    pots[7]=(ADC1BUF7>>1)+0x1F;
     
-    if(pots[1]<=2048)
-        pots_scaled[1]=8;
-    else if(pots[1]<=4096)
-        pots_scaled[1]=12;
-    else if(pots[1]<=6144)
-        pots_scaled[1]=14;
-    else if(pots[1]<=8192)
-        pots_scaled[1]=16;
-    else if(pots[1]<=10240)
-        pots_scaled[1]=19;
-    else if(pots[1]<=12288)
-        pots_scaled[1]=23;
-    else if(pots[1]<=14336)
-        pots_scaled[1]=28;
-    else if(pots[1]<=16384)
-        pots_scaled[1]=32;
-    else if(pots[1]<=18432)
-        pots_scaled[1]=36;
-    else if(pots[1]<=20480)
-        pots_scaled[2]=40;
-    else if(pots[1]<=22528)
-        pots_scaled[2]=44;
-    else if(pots[1]<=24576)
-        pots_scaled[1]=48;
-    else if(pots[1]<=26624)
-        pots_scaled[1]=52;
-    else if(pots[1]<=28672)
-        pots_scaled[1]=56;
-    else if(pots[1]<=30720)
-        pots_scaled[1]=60;
-    else if(pots[1]<=32768)
-        pots_scaled[1]=64;
-    else if(pots[1]<=34816)
-        pots_scaled[1]=68;
-    else 
-        pots_scaled[1]=72;
-     
-                                                                                 
     loop_lim=154*pots_scaled[1];                                                //LOOPER CONTROL
     if(pots[1]>=310){                                                           //LPF CONTROL
         lpf_alpha=pots[1];
         lpf_inv_alpha=(32767-lpf_alpha); 
     }
     //tremelo_depth=pots[4];
-            
 }
 
 void display(void){
@@ -184,13 +149,23 @@ void display(void){
     int trash = SPI1BUF;
     SPI1BUF=0xFAAF;
     
-    lcdDrawPads(16);
+   lcdDrawPads(16);
+   
+   lcdSetCursorQ(3,0);
+   lcdWriteWordQ(pots[5]);
+   lcdSetCursorQ(11,0);
+   lcdWriteWordQ(pots[1]);
+   lcdSetCursorQ(3,1);
+   lcdWriteWordQ(pots[2]);
+   lcdSetCursorQ(11,1);
+   lcdWriteWordQ(pots[3]);
+   
    lcdSetCursorQ(2,2);
-   lcdWriteWord(sampin);
+   lcdWriteWordQ(sampin);
    lcdSetCursorQ(10,2);
-   lcdWriteWord(sampout);
+   lcdWriteWordQ(sampout);
    lcdSetCursorQ(4,3);
-    if(pad[14])lcdWriteWord(cycle);
+    if(pad[14])lcdWriteWordQ(cycle);
 
     lcdSetCursorQ(11,3);
     if(hard_clipped==TRUE){                                                     //CLIP CONTROL    

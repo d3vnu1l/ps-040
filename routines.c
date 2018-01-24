@@ -20,7 +20,6 @@ extern unsigned char t1flag, t2flag, t3flag;
 volatile fractional sampin=0;
 volatile fractional sampout=0;
 volatile int rxBufferIndicator = 0;
-unsigned int write_ptr=STREAMBUF;
 fractional *ping, *pong;
 
 //Description: This interrupt toggles status led, runs UART1 and handles display
@@ -92,7 +91,6 @@ void __attribute__((__interrupt__,no_auto_psv)) _DMA2Interrupt(void){
     }
     rxBufferIndicator ^= 1; /* Toggle the indicator*/    
 }
-
 
 /*
 //Description: This interrupt handles polling button input

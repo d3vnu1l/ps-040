@@ -29,7 +29,7 @@ void lcdSetupPots(void);
 void lcdWriteStringQ(char *);
 void lcdCustomSymbols(void);
 void lcdSetCursorQ(unsigned char, unsigned char);
-void lcdWriteWord(int);
+void lcdWriteWordQ(int);
 void lcdVU(char, char, int);
 void lcdDrawPads(unsigned char);
 void lcdPoll(void);

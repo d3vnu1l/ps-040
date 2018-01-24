@@ -22,24 +22,15 @@ int *lcdSendPtr=lcdBuf;
 
 
 void lcdWriteQ(unsigned char data){
-
-
     *lcdWritePtr++=data|0x0000;
     if(lcdWritePtr==&lcdBuf[LCDBUF])
         lcdWritePtr=lcdBuf;
-    //if(!LCD_RS_P)LCD_RS=1;
-    //if(!PMMODEbits.BUSY) PMDIN1=data; //(!skips if busy!)
 }
 
 void lcdCommandQ(unsigned char data){
-
-
-    *lcdWritePtr++=data|0x0100;
+    *lcdWritePtr++=data|0x0100;     //flag for rs=1
     if(lcdWritePtr==&lcdBuf[LCDBUF])
         lcdWritePtr=lcdBuf;
-    
-    //if(LCD_RS_P)LCD_RS=0;
-    //if(!PMMODEbits.BUSY) PMDIN1=data; //(!skips if busy!)
 }
 
 void lcdClearQ(void){
@@ -55,10 +46,9 @@ void lcdSetCursorQ(unsigned char col, unsigned char row) {
   if (row > 3) {
     row = 3;
   }
-
-  *lcdWritePtr++=(LCD_SETDDRAMADDR | (col + offsets[row]))|0x0100;  //flag for rs=0
-    if(lcdWritePtr==&lcdBuf[LCDBUF])
-        lcdWritePtr=lcdBuf;
+  *lcdWritePtr++=(LCD_SETDDRAMADDR | (col + offsets[row]))|0x0100;  //flag for rs=0 
+    if(lcdWritePtr==&lcdBuf[LCDBUF]) 
+        lcdWritePtr=lcdBuf; 
 }
 
 void lcdPwrQ(signed int pwr){
@@ -97,16 +87,13 @@ void lcdWriteStringQ(char *string) {
 void lcdSetupPots(){
     lcdSetCursorQ(0,0);
     lcdWriteStringQ("P1:");
-    lcdSetCursorQ(6,0);
+    lcdSetCursorQ(8,0);
     lcdWriteStringQ("P2:");
-    lcdSetCursorQ(12,0);
-    lcdWriteStringQ("P3:");
     lcdSetCursorQ(0,1);
+    lcdWriteStringQ("P3:");
+    lcdSetCursorQ(8,1);
     lcdWriteStringQ("P4:");
-    lcdSetCursorQ(6,1);
-    lcdWriteStringQ("P5:");
-    lcdSetCursorQ(12,1);
-    lcdWriteStringQ("P6:");
+
     lcdSetCursorQ(0,2);
     lcdWriteStringQ("I:");
     lcdSetCursorQ(8,2);
@@ -129,7 +116,7 @@ void lcdCustomSymbols(void){
     //lcdWriteString(loadingFour);
 }
 
-void lcdWriteWord(int word){
+void lcdWriteWordQ(int word){
     int i;
     char inchar[4];
     
@@ -190,10 +177,10 @@ void lcdPoll(void){
         PMDIN1=(*lcdSendPtr++)&0x00FF;
         if(lcdSendPtr==&lcdBuf[LCDBUF]) lcdSendPtr=lcdBuf;
         if((*lcdSendPtr>>9)&1)
-            PR3=0x2D00; //2D
-        else PR3=0x0120; //120
+            PR3=0x2D00; //2D00 for ~1.3mS
+        else PR3=0x0120; //120 for ~40uS
     } 
-    TMR3=0x0000;
+    TMR3=0x0000; 
     IFS0bits.T3IF = 0;              //clear flag, restart
 }
 

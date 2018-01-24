@@ -49,17 +49,11 @@ void initPorts(void){
     PMD1bits.T2MD=0;
     PMD1bits.T3MD=0;
     PMD1bits.T4MD=0;
+    PMD1bits.T5MD=0;
     PMD3bits.PMPMD=0;
     PMD3bits.CMPMD=0;
     PMD6bits.SPI3MD=0;
     PMD7bits.DMA0MD=0;
-    
-    /* ANALOG PINS (1 = analog) */
-    ANSELA=ANSELB=ANSELC=ANSELD=ANSELE=ANSELF=ANSELG=0x0000;
-    ANSELBbits.ANSB0 = 1; // Ensure AN0/RB0 is analog
-    ANSELBbits.ANSB1 = 1; // Ensure AN1/RB1 is analog
-    ANSELBbits.ANSB2 = 1; // Ensure AN2/RB2 is analog
-    ANSELBbits.ANSB3 = 1; // Ensure AN5/RB5 is analog
     
     /* IO DIRECTION (1 = input) */
     TRISA=TRISB=TRISC=TRISD=TRISE=TRISF=TRISG=0x0000;
@@ -74,6 +68,12 @@ void initPorts(void){
     /* DIGITAL OUTPUT LATCH */
     LATA=LATB=LATC=LATD=LATE=LATF=LATG=0x0000;
     LATA=0x0040;
+    
+    /* ANALOG PINS (1 = analog) */
+    ANSELA=ANSELB=ANSELC=ANSELD=ANSELE=ANSELF=ANSELG=0x0000;
+    ANSELAbits.ANSA0=1;
+    ANSELAbits.ANSA1=1;
+    ANSELBbits.ANSB1=1;
     
     
     
@@ -100,16 +100,33 @@ void initUART1(void){
 //Description: Initializes onboard ADC 
 //Prereq: NONE
 //Dependencies: NONE
-void initADC1(void){
-    AD1CON1bits.ASAM = 1;       //enable simultaneous sample
-    AD1CON1bits.SIMSAM = 0;     //enable simultaneous sample
-    AD1CON1bits.FORM=2;         //signed fractional format
-    AD1CON2bits.CHPS = 0b01;    //sample channels 0-3
-    AD1CON3bits.ADCS = 0x3F;    //tad ~ 1us
-    //AD1CHS0bits.CH0SA = 0x03;   //ch0->an3 (no use an0)
-    AD1CHS0bits.CH0NA = 0; // Select Vref- for CH0 -ve input
-    AD1CHS123bits.CH123NA = 0; // Select Vref- for CH1/CH2/CH3 -ve input
-    AD1CON1bits.ADON = 1;       //start ADC module
+void initADC1(void){ 
+    /* Initialize ADC module */
+    AD1CON1 = 0x00EC; // Enable simultaneous sampling, auto-sample and auto-conversion
+    AD1CON2 = 0x0305; // Sample 4 channels at a time, with alternate sampling enabled
+    AD1CON3 = 0x0F0F; // Sample for 15*Tad before triggering conversion
+    AD1CON4 = 0x0000;
+    AD1CSSH = 0x0000;
+    AD1CSSL = 0x0000;
+    /* Assign MUXA inputs */
+    AD1CHS0bits.CH0SA = 8; // Select AN8 for CH0 +ve input
+    AD1CHS0bits.CH0NA = 0; // Select VREF- for CH0 -ve input
+    //AD1CHS123bits.CH123SA = 0; // Select AN0 for CH1 +ve input
+    // Select AN1 for CH2 +ve input
+    // Select AN2 for CH3 +ve input
+    AD1CHS123bits.CH123NA = 0; // Select VREF- for CH1/CH2/CH3 -ve inputs
+    /* Assign MUXB inputs */
+    AD1CHS0bits.CH0SB = 9; // Select AN9 for CH0 +ve input
+    AD1CHS0bits.CH0NB = 0; // Select VREF- for CH0 -ve input
+    AD1CHS123bits.CH123SB1 = 1; // Select AN3 for CH1 +ve input
+    // Select AN0 for CH2 +ve input
+    // Select AN6 for CH3 +ve input
+    AD1CHS123bits.CH123NB = 0; // Select VREF- for CH1/CH2/CH3 -ve inputs
+    AD1CON1bits.FORM=2;         //signed fractional format 
+    AD1CON3bits.ADCS=0x3F;
+    AD1CON3bits.SAMC=0x0F;
+    /* Enable ADC module and provide ADC stabilization delay */
+    AD1CON1bits.ADON = 1;
     Delay_us(20);
 }
 
@@ -187,6 +204,23 @@ void initT3(void){          //16/32 bit timer
     
     T3CONbits.TON = 1;
     
+}
+
+/*=============================================================================  
+Timer 5 is setup to time-out every 125 microseconds (8Khz Rate). As a result, the module 
+will stop sampling and trigger a conversion on every Timer3 time-out, i.e., Ts=125us. 
+=============================================================================*/
+void initT5() 
+{
+        TMR5 = 0x0000;
+        PR5 = 4999;
+        T5CONbits.TCKPS = 2;    //prescale 8:1
+        IFS1bits.T5IF = 0;
+        IEC1bits.T5IE = 0;
+
+        //Start Timer 3
+        T5CONbits.TON = 1;
+
 }
 
 //Description: Initializes & starts 16 bit DCI I2S DAC
