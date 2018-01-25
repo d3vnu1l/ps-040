@@ -1,4 +1,4 @@
-build/default/debug/plcd.o:  \
+build/default/production/plcd.o:  \
 plcd.c  \
 plcd.h  \
 common.h  \

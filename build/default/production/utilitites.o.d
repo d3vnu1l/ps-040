@@ -1,4 +1,4 @@
-build/default/debug/utilitites.o:  \
+build/default/production/utilitites.o:  \
 utilitites.c  \
 utilities.h  \
 common.h  \

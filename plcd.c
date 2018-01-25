@@ -84,7 +84,7 @@ void lcdWriteStringQ(char *string) {
   }
 }
 
-void lcdSetupPots(){
+void lcdSetupDebug(){
     lcdSetCursorQ(0,0);
     lcdWriteStringQ("P1:");
     lcdSetCursorQ(8,0);
@@ -102,8 +102,27 @@ void lcdSetupPots(){
     lcdWriteStringQ("Cyc:");
     lcdSetCursorQ(11,3);
     if(TEST_SIN==TRUE)lcdWriteStringQ("SINE");
-    else lcdWriteStringQ("THRU");
-    
+    else lcdWriteStringQ("THRU");  
+}
+
+void lcdSetupPots(void){
+    lcdSetCursorQ(0,0);
+    lcdWriteStringQ("1:");
+    lcdSetCursorQ(8,0);
+    lcdWriteStringQ("2:");
+    lcdSetCursorQ(0,1);
+    lcdWriteStringQ("3:");
+    lcdSetCursorQ(8,1);
+    lcdWriteStringQ("4:");
+    lcdSetCursorQ(0,2);
+    lcdWriteStringQ("5:");
+    lcdSetCursorQ(8,2);
+    lcdWriteStringQ("6:");
+    lcdSetCursorQ(0,3);
+    lcdWriteStringQ("7:");
+    lcdSetCursorQ(8,3);
+    lcdWriteStringQ("8:");
+     
 }
 
 void lcdCustomSymbols(void){

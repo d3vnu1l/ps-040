@@ -55,7 +55,7 @@ void initPorts(void){
     PMD6bits.SPI3MD=0;
     PMD7bits.DMA0MD=0;
     
-    /* IO DIRECTION (1 = input) */
+    /* Digital IO DIRECTION (1 = input) */
     TRISA=TRISB=TRISC=TRISD=TRISE=TRISF=TRISG=0x0000;
     TRISA=0x0603;
     TRISB=0x0003;
@@ -74,6 +74,10 @@ void initPorts(void){
     ANSELAbits.ANSA0=1;
     ANSELAbits.ANSA1=1;
     ANSELBbits.ANSB1=1;
+    
+    ANSELCbits.ANSC0=1;
+    ANSELCbits.ANSC1=1;
+    ANSELCbits.ANSC2=1;
     
     
     
@@ -101,30 +105,18 @@ void initUART1(void){
 //Prereq: NONE
 //Dependencies: NONE
 void initADC1(void){ 
-    /* Initialize ADC module */
-    AD1CON1 = 0x00EC; // Enable simultaneous sampling, auto-sample and auto-conversion
-    AD1CON2 = 0x0305; // Sample 4 channels at a time, with alternate sampling enabled
-    AD1CON3 = 0x0F0F; // Sample for 15*Tad before triggering conversion
-    AD1CON4 = 0x0000;
-    AD1CSSH = 0x0000;
-    AD1CSSL = 0x0000;
+
     /* Assign MUXA inputs */
-    AD1CHS0bits.CH0SA = 8; // Select AN8 for CH0 +ve input
-    AD1CHS0bits.CH0NA = 0; // Select VREF- for CH0 -ve input
-    //AD1CHS123bits.CH123SA = 0; // Select AN0 for CH1 +ve input
-    // Select AN1 for CH2 +ve input
-    // Select AN2 for CH3 +ve input
-    AD1CHS123bits.CH123NA = 0; // Select VREF- for CH1/CH2/CH3 -ve inputs
-    /* Assign MUXB inputs */
-    AD1CHS0bits.CH0SB = 9; // Select AN9 for CH0 +ve input
-    AD1CHS0bits.CH0NB = 0; // Select VREF- for CH0 -ve input
-    AD1CHS123bits.CH123SB1 = 1; // Select AN3 for CH1 +ve input
-    // Select AN0 for CH2 +ve input
-    // Select AN6 for CH3 +ve input
-    AD1CHS123bits.CH123NB = 0; // Select VREF- for CH1/CH2/CH3 -ve inputs
+    AD1CON1 = 0x04E4; // Enable 12-bit mode, auto-sample and auto-conversion
+    AD1CON2 = 0x0404; // Sample 2 channels alternately using channel scanning
+    AD1CON3 = 0x0F0F; // Sample for 15*TAD before converting
     AD1CON1bits.FORM=2;         //signed fractional format 
-    AD1CON3bits.ADCS=0x3F;
-    AD1CON3bits.SAMC=0x0F;
+    //AD1CON3bits.ADCS=0x3F;
+    //AD1CON3bits.SAMC=0x0F;
+    //select  AN6,7,8
+    AD1CSSLbits.CSS6=1;
+    AD1CSSLbits.CSS7=1;
+    AD1CSSLbits.CSS8=1;
     /* Enable ADC module and provide ADC stabilization delay */
     AD1CON1bits.ADON = 1;
     Delay_us(20);

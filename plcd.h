@@ -25,7 +25,6 @@ void lcdReturnQ(void);
 void lcdPwrQ(signed int);
 void lcdCursorPwrQ(void);
 void lcdCursorBlinkQ(signed int);
-void lcdSetupPots(void);
 void lcdWriteStringQ(char *);
 void lcdCustomSymbols(void);
 void lcdSetCursorQ(unsigned char, unsigned char);
@@ -33,10 +32,16 @@ void lcdWriteWordQ(int);
 void lcdVU(char, char, int);
 void lcdDrawPads(unsigned char);
 void lcdPoll(void);
+
+void lcdSetupDebug(void);
+void lcdSetupPots(void);
+
 /* Blocking Functions */
 void lcdSend(unsigned char);
 void lcdClear(void);
 void lcdReturn(void);
+
+
 
 #endif	/* XC_HEADER_TEMPLATE_H */
 

@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project>
-  <executable name="dist/default/debug/ps-040.debug.elf">
+  <executable name="dist/default/production/ps-040.production.elf">
     <memory name="data">
       <units>bytes</units>
       <length>49152</length>
-      <used>25586</used>
-      <free>23566</free>
+      <used>25506</used>
+      <free>23646</free>
     </memory>
     <memory name="program">
       <units>bytes</units>
       <length>524514</length>
-      <used>49854</used>
-      <free>474660</free>
+      <used>49875</used>
+      <free>474639</free>
     </memory>
   </executable>
 </project>

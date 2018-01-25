@@ -123,7 +123,6 @@ void scanMatrix(void){
 
 void readPots(void){
     volatile register int scaled asm("A");
-    while (!_AD1IF); // Wait for all 8 conversions to complete
     _AD1IF = 0; // Clear conversion done status bit
     
     pots[0]=(ADC1BUF0>>1)+0x1F;
@@ -146,25 +145,38 @@ void readPots(void){
 void display(void){
     IFS0bits.SPI1IF=0;
     SPI1STATbits.SPIROV = 0;
+   
     int trash = SPI1BUF;
     SPI1BUF=0xFAAF;
     
    lcdDrawPads(16);
    
-   lcdSetCursorQ(3,0);
-   lcdWriteWordQ(pots[5]);
-   lcdSetCursorQ(11,0);
+   lcdSetCursorQ(2,0);
+   lcdWriteWordQ(pots[0]);
+   lcdSetCursorQ(10,0);
    lcdWriteWordQ(pots[1]);
-   lcdSetCursorQ(3,1);
+   lcdSetCursorQ(2,1);
    lcdWriteWordQ(pots[2]);
-   lcdSetCursorQ(11,1);
+   lcdSetCursorQ(10,1);
    lcdWriteWordQ(pots[3]);
+   lcdSetCursorQ(2,2);
+   lcdWriteWordQ(pots[4]);
+   lcdSetCursorQ(10,2);
+   lcdWriteWordQ(pots[5]);
+   lcdSetCursorQ(2,3);
+   lcdWriteWordQ(pots[6]);
+   lcdSetCursorQ(10,3);
+   lcdWriteWordQ(pots[7]);
    
+   
+   /*
    lcdSetCursorQ(2,2);
    lcdWriteWordQ(sampin);
    lcdSetCursorQ(10,2);
    lcdWriteWordQ(sampout);
+   
    lcdSetCursorQ(4,3);
+    
     if(pad[14])lcdWriteWordQ(cycle);
 
     lcdSetCursorQ(11,3);
@@ -174,7 +186,7 @@ void display(void){
     }
     else if(TEST_SIN==TRUE)lcdWriteStringQ("SINE");
     else lcdWriteStringQ("THRU");
-    
+    */
 
     
    if(UART_ON==TRUE){

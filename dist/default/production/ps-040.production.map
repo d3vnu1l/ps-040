@@ -6,7 +6,7 @@ Tool Name:
 Command:
   -p33EP512GM310 \
   -o \
-  dist/default/debug/ps-040.debug.elf \
+  dist/default/production/ps-040.production.elf \
   -Lc:/program files (x86)/microchip/xc16/v1.30/bin/bin/.. \
   -Lc:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib \
   -Lc:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib/PIC24E \
@@ -21,26 +21,16 @@ Command:
   -Lc:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../support/dsPIC33E/gld \
   -Lc:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib/dsPIC33F \
   -Lc:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../support/dsPIC33F/gld \
-  build/default/debug/devInits.o \
-  build/default/debug/main.o \
-  build/default/debug/utilitites.o \
-  build/default/debug/routines.o \
-  build/default/debug/sounds.o \
-  build/default/debug/audio.o \
-  build/default/debug/plcd.o \
-  -TC:\\Users\\ryan\\AppData\\Local\\Temp\\tmp00001e34.00 \
-  -TC:\\Users\\ryan\\AppData\\Local\\Temp\\tmp00001e34.01 \
-  -TC:\\Users\\ryan\\AppData\\Local\\Temp\\tmp00001e34.02 \
-  -TC:\\Users\\ryan\\AppData\\Local\\Temp\\tmp00001e34.03 \
-  -TC:\\Users\\ryan\\AppData\\Local\\Temp\\tmp00001e34.04 \
-  -TC:\\Users\\ryan\\AppData\\Local\\Temp\\tmp00001e34.05 \
-  -TC:\\Users\\ryan\\AppData\\Local\\Temp\\tmp00001e34.06 \
+  build/default/production/devInits.o \
+  build/default/production/main.o \
+  build/default/production/utilitites.o \
+  build/default/production/routines.o \
+  build/default/production/sounds.o \
+  build/default/production/audio.o \
+  build/default/production/plcd.o \
   --local-stack \
   --defsym=__MPLAB_BUILD=1 \
-  --defsym=__MPLAB_DEBUG=1 \
-  --defsym=__DEBUG=1 \
-  --defsym=__MPLAB_DEBUGGER_PK3=1 \
-  -Tp33EP512GM310.gld.07 \
+  -Tp33EP512GM310.gld.00 \
   --stack=16 \
   --check-sections \
   --data-init \
@@ -52,10 +42,10 @@ Command:
   --stackguard=16 \
   --no-force-link \
   --smart-io \
-  -Map=dist/default/debug/ps-040.debug.map \
+  -Map=dist/default/production/ps-040.production.map \
   --report-mem \
   --memorysummary \
-  dist/default/debug/memoryfile.xml \
+  dist/default/production/memoryfile.xml \
   -start-group \
   --library=lega-pic30-elf \
   --library=m-elf \
@@ -71,7 +61,7 @@ c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.
 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(crt_start_mode_normalep.Leo)
                               (__crt_start_mode_normal)
 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(printf_cdnopuxX.EPeo)
-                              build/default/debug/utilitites.o (__printf_cdnopuxX)
+                              build/default/production/utilitites.o (__printf_cdnopuxX)
 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xprintf_cdnopuxX.EPeo)
                               c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(printf_cdnopuxX.EPeo) (___Printf_cdnopuxX)
 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xputfld_cdnopuxX.EPeo)
@@ -152,14 +142,14 @@ Program Memory  [Origin = 0x200, Length = 0x555ec]
 section                    address   length (PC units)   length (bytes) (dec)
 -------                    -------   -----------------   --------------------
 .text                        0x200              0x10d8          0x1944  (6468)
-_07ba84805a68ee00           0x12d8              0x30d8          0x4944  (18756)
-_07ba81e05a68ee00           0x43b0              0x2b60          0x4110  (16656)
-.const                      0x6f10               0x856           0xc81  (3201)
-.text                       0x7766               0xa8a           0xfcf  (4047)
-.dinit                      0x81f0               0x146           0x1e9  (489)
-.text                       0x8336                0x9e            0xed  (237)
+_074774805a6a6563           0x12d8              0x30d8          0x4944  (18756)
+_074771e05a6a6563           0x43b0              0x2b60          0x4110  (16656)
+.const                      0x6f10               0x860           0xc90  (3216)
+.text                       0x7770               0xa88           0xfcc  (4044)
+.dinit                      0x81f8               0x146           0x1e9  (489)
+.text                       0x833e                0xa4            0xf6  (246)
 
-                 Total program memory used (bytes):         0xc2be  (49854) 9%
+                 Total program memory used (bytes):         0xc2d3  (49875) 9%
 
 
 Ivt Memory  [Origin = 0x4, Length = 0x1fc]
@@ -178,27 +168,20 @@ Data Memory  [Origin = 0x1000, Length = 0xc000]
 
 section                    address      alignment gaps    total length  (dec)
 -------                    -------      --------------    -------------------
-reserve_data_0x1000         0x1000                0x1c            0x1c  (28)
-reserve_data_0x101c         0x101c                 0x2             0x2  (2)
-reserve_data_0x101e         0x101e                 0x2             0x2  (2)
-reserve_data_0x1020         0x1020                 0x2             0x2  (2)
-reserve_data_0x1022         0x1022                 0x2             0x2  (2)
-reserve_data_0x1024         0x1024                 0x4             0x4  (4)
-reserve_data_0x1028         0x1028                0x28            0x28  (40)
-.nbss                       0x1050                   0            0x3c  (60)
-.ndata                      0x108c                   0            0x10  (16)
-.nbss                       0x109c                   0             0x2  (2)
-.bss                        0x109e                   0          0x5a60  (23136)
-.data                       0x6afe                   0            0xe8  (232)
-.bss                        0x6be6                   0             0x6  (6)
-.data                       0x6bec                   0             0x4  (4)
-.bss                        0x6bf0                   0             0x2  (2)
-_07345EA05a68ee00           0xc800                   0           0x200  (512)
-_07345D805a68ee00           0xca00                   0           0x200  (512)
-_07345C605a68ee00           0xcc00                   0           0x200  (512)
-_07345B405a68ee00           0xce00                   0           0x200  (512)
+.nbss                       0x1000                   0            0x3c  (60)
+.ndata                      0x103c                   0            0x10  (16)
+.nbss                       0x104c                   0             0x2  (2)
+.bss                        0x104e                   0          0x5a60  (23136)
+.data                       0x6aae                   0            0xe8  (232)
+.bss                        0x6b96                   0             0x6  (6)
+.data                       0x6b9c                   0             0x4  (4)
+.bss                        0x6ba0                   0             0x2  (2)
+_07ACAEA05a6a6563           0xc800                   0           0x200  (512)
+_07ACAD805a6a6563           0xca00                   0           0x200  (512)
+_07ACAC605a6a6563           0xcc00                   0           0x200  (512)
+_07ACAB405a6a6563           0xce00                   0           0x200  (512)
 
-                 Total data memory used (bytes):         0x63f2  (25586) 52%
+                 Total data memory used (bytes):         0x63a2  (25506) 51%
 
 
 Dynamic Memory Usage
@@ -206,71 +189,71 @@ Dynamic Memory Usage
 region                     address                      maximum length  (dec)
 ------                     -------                      ---------------------
 heap                             0                                   0  (0)
-stack                       0x6bf2                              0x140e  (5134)
+stack                       0x6ba2                              0x145e  (5214)
 
-                 Maximum dynamic memory (bytes):         0x140e  (5134)
+                 Maximum dynamic memory (bytes):         0x145e  (5214)
 
 
 External Symbols in Data Memory (by address):
 
-                    0x1050                  _bpm
-                    0x1052                  _rw
-                    0x1054                  _frameReady
-                    0x1056                  _idle
-                    0x1058                  _cycle
-                    0x105a                  _hard_clipped
-                    0x105b                  _t1flag
-                    0x105c                  _t2flag
-                    0x105d                  _UART_ON
-                    0x105e                  _TEST_SIN
-                    0x105f                  _tremelo
-                    0x1060                  _looper
-                    0x1061                  _lpf
-                    0x1062                  _frame
-                    0x1064                  _loop_ptr
-                    0x1066                  _loop_lim
-                    0x1068                  _tremelo_ptr
-                    0x106a                  _tremelo_length
-                    0x106c                  _trem_var
-                    0x106e                  _delay_samples
-                    0x1076                  _kick_playing
-                    0x1077                  _kick_mode
-                    0x1078                  _kick_ptr
-                    0x107a                  _snare_playing
-                    0x107c                  _snare_ptr
-                    0x107e                  _hat_playing
-                    0x1080                  _hat_ptr
-                    0x1082                  _sampin
-                    0x1084                  _sampout
-                    0x1086                  _rxBufferIndicator
-                    0x1088                  _ping
-                    0x108a                  _pong
-                    0x108c                  _lpf_alpha
-                    0x108e                  _lpf_inv_alpha
-                    0x1090                  _tremelo_depth
-                    0x1092                  _statusReg
-                    0x1094                  _lcdWritePtr
-                    0x1096                  _lcdSendPtr
-                    0x1098                  _write_ptr
-                    0x109a                  _recording
-                    0x109c                  _scanCounter
-                    0x109e                  _loop
-                    0x5ebe                  _pots
-                    0x5ece                  _pots_scaled
-                    0x5ede                  _outputA
-                    0x60de                  _outputB
-                    0x62de                  _streamA
-                    0x64de                  _streamB
-                    0x66de                  _lcdBuf
-                    0x6afe                  __Stdin
-                    0x6b26                  __Stdout
-                    0x6b4e                  __Stderr
-                    0x6b76                  __Files
-                    0x6bc2                  _pad
-                    0x6be6                  __Aldata
-                    0x6bec                  __Size_block
-                    0x6bee                  ___C30_UART
-                    0x6bf0                  ___curbrk
+                    0x1000                  _bpm
+                    0x1002                  _rw
+                    0x1004                  _frameReady
+                    0x1006                  _idle
+                    0x1008                  _cycle
+                    0x100a                  _hard_clipped
+                    0x100b                  _t1flag
+                    0x100c                  _t2flag
+                    0x100d                  _UART_ON
+                    0x100e                  _TEST_SIN
+                    0x100f                  _tremelo
+                    0x1010                  _looper
+                    0x1011                  _lpf
+                    0x1012                  _frame
+                    0x1014                  _loop_ptr
+                    0x1016                  _loop_lim
+                    0x1018                  _tremelo_ptr
+                    0x101a                  _tremelo_length
+                    0x101c                  _trem_var
+                    0x101e                  _delay_samples
+                    0x1026                  _kick_playing
+                    0x1027                  _kick_mode
+                    0x1028                  _kick_ptr
+                    0x102a                  _snare_playing
+                    0x102c                  _snare_ptr
+                    0x102e                  _hat_playing
+                    0x1030                  _hat_ptr
+                    0x1032                  _sampin
+                    0x1034                  _sampout
+                    0x1036                  _rxBufferIndicator
+                    0x1038                  _ping
+                    0x103a                  _pong
+                    0x103c                  _lpf_alpha
+                    0x103e                  _lpf_inv_alpha
+                    0x1040                  _tremelo_depth
+                    0x1042                  _statusReg
+                    0x1044                  _lcdWritePtr
+                    0x1046                  _lcdSendPtr
+                    0x1048                  _write_ptr
+                    0x104a                  _recording
+                    0x104c                  _scanCounter
+                    0x104e                  _loop
+                    0x5e6e                  _pots
+                    0x5e7e                  _pots_scaled
+                    0x5e8e                  _outputA
+                    0x608e                  _outputB
+                    0x628e                  _streamA
+                    0x648e                  _streamB
+                    0x668e                  _lcdBuf
+                    0x6aae                  __Stdin
+                    0x6ad6                  __Stdout
+                    0x6afe                  __Stderr
+                    0x6b26                  __Files
+                    0x6b72                  _pad
+                    0x6b96                  __Aldata
+                    0x6b9c                  __Size_block
+                    0x6b9e                  ___C30_UART
+                    0x6ba0                  ___curbrk
                     0xc800                  _rxBufferB
                     0xca00                  _rxBufferA
                     0xcc00                  _txBufferB
@@ -278,75 +261,75 @@ External Symbols in Data Memory (by address):
 
 External Symbols in Data Memory (by name):
 
-                    0x105e                  _TEST_SIN
-                    0x105d                  _UART_ON
-                    0x6be6                  __Aldata
-                    0x6b76                  __Files
-                    0x6bec                  __Size_block
-                    0x6b4e                  __Stderr
-                    0x6afe                  __Stdin
-                    0x6b26                  __Stdout
-                    0x6bee                  ___C30_UART
-                    0x6bf0                  ___curbrk
-                    0x1050                  _bpm
-                    0x1058                  _cycle
-                    0x106e                  _delay_samples
-                    0x1062                  _frame
-                    0x1054                  _frameReady
-                    0x105a                  _hard_clipped
-                    0x107e                  _hat_playing
-                    0x1080                  _hat_ptr
-                    0x1056                  _idle
-                    0x1077                  _kick_mode
-                    0x1076                  _kick_playing
-                    0x1078                  _kick_ptr
-                    0x66de                  _lcdBuf
-                    0x1096                  _lcdSendPtr
-                    0x1094                  _lcdWritePtr
-                    0x109e                  _loop
-                    0x1066                  _loop_lim
-                    0x1064                  _loop_ptr
-                    0x1060                  _looper
-                    0x1061                  _lpf
-                    0x108c                  _lpf_alpha
-                    0x108e                  _lpf_inv_alpha
-                    0x5ede                  _outputA
-                    0x60de                  _outputB
-                    0x6bc2                  _pad
-                    0x1088                  _ping
-                    0x108a                  _pong
-                    0x5ebe                  _pots
-                    0x5ece                  _pots_scaled
-                    0x109a                  _recording
-                    0x1052                  _rw
+                    0x100e                  _TEST_SIN
+                    0x100d                  _UART_ON
+                    0x6b96                  __Aldata
+                    0x6b26                  __Files
+                    0x6b9c                  __Size_block
+                    0x6afe                  __Stderr
+                    0x6aae                  __Stdin
+                    0x6ad6                  __Stdout
+                    0x6b9e                  ___C30_UART
+                    0x6ba0                  ___curbrk
+                    0x1000                  _bpm
+                    0x1008                  _cycle
+                    0x101e                  _delay_samples
+                    0x1012                  _frame
+                    0x1004                  _frameReady
+                    0x100a                  _hard_clipped
+                    0x102e                  _hat_playing
+                    0x1030                  _hat_ptr
+                    0x1006                  _idle
+                    0x1027                  _kick_mode
+                    0x1026                  _kick_playing
+                    0x1028                  _kick_ptr
+                    0x668e                  _lcdBuf
+                    0x1046                  _lcdSendPtr
+                    0x1044                  _lcdWritePtr
+                    0x104e                  _loop
+                    0x1016                  _loop_lim
+                    0x1014                  _loop_ptr
+                    0x1010                  _looper
+                    0x1011                  _lpf
+                    0x103c                  _lpf_alpha
+                    0x103e                  _lpf_inv_alpha
+                    0x5e8e                  _outputA
+                    0x608e                  _outputB
+                    0x6b72                  _pad
+                    0x1038                  _ping
+                    0x103a                  _pong
+                    0x5e6e                  _pots
+                    0x5e7e                  _pots_scaled
+                    0x104a                  _recording
+                    0x1002                  _rw
                     0xca00                  _rxBufferA
                     0xc800                  _rxBufferB
-                    0x1086                  _rxBufferIndicator
-                    0x1082                  _sampin
-                    0x1084                  _sampout
-                    0x109c                  _scanCounter
-                    0x107a                  _snare_playing
-                    0x107c                  _snare_ptr
-                    0x1092                  _statusReg
-                    0x62de                  _streamA
-                    0x64de                  _streamB
-                    0x105b                  _t1flag
-                    0x105c                  _t2flag
-                    0x106c                  _trem_var
-                    0x105f                  _tremelo
-                    0x1090                  _tremelo_depth
-                    0x106a                  _tremelo_length
-                    0x1068                  _tremelo_ptr
+                    0x1036                  _rxBufferIndicator
+                    0x1032                  _sampin
+                    0x1034                  _sampout
+                    0x104c                  _scanCounter
+                    0x102a                  _snare_playing
+                    0x102c                  _snare_ptr
+                    0x1042                  _statusReg
+                    0x628e                  _streamA
+                    0x648e                  _streamB
+                    0x100b                  _t1flag
+                    0x100c                  _t2flag
+                    0x101c                  _trem_var
+                    0x100f                  _tremelo
+                    0x1040                  _tremelo_depth
+                    0x101a                  _tremelo_length
+                    0x1018                  _tremelo_ptr
                     0xce00                  _txBufferA
                     0xcc00                  _txBufferB
-                    0x1098                  _write_ptr
+                    0x1048                  _write_ptr
 
 External Symbols in Program Memory (by address):
 
                   0x000200                  __resetPRI
                   0x00023c                  __psv_init
-                  0x000248                  __data_init_extended
                   0x000248                  __data_init
+                  0x000248                  __data_init_extended
                   0x000306                  __T1Interrupt
                   0x000322                  __T2Interrupt
                   0x00033e                  __DCIInterrupt
@@ -391,50 +374,51 @@ External Symbols in Program Memory (by address):
                   0x006f12                  _snare_max
                   0x006f14                  _hat_max
                   0x006f16                  _sintab
-                  0x007766                  _initPorts
-                  0x0078a4                  _initUART1
-                  0x0078c6                  _initADC1
-                  0x00791a                  _initPMP
-                  0x007944                  _initT1
-                  0x007962                  _initT2
-                  0x007986                  _initT3
-                  0x00799c                  _initT5
-                  0x0079b2                  _initDCI_DAC
-                  0x0079f4                  _initDMA0
-                  0x007a98                  _initSPI3_MEM
-                  0x007ada                  _lcdWriteQ
-                  0x007aee                  _lcdCommandQ
-                  0x007b04                  _lcdClearQ
-                  0x007b0e                  _lcdReturnQ
-                  0x007b18                  _lcdSetCursorQ
-                  0x007b40                  _lcdPwrQ
-                  0x007b52                  _lcdCursorEn
-                  0x007b64                  _lcdCursorBlinkQ
-                  0x007b76                  _lcdWriteStringQ
-                  0x007b8c                  _lcdSetupPots
-                  0x007bea                  _lcdCustomSymbols
-                  0x007bf4                  _lcdWriteWordQ
-                  0x007c54                  _lcdVUvertical
-                  0x007c58                  _lcdDrawPads
-                  0x007d78                  _lcdPoll
-                  0x007db4                  _lcdSend
-                  0x007dd6                  _lcdClear
-                  0x007df2                  _lcdReturn
-                  0x007e0e                  _lcdInit
-                  0x007e46                  _scanMatrix
-                  0x007f34                  _readPots
-                  0x007f94                  _display
-                  0x008036                  _processRxData
-                  0x008044                  _Delay_us
-                  0x008056                  _mixer
-                  0x008106                  _fx
-                  0x008336                  _initBuffer
-                  0x008358                  _main
+                  0x007770                  _lcdWriteQ
+                  0x007784                  _lcdCommandQ
+                  0x00779a                  _lcdClearQ
+                  0x0077a4                  _lcdReturnQ
+                  0x0077ae                  _lcdSetCursorQ
+                  0x0077d6                  _lcdPwrQ
+                  0x0077e8                  _lcdCursorEn
+                  0x0077fa                  _lcdCursorBlinkQ
+                  0x00780c                  _lcdWriteStringQ
+                  0x007822                  _lcdSetupDebug
+                  0x007880                  _lcdSetupPots
+                  0x0078d2                  _lcdCustomSymbols
+                  0x0078dc                  _lcdWriteWordQ
+                  0x00793c                  _lcdVUvertical
+                  0x007940                  _lcdDrawPads
+                  0x007a60                  _lcdPoll
+                  0x007a9c                  _lcdSend
+                  0x007abe                  _lcdClear
+                  0x007ada                  _lcdReturn
+                  0x007af6                  _lcdInit
+                  0x007b2e                  _initPorts
+                  0x007c72                  _initUART1
+                  0x007c94                  _initADC1
+                  0x007cb6                  _initPMP
+                  0x007ce0                  _initT1
+                  0x007cfe                  _initT2
+                  0x007d22                  _initT3
+                  0x007d38                  _initT5
+                  0x007d4e                  _initDCI_DAC
+                  0x007d90                  _initDMA0
+                  0x007e34                  _initSPI3_MEM
+                  0x007e76                  _scanMatrix
+                  0x007f64                  _readPots
+                  0x007fbc                  _display
+                  0x00803e                  _processRxData
+                  0x00804c                  _Delay_us
+                  0x00805e                  _mixer
+                  0x00810e                  _fx
+                  0x00833e                  _initBuffer
+                  0x008360                  _main
                   0x0557fa                  __FGS.sec
 
 External Symbols in Program Memory (by name):
 
-                  0x008044                  _Delay_us
+                  0x00804c                  _Delay_us
                   0x000f2c                  __Atexit
                   0x000df2                  __Closreg
                   0x00033e                  __DCIInterrupt
@@ -469,53 +453,54 @@ External Symbols in Program Memory (by name):
                   0x000504                  __printf_cdnopuxX
                   0x00023c                  __psv_init
                   0x000200                  __resetPRI
-                  0x007f94                  _display
+                  0x007fbc                  _display
                   0x000e04                  _fclose
                   0x000f46                  _free
                   0x000894                  _fwrite
-                  0x008106                  _fx
+                  0x00810e                  _fx
                   0x006f14                  _hat_max
-                  0x0078c6                  _initADC1
-                  0x008336                  _initBuffer
-                  0x0079b2                  _initDCI_DAC
-                  0x0079f4                  _initDMA0
-                  0x00791a                  _initPMP
-                  0x007766                  _initPorts
-                  0x007a98                  _initSPI3_MEM
-                  0x007944                  _initT1
-                  0x007962                  _initT2
-                  0x007986                  _initT3
-                  0x00799c                  _initT5
-                  0x0078a4                  _initUART1
+                  0x007c94                  _initADC1
+                  0x00833e                  _initBuffer
+                  0x007d4e                  _initDCI_DAC
+                  0x007d90                  _initDMA0
+                  0x007cb6                  _initPMP
+                  0x007b2e                  _initPorts
+                  0x007e34                  _initSPI3_MEM
+                  0x007ce0                  _initT1
+                  0x007cfe                  _initT2
+                  0x007d22                  _initT3
+                  0x007d38                  _initT5
+                  0x007c72                  _initUART1
                   0x0043b0                  _kick
                   0x006f10                  _kick_max
-                  0x007dd6                  _lcdClear
-                  0x007b04                  _lcdClearQ
-                  0x007aee                  _lcdCommandQ
-                  0x007b64                  _lcdCursorBlinkQ
-                  0x007b52                  _lcdCursorEn
-                  0x007bea                  _lcdCustomSymbols
-                  0x007c58                  _lcdDrawPads
-                  0x007e0e                  _lcdInit
-                  0x007d78                  _lcdPoll
-                  0x007b40                  _lcdPwrQ
-                  0x007df2                  _lcdReturn
-                  0x007b0e                  _lcdReturnQ
-                  0x007db4                  _lcdSend
-                  0x007b18                  _lcdSetCursorQ
-                  0x007b8c                  _lcdSetupPots
-                  0x007c54                  _lcdVUvertical
-                  0x007ada                  _lcdWriteQ
-                  0x007b76                  _lcdWriteStringQ
-                  0x007bf4                  _lcdWriteWordQ
-                  0x008358                  _main
+                  0x007abe                  _lcdClear
+                  0x00779a                  _lcdClearQ
+                  0x007784                  _lcdCommandQ
+                  0x0077fa                  _lcdCursorBlinkQ
+                  0x0077e8                  _lcdCursorEn
+                  0x0078d2                  _lcdCustomSymbols
+                  0x007940                  _lcdDrawPads
+                  0x007af6                  _lcdInit
+                  0x007a60                  _lcdPoll
+                  0x0077d6                  _lcdPwrQ
+                  0x007ada                  _lcdReturn
+                  0x0077a4                  _lcdReturnQ
+                  0x007a9c                  _lcdSend
+                  0x0077ae                  _lcdSetCursorQ
+                  0x007822                  _lcdSetupDebug
+                  0x007880                  _lcdSetupPots
+                  0x00793c                  _lcdVUvertical
+                  0x007770                  _lcdWriteQ
+                  0x00780c                  _lcdWriteStringQ
+                  0x0078dc                  _lcdWriteWordQ
+                  0x008360                  _main
                   0x001010                  _malloc
                   0x00093c                  _memchr
                   0x000950                  _memcpy
-                  0x008056                  _mixer
-                  0x008036                  _processRxData
-                  0x007f34                  _readPots
-                  0x007e46                  _scanMatrix
+                  0x00805e                  _mixer
+                  0x00803e                  _processRxData
+                  0x007f64                  _readPots
+                  0x007e76                  _scanMatrix
                   0x006f16                  _sintab
                   0x0012d8                  _snare
                   0x006f12                  _snare_max
@@ -545,52 +530,14 @@ aivt             0x000000           0xffffffff
 
 Linker script and memory map
 
-LOAD build/default/debug/devInits.o
-LOAD build/default/debug/main.o
-LOAD build/default/debug/utilitites.o
-LOAD build/default/debug/routines.o
-LOAD build/default/debug/sounds.o
-LOAD build/default/debug/audio.o
-LOAD build/default/debug/plcd.o
-
-reserve_data_0x1000
-                    0x1000         0x1c
-                    0x101c                  . = 0x1c
- *fill*             0x1000         0x1c00
-
-reserve_data_0x101c
-                    0x101c          0x2
-                    0x101e                  . = 0x2
- *fill*             0x101c          0x200
-
-reserve_data_0x101e
-                    0x101e          0x2
-                    0x1020                  . = 0x2
- *fill*             0x101e          0x200
-
-reserve_data_0x1020
-                    0x1020          0x2
-                    0x1022                  . = 0x2
- *fill*             0x1020          0x200
-
-reserve_data_0x1022
-                    0x1022          0x2
-                    0x1024                  . = 0x2
- *fill*             0x1022          0x200
-
-reserve_data_0x1024
-                    0x1024          0x4
-                    0x1028                  . = 0x4
- *fill*             0x1024          0x400
-
-reserve_data_0x1028
-                    0x1028         0x28
-                    0x1050                  . = 0x28
- *fill*             0x1028         0x2800
+LOAD build/default/production/devInits.o
+LOAD build/default/production/main.o
+LOAD build/default/production/utilitites.o
+LOAD build/default/production/routines.o
+LOAD build/default/production/sounds.o
+LOAD build/default/production/audio.o
+LOAD build/default/production/plcd.o
                     0x0001                  __MPLAB_BUILD = 0x1
-                    0x0001                  __MPLAB_DEBUG = 0x1
-                    0x0001                  __DEBUG = 0x1
-                    0x0001                  __MPLAB_DEBUGGER_PK3 = 0x1
 LOAD c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib/dsPIC33E\libp33EP512GM310-elf.a
 LOAD c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libfx-elf.a
                     0x557f0                  __FICD = 0x557f0
@@ -629,7 +576,7 @@ LOAD c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libfx-elf.a
  *(.handle)
  .handle          0x0002fa          0xc jump_table
  *(.isr*)
- .isr.text        0x000306        0x11c build/default/debug/routines.o
+ .isr.text        0x000306        0x11c build/default/production/routines.o
                   0x000306                  __T1Interrupt
                   0x000322                  __T2Interrupt
                   0x00033e                  __DCIInterrupt
@@ -778,54 +725,54 @@ __FUID3
  *(.comment)
  .comment         0x000000         0x5e c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xfiles.EP_eo)
 
-.debug_info       0x000000       0x8d9e
+.debug_info       0x000000       0x8a53
  *(.debug_info)
- .debug_info      0x000000       0x5ad9 build/default/debug/devInits.o
- .debug_info      0x005ad9        0x67f build/default/debug/main.o
- .debug_info      0x006158        0xcc0 build/default/debug/utilitites.o
- .debug_info      0x006e18        0xd83 build/default/debug/routines.o
- .debug_info      0x007b9b        0x288 build/default/debug/sounds.o
- .debug_info      0x007e23        0x525 build/default/debug/audio.o
- .debug_info      0x008348        0xa56 build/default/debug/plcd.o
+ .debug_info      0x000000       0x5805 build/default/production/devInits.o
+ .debug_info      0x005805        0x67f build/default/production/main.o
+ .debug_info      0x005e84        0xc2c build/default/production/utilitites.o
+ .debug_info      0x006ab0        0xd83 build/default/production/routines.o
+ .debug_info      0x007833        0x288 build/default/production/sounds.o
+ .debug_info      0x007abb        0x525 build/default/production/audio.o
+ .debug_info      0x007fe0        0xa73 build/default/production/plcd.o
  *(.gnu.linkonce.wi.*)
 
 .debug_abbrev     0x000000        0x7a6
  *(.debug_abbrev)
- .debug_abbrev    0x000000        0x13a build/default/debug/devInits.o
- .debug_abbrev    0x00013a        0x13f build/default/debug/main.o
- .debug_abbrev    0x000279        0x140 build/default/debug/utilitites.o
- .debug_abbrev    0x0003b9        0x148 build/default/debug/routines.o
- .debug_abbrev    0x000501         0x5d build/default/debug/sounds.o
- .debug_abbrev    0x00055e         0xc9 build/default/debug/audio.o
- .debug_abbrev    0x000627        0x17f build/default/debug/plcd.o
+ .debug_abbrev    0x000000        0x13a build/default/production/devInits.o
+ .debug_abbrev    0x00013a        0x13f build/default/production/main.o
+ .debug_abbrev    0x000279        0x140 build/default/production/utilitites.o
+ .debug_abbrev    0x0003b9        0x148 build/default/production/routines.o
+ .debug_abbrev    0x000501         0x5d build/default/production/sounds.o
+ .debug_abbrev    0x00055e         0xc9 build/default/production/audio.o
+ .debug_abbrev    0x000627        0x17f build/default/production/plcd.o
 
-.debug_line       0x000000        0x758
+.debug_line       0x000000        0x761
  *(.debug_line)
- .debug_line      0x000000        0x16a build/default/debug/devInits.o
- .debug_line      0x00016a        0x11f build/default/debug/main.o
- .debug_line      0x000289        0x150 build/default/debug/utilitites.o
- .debug_line      0x0003d9        0x117 build/default/debug/routines.o
- .debug_line      0x0004f0         0x7b build/default/debug/sounds.o
- .debug_line      0x00056b         0xc4 build/default/debug/audio.o
- .debug_line      0x00062f        0x129 build/default/debug/plcd.o
+ .debug_line      0x000000        0x164 build/default/production/devInits.o
+ .debug_line      0x000164        0x120 build/default/production/main.o
+ .debug_line      0x000284        0x14d build/default/production/utilitites.o
+ .debug_line      0x0003d1        0x117 build/default/production/routines.o
+ .debug_line      0x0004e8         0x7b build/default/production/sounds.o
+ .debug_line      0x000563         0xc4 build/default/production/audio.o
+ .debug_line      0x000627        0x13a build/default/production/plcd.o
 
-.debug_frame      0x000000        0x456
+.debug_frame      0x000000        0x466
  *(.debug_frame)
- .debug_frame     0x000000         0xc4 build/default/debug/devInits.o
- .debug_frame     0x0000c4         0x58 build/default/debug/main.o
- .debug_frame     0x00011c         0x8e build/default/debug/utilitites.o
- .debug_frame     0x0001aa         0xe0 build/default/debug/routines.o
- .debug_frame     0x00028a         0x34 build/default/debug/audio.o
- .debug_frame     0x0002be        0x198 build/default/debug/plcd.o
+ .debug_frame     0x000000         0xc4 build/default/production/devInits.o
+ .debug_frame     0x0000c4         0x58 build/default/production/main.o
+ .debug_frame     0x00011c         0x8e build/default/production/utilitites.o
+ .debug_frame     0x0001aa         0xe0 build/default/production/routines.o
+ .debug_frame     0x00028a         0x34 build/default/production/audio.o
+ .debug_frame     0x0002be        0x1a8 build/default/production/plcd.o
 
-.debug_str        0x000000        0x584
+.debug_str        0x000000        0x55f
  *(.debug_str)
- .debug_str       0x000000        0x2de build/default/debug/devInits.o
- .debug_str       0x0002de         0x53 build/default/debug/main.o
- .debug_str       0x000331         0xd7 build/default/debug/utilitites.o
- .debug_str       0x000408         0x89 build/default/debug/routines.o
- .debug_str       0x000491         0xa3 build/default/debug/audio.o
- .debug_str       0x000534         0x50 build/default/debug/plcd.o
+ .debug_str       0x000000        0x2cf build/default/production/devInits.o
+ .debug_str       0x0002cf         0x53 build/default/production/main.o
+ .debug_str       0x000322         0xc1 build/default/production/utilitites.o
+ .debug_str       0x0003e3         0x89 build/default/production/routines.o
+ .debug_str       0x00046c         0xa3 build/default/production/audio.o
+ .debug_str       0x00050f         0x50 build/default/production/plcd.o
 
 .debug_loc
  *(.debug_loc)
@@ -834,22 +781,22 @@ __FUID3
  *(.debug_macinfo)
 
 .debug_pubnames
-                  0x000000        0x61d
+                  0x000000        0x62f
  *(.debug_pubnames)
  .debug_pubnames
-                  0x000000         0xa1 build/default/debug/devInits.o
+                  0x000000         0xa1 build/default/production/devInits.o
  .debug_pubnames
-                  0x0000a1        0x169 build/default/debug/main.o
+                  0x0000a1        0x169 build/default/production/main.o
  .debug_pubnames
-                  0x00020a         0x69 build/default/debug/utilitites.o
+                  0x00020a         0x69 build/default/production/utilitites.o
  .debug_pubnames
-                  0x000273         0xbd build/default/debug/routines.o
+                  0x000273         0xbd build/default/production/routines.o
  .debug_pubnames
-                  0x000330         0xbf build/default/debug/sounds.o
+                  0x000330         0xbf build/default/production/sounds.o
  .debug_pubnames
-                  0x0003ef         0xba build/default/debug/audio.o
+                  0x0003ef         0xba build/default/production/audio.o
  .debug_pubnames
-                  0x0004a9        0x174 build/default/debug/plcd.o
+                  0x0004a9        0x186 build/default/production/plcd.o
 
 .debug_ranges
  *(.debug_ranges)
@@ -857,17 +804,17 @@ __FUID3
 .debug_aranges    0x000000         0x90
  *(.debug_aranges)
  .debug_aranges
-                  0x000000         0x18 build/default/debug/devInits.o
+                  0x000000         0x18 build/default/production/devInits.o
  .debug_aranges
-                  0x000018         0x18 build/default/debug/main.o
+                  0x000018         0x18 build/default/production/main.o
  .debug_aranges
-                  0x000030         0x18 build/default/debug/utilitites.o
+                  0x000030         0x18 build/default/production/utilitites.o
  .debug_aranges
-                  0x000048         0x18 build/default/debug/routines.o
+                  0x000048         0x18 build/default/production/routines.o
  .debug_aranges
-                  0x000060         0x18 build/default/debug/audio.o
+                  0x000060         0x18 build/default/production/audio.o
  .debug_aranges
-                  0x000078         0x18 build/default/debug/plcd.o
+                  0x000078         0x18 build/default/production/plcd.o
                     0x0000                  WREG0 = 0x0
                     0x0000                  _WREG0 = 0x0
                     0x0002                  WREG1 = 0x2
@@ -2702,343 +2649,344 @@ LOAD c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30
 LOAD c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a
 LOAD c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a
 END GROUP
-OUTPUT(dist/default/debug/ps-040.debug.elf elf32-pic30)
+OUTPUT(dist/default/production/ps-040.production.elf elf32-pic30)
 LOAD FGS
 LOAD jump_table
 LOAD default_isr
 LOAD data_init
 
 .debug_pubtypes
-                  0x000090        0x994
+                  0x000090        0x96b
  .debug_pubtypes
-                  0x000090        0x716 build/default/debug/devInits.o
+                  0x000090        0x6ed build/default/production/devInits.o
  .debug_pubtypes
-                  0x0007a6         0x3e build/default/debug/main.o
+                  0x00077d         0x3e build/default/production/main.o
  .debug_pubtypes
-                  0x0007e4         0xba build/default/debug/utilitites.o
+                  0x0007bb         0xba build/default/production/utilitites.o
  .debug_pubtypes
-                  0x00089e         0xd7 build/default/debug/routines.o
+                  0x000875         0xd7 build/default/production/routines.o
  .debug_pubtypes
-                  0x000975         0x21 build/default/debug/sounds.o
+                  0x00094c         0x21 build/default/production/sounds.o
  .debug_pubtypes
-                  0x000996         0x21 build/default/debug/audio.o
+                  0x00096d         0x21 build/default/production/audio.o
  .debug_pubtypes
-                  0x0009b7         0x6d build/default/debug/plcd.o
+                  0x00098e         0x6d build/default/production/plcd.o
 
 __c30_signature
-                  0x000a24         0xe4
+                  0x0009fb         0xe4
  __c30_signature
-                  0x000a24          0x6 build/default/debug/devInits.o
+                  0x0009fb          0x6 build/default/production/devInits.o
  __c30_signature
-                  0x000a2a          0x6 build/default/debug/main.o
+                  0x000a01          0x6 build/default/production/main.o
  __c30_signature
-                  0x000a30          0x6 build/default/debug/utilitites.o
+                  0x000a07          0x6 build/default/production/utilitites.o
  __c30_signature
-                  0x000a36          0x6 build/default/debug/routines.o
+                  0x000a0d          0x6 build/default/production/routines.o
  __c30_signature
-                  0x000a3c          0x6 build/default/debug/sounds.o
+                  0x000a13          0x6 build/default/production/sounds.o
  __c30_signature
-                  0x000a42          0x6 build/default/debug/audio.o
+                  0x000a19          0x6 build/default/production/audio.o
  __c30_signature
-                  0x000a48          0x6 build/default/debug/plcd.o
+                  0x000a1f          0x6 build/default/production/plcd.o
  __c30_signature
-                  0x000a4e          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(crt0_extendedep.o)
+                  0x000a25          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(crt0_extendedep.o)
  __c30_signature
-                  0x000a54          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(data_init_extended.o)
+                  0x000a2b          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(data_init_extended.o)
  __c30_signature
-                  0x000a5a          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(printf_cdnopuxX.EPeo)
+                  0x000a31          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(printf_cdnopuxX.EPeo)
  __c30_signature
-                  0x000a60          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xprintf_cdnopuxX.EPeo)
+                  0x000a37          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xprintf_cdnopuxX.EPeo)
  __c30_signature
-                  0x000a66          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xputfld_cdnopuxX.EPeo)
+                  0x000a3d          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xputfld_cdnopuxX.EPeo)
  __c30_signature
-                  0x000a6c          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(fwrite.EP_eo)
+                  0x000a43          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(fwrite.EP_eo)
  __c30_signature
-                  0x000a72          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(memchr.EP_eo)
+                  0x000a49          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(memchr.EP_eo)
  __c30_signature
-                  0x000a78          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(memcpy.EP_eo)
+                  0x000a4f          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(memcpy.EP_eo)
  __c30_signature
-                  0x000a7e          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(strchr.EP_eo)
+                  0x000a55          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(strchr.EP_eo)
  __c30_signature
-                  0x000a84          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xfiles.EP_eo)
+                  0x000a5b          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xfiles.EP_eo)
  __c30_signature
-                  0x000a8a          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xfwprep.EP_eo)
+                  0x000a61          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xfwprep.EP_eo)
  __c30_signature
-                  0x000a90          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xlitob.EP_eo)
+                  0x000a67          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xlitob.EP_eo)
  __c30_signature
-                  0x000a96          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xputtxt.EP_eo)
+                  0x000a6d          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xputtxt.EP_eo)
  __c30_signature
-                  0x000a9c          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xvacopy.EP_eo)
+                  0x000a73          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xvacopy.EP_eo)
  __c30_signature
-                  0x000aa2          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(fclose.EP_elo)
+                  0x000a79          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(fclose.EP_elo)
  __c30_signature
-                  0x000aa8          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(fflush.EP_elo)
+                  0x000a7f          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(fflush.EP_elo)
  __c30_signature
-                  0x000aae          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xatexit.EP_elo)
+                  0x000a85          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xatexit.EP_elo)
  __c30_signature
-                  0x000ab4          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(free.EP_eo)
+                  0x000a8b          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(free.EP_eo)
  __c30_signature
-                  0x000aba          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(malloc.EP_eo)
+                  0x000a91          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(malloc.EP_eo)
  __c30_signature
-                  0x000ac0          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xgetmem.EP_eo)
+                  0x000a97          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xgetmem.EP_eo)
  __c30_signature
-                  0x000ac6          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(closeep.Leo)
+                  0x000a9d          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(closeep.Leo)
  __c30_signature
-                  0x000acc          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(writeep.Leo)
+                  0x000aa3          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(writeep.Leo)
  __c30_signature
-                  0x000ad2          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(removeep.Leo)
+                  0x000aa9          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(removeep.Leo)
  __c30_signature
-                  0x000ad8          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(sbrkep.Leo)
+                  0x000aaf          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(sbrkep.Leo)
  __c30_signature
-                  0x000ade          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(c30_uartep.Leo)
+                  0x000ab5          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(c30_uartep.Leo)
  __c30_signature
-                  0x000ae4          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(brkep.Lelo)
+                  0x000abb          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(brkep.Lelo)
  __c30_signature
-                  0x000aea          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(divsi3.epeo)
+                  0x000ac1          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(divsi3.epeo)
  __c30_signature
-                  0x000af0          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(udivsi3.epeo)
+                  0x000ac7          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(udivsi3.epeo)
  __c30_signature
-                  0x000af6          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(umodsi3.epeo)
+                  0x000acd          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(umodsi3.epeo)
  __c30_signature
-                  0x000afc          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(mulsi3.epeo)
+                  0x000ad3          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(mulsi3.epeo)
  __c30_signature
-                  0x000b02          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(divmoddi3.epeo)
+                  0x000ad9          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(divmoddi3.epeo)
 
-.nbss               0x1050         0x3c
- .nbss              0x1050         0x14 build/default/debug/main.o
-                    0x1050                  _bpm
-                    0x1052                  _rw
-                    0x1054                  _frameReady
-                    0x1056                  _idle
-                    0x1058                  _cycle
-                    0x105a                  _hard_clipped
-                    0x105b                  _t1flag
-                    0x105c                  _t2flag
-                    0x105d                  _UART_ON
-                    0x105e                  _TEST_SIN
-                    0x105f                  _tremelo
-                    0x1060                  _looper
-                    0x1061                  _lpf
-                    0x1062                  _frame
- .nbss              0x1064         0x12 build/default/debug/audio.o
-                    0x1064                  _loop_ptr
-                    0x1066                  _loop_lim
-                    0x1068                  _tremelo_ptr
-                    0x106a                  _tremelo_length
-                    0x106c                  _trem_var
-                    0x106e                  _delay_samples
- .nbss              0x1076          0xc build/default/debug/sounds.o
-                    0x1076                  _kick_playing
-                    0x1077                  _kick_mode
-                    0x1078                  _kick_ptr
-                    0x107a                  _snare_playing
-                    0x107c                  _snare_ptr
-                    0x107e                  _hat_playing
-                    0x1080                  _hat_ptr
- .nbss              0x1082          0xa build/default/debug/routines.o
-                    0x1082                  _sampin
-                    0x1084                  _sampout
-                    0x1086                  _rxBufferIndicator
-                    0x1088                  _ping
-                    0x108a                  _pong
+.nbss               0x1000         0x3c
+ .nbss              0x1000         0x14 build/default/production/main.o
+                    0x1000                  _bpm
+                    0x1002                  _rw
+                    0x1004                  _frameReady
+                    0x1006                  _idle
+                    0x1008                  _cycle
+                    0x100a                  _hard_clipped
+                    0x100b                  _t1flag
+                    0x100c                  _t2flag
+                    0x100d                  _UART_ON
+                    0x100e                  _TEST_SIN
+                    0x100f                  _tremelo
+                    0x1010                  _looper
+                    0x1011                  _lpf
+                    0x1012                  _frame
+ .nbss              0x1014         0x12 build/default/production/audio.o
+                    0x1014                  _loop_ptr
+                    0x1016                  _loop_lim
+                    0x1018                  _tremelo_ptr
+                    0x101a                  _tremelo_length
+                    0x101c                  _trem_var
+                    0x101e                  _delay_samples
+ .nbss              0x1026          0xc build/default/production/sounds.o
+                    0x1026                  _kick_playing
+                    0x1027                  _kick_mode
+                    0x1028                  _kick_ptr
+                    0x102a                  _snare_playing
+                    0x102c                  _snare_ptr
+                    0x102e                  _hat_playing
+                    0x1030                  _hat_ptr
+ .nbss              0x1032          0xa build/default/production/routines.o
+                    0x1032                  _sampin
+                    0x1034                  _sampout
+                    0x1036                  _rxBufferIndicator
+                    0x1038                  _ping
+                    0x103a                  _pong
 
-.ndata              0x108c         0x10
- .ndata             0x108c          0x6 build/default/debug/audio.o
-                    0x108c                  _lpf_alpha
-                    0x108e                  _lpf_inv_alpha
-                    0x1090                  _tremelo_depth
- .ndata             0x1092          0x6 build/default/debug/plcd.o
-                    0x1092                  _statusReg
-                    0x1094                  _lcdWritePtr
-                    0x1096                  _lcdSendPtr
- .ndata             0x1098          0x4 build/default/debug/main.o
-                    0x1098                  _write_ptr
-                    0x109a                  _recording
+.ndata              0x103c         0x10
+ .ndata             0x103c          0x6 build/default/production/audio.o
+                    0x103c                  _lpf_alpha
+                    0x103e                  _lpf_inv_alpha
+                    0x1040                  _tremelo_depth
+ .ndata             0x1042          0x6 build/default/production/plcd.o
+                    0x1042                  _statusReg
+                    0x1044                  _lcdWritePtr
+                    0x1046                  _lcdSendPtr
+ .ndata             0x1048          0x4 build/default/production/main.o
+                    0x1048                  _write_ptr
+                    0x104a                  _recording
 
-.nbss               0x109c          0x2
- .nbss              0x109c          0x2 build/default/debug/utilitites.o
-                    0x109c                  _scanCounter
+.nbss               0x104c          0x2
+ .nbss              0x104c          0x2 build/default/production/utilitites.o
+                    0x104c                  _scanCounter
 
-.bss                0x109e       0x5a60
- .bss               0x109e       0x4e20 build/default/debug/audio.o
-                    0x109e                  _loop
- .bss               0x5ebe        0x820 build/default/debug/main.o
-                    0x5ebe                  _pots
-                    0x5ece                  _pots_scaled
-                    0x5ede                  _outputA
-                    0x60de                  _outputB
-                    0x62de                  _streamA
-                    0x64de                  _streamB
- .bss               0x66de        0x420 build/default/debug/plcd.o
-                    0x66de                  _lcdBuf
+.bss                0x104e       0x5a60
+ .bss               0x104e       0x4e20 build/default/production/audio.o
+                    0x104e                  _loop
+ .bss               0x5e6e        0x820 build/default/production/main.o
+                    0x5e6e                  _pots
+                    0x5e7e                  _pots_scaled
+                    0x5e8e                  _outputA
+                    0x608e                  _outputB
+                    0x628e                  _streamA
+                    0x648e                  _streamB
+ .bss               0x668e        0x420 build/default/production/plcd.o
+                    0x668e                  _lcdBuf
 
-.data               0x6afe         0xe8
- .data              0x6afe         0x88 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xfiles.EP_eo)
-                    0x6afe                  __Stdin
-                    0x6b26                  __Stdout
-                    0x6b4e                  __Stderr
-                    0x6b76                  __Files
- .data              0x6b86         0x22 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xlitob.EP_eo)
- .data              0x6ba8         0x1a c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xprintf_cdnopuxX.EPeo)
- .data              0x6bc2         0x12 build/default/debug/main.o
-                    0x6bc2                  _pad
- .data              0x6bd4         0x12 build/default/debug/utilitites.o
+.data               0x6aae         0xe8
+ .data              0x6aae         0x88 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xfiles.EP_eo)
+                    0x6aae                  __Stdin
+                    0x6ad6                  __Stdout
+                    0x6afe                  __Stderr
+                    0x6b26                  __Files
+ .data              0x6b36         0x22 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xlitob.EP_eo)
+ .data              0x6b58         0x1a c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(xprintf_cdnopuxX.EPeo)
+ .data              0x6b72         0x12 build/default/production/main.o
+                    0x6b72                  _pad
+ .data              0x6b84         0x12 build/default/production/utilitites.o
 
-.bss                0x6be6          0x6
- .bss               0x6be6          0x4 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(malloc.EP_eo)
-                    0x6be6                  __Aldata
- .bss               0x6bea          0x2 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(fclose.EP_elo)
+.bss                0x6b96          0x6
+ .bss               0x6b96          0x4 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(malloc.EP_eo)
+                    0x6b96                  __Aldata
+ .bss               0x6b9a          0x2 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(fclose.EP_elo)
 
-.data               0x6bec          0x4
- .data              0x6bec          0x2 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(malloc.EP_eo)
-                    0x6bec                  __Size_block
- .data              0x6bee          0x2 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(c30_uartep.Leo)
-                    0x6bee                  ___C30_UART
+.data               0x6b9c          0x4
+ .data              0x6b9c          0x2 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-c-elf.a(malloc.EP_eo)
+                    0x6b9c                  __Size_block
+ .data              0x6b9e          0x2 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(c30_uartep.Leo)
+                    0x6b9e                  ___C30_UART
 
-.bss                0x6bf0          0x2
- .bss               0x6bf0          0x2 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(brkep.Lelo)
-                    0x6bf0                  ___curbrk
+.bss                0x6ba0          0x2
+ .bss               0x6ba0          0x2 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(brkep.Lelo)
+                    0x6ba0                  ___curbrk
 
-_07345B405a68ee00
+_07ACAB405a6a6563
                     0xce00        0x200
- _07345B405a68ee00
-                    0xce00        0x200 build/default/debug/main.o
+ _07ACAB405a6a6563
+                    0xce00        0x200 build/default/production/main.o
                     0xce00                  _txBufferA
 
-_07345C605a68ee00
+_07ACAC605a6a6563
                     0xcc00        0x200
- _07345C605a68ee00
-                    0xcc00        0x200 build/default/debug/main.o
+ _07ACAC605a6a6563
+                    0xcc00        0x200 build/default/production/main.o
                     0xcc00                  _txBufferB
 
-_07345D805a68ee00
+_07ACAD805a6a6563
                     0xca00        0x200
- _07345D805a68ee00
-                    0xca00        0x200 build/default/debug/main.o
+ _07ACAD805a6a6563
+                    0xca00        0x200 build/default/production/main.o
                     0xca00                  _rxBufferA
 
-_07345EA05a68ee00
+_07ACAEA05a6a6563
                     0xc800        0x200
- _07345EA05a68ee00
-                    0xc800        0x200 build/default/debug/main.o
+ _07ACAEA05a6a6563
+                    0xc800        0x200 build/default/production/main.o
                     0xc800                  _rxBufferB
 
 .config_IESO      0x0557f8          0x2
- .config_IESO     0x0557f8          0x2 build/default/debug/main.o
+ .config_IESO     0x0557f8          0x2 build/default/production/main.o
 
 .config_FCKSM     0x0557f6          0x2
- .config_FCKSM    0x0557f6          0x2 build/default/debug/main.o
+ .config_FCKSM    0x0557f6          0x2 build/default/production/main.o
 
 .config_FWDTEN    0x0557f4          0x2
  .config_FWDTEN
-                  0x0557f4          0x2 build/default/debug/main.o
+                  0x0557f4          0x2 build/default/production/main.o
 
 .config_WDTWIN    0x0557f2          0x2
  .config_WDTWIN
-                  0x0557f2          0x2 build/default/debug/main.o
+                  0x0557f2          0x2 build/default/production/main.o
 
 .config_JTAGEN    0x0557f0          0x2
  .config_JTAGEN
-                  0x0557f0          0x2 build/default/debug/main.o
+                  0x0557f0          0x2 build/default/production/main.o
 
 .ivt._T1Interrupt
                   0x00001a          0x2
  .ivt._T1Interrupt
-                  0x00001a          0x2 build/default/debug/routines.o
+                  0x00001a          0x2 build/default/production/routines.o
 
 .ivt._T2Interrupt
                   0x000022          0x2
  .ivt._T2Interrupt
-                  0x000022          0x2 build/default/debug/routines.o
+                  0x000022          0x2 build/default/production/routines.o
 
 .ivt._DCIInterrupt
                   0x00008c          0x2
  .ivt._DCIInterrupt
-                  0x00008c          0x2 build/default/debug/routines.o
+                  0x00008c          0x2 build/default/production/routines.o
 
 .ivt._IC1Interrupt
                   0x000016          0x2
  .ivt._IC1Interrupt
-                  0x000016          0x2 build/default/debug/routines.o
+                  0x000016          0x2 build/default/production/routines.o
 
 .ivt._SPI3Interrupt
                   0x0000ca          0x2
  .ivt._SPI3Interrupt
-                  0x0000ca          0x2 build/default/debug/routines.o
+                  0x0000ca          0x2 build/default/production/routines.o
 
 .ivt._DMA2Interrupt
                   0x000044          0x2
  .ivt._DMA2Interrupt
-                  0x000044          0x2 build/default/debug/routines.o
+                  0x000044          0x2 build/default/production/routines.o
 
-_07ba84805a68ee00
+_074774805a6a6563
                     0x92d8       0x30d8 load address 0x0012d8  
- _07ba84805a68ee00
-                    0x92d8       0x30d8 build/default/debug/sounds.o
+ _074774805a6a6563
+                    0x92d8       0x30d8 build/default/production/sounds.o
                     0x92d8                  _snare
 
-_07ba81e05a68ee00
+_074771e05a6a6563
                     0xc3b0       0x2b60 load address 0x0043b0  
- _07ba81e05a68ee00
-                    0xc3b0       0x2b60 build/default/debug/sounds.o
+ _074771e05a6a6563
+                    0xc3b0       0x2b60 build/default/production/sounds.o
                     0xc3b0                  _kick
 
-.const              0xef10        0x856 load address 0x006f10  
- .const             0xef10        0x806 build/default/debug/sounds.o
+.const              0xef10        0x860 load address 0x006f10  
+ .const             0xef10        0x806 build/default/production/sounds.o
                     0xef10                  _kick_max
                     0xef12                  _snare_max
                     0xef14                  _hat_max
                     0xef16                  _sintab
- .const             0xf716         0x2c build/default/debug/plcd.o
- .const             0xf742         0x24 build/default/debug/utilitites.o
+ .const             0xf716         0x44 build/default/production/plcd.o
+ .const             0xf75a         0x16 build/default/production/utilitites.o
 
-.text             0x007766        0xa8a
- .text            0x007766        0x374 build/default/debug/devInits.o
-                  0x007766                  _initPorts
-                  0x0078a4                  _initUART1
-                  0x0078c6                  _initADC1
-                  0x00791a                  _initPMP
-                  0x007944                  _initT1
-                  0x007962                  _initT2
-                  0x007986                  _initT3
-                  0x00799c                  _initT5
-                  0x0079b2                  _initDCI_DAC
-                  0x0079f4                  _initDMA0
-                  0x007a98                  _initSPI3_MEM
- .text            0x007ada        0x36c build/default/debug/plcd.o
-                  0x007ada                  _lcdWriteQ
-                  0x007aee                  _lcdCommandQ
-                  0x007b04                  _lcdClearQ
-                  0x007b0e                  _lcdReturnQ
-                  0x007b18                  _lcdSetCursorQ
-                  0x007b40                  _lcdPwrQ
-                  0x007b52                  _lcdCursorEn
-                  0x007b64                  _lcdCursorBlinkQ
-                  0x007b76                  _lcdWriteStringQ
-                  0x007b8c                  _lcdSetupPots
-                  0x007bea                  _lcdCustomSymbols
-                  0x007bf4                  _lcdWriteWordQ
-                  0x007c54                  _lcdVUvertical
-                  0x007c58                  _lcdDrawPads
-                  0x007d78                  _lcdPoll
-                  0x007db4                  _lcdSend
-                  0x007dd6                  _lcdClear
-                  0x007df2                  _lcdReturn
-                  0x007e0e                  _lcdInit
- .text            0x007e46        0x210 build/default/debug/utilitites.o
-                  0x007e46                  _scanMatrix
-                  0x007f34                  _readPots
-                  0x007f94                  _display
-                  0x008036                  _processRxData
-                  0x008044                  _Delay_us
- .text            0x008056        0x19a build/default/debug/audio.o
-                  0x008056                  _mixer
-                  0x008106                  _fx
+.text             0x007770        0xa88
+ .text            0x007770        0x3be build/default/production/plcd.o
+                  0x007770                  _lcdWriteQ
+                  0x007784                  _lcdCommandQ
+                  0x00779a                  _lcdClearQ
+                  0x0077a4                  _lcdReturnQ
+                  0x0077ae                  _lcdSetCursorQ
+                  0x0077d6                  _lcdPwrQ
+                  0x0077e8                  _lcdCursorEn
+                  0x0077fa                  _lcdCursorBlinkQ
+                  0x00780c                  _lcdWriteStringQ
+                  0x007822                  _lcdSetupDebug
+                  0x007880                  _lcdSetupPots
+                  0x0078d2                  _lcdCustomSymbols
+                  0x0078dc                  _lcdWriteWordQ
+                  0x00793c                  _lcdVUvertical
+                  0x007940                  _lcdDrawPads
+                  0x007a60                  _lcdPoll
+                  0x007a9c                  _lcdSend
+                  0x007abe                  _lcdClear
+                  0x007ada                  _lcdReturn
+                  0x007af6                  _lcdInit
+ .text            0x007b2e        0x348 build/default/production/devInits.o
+                  0x007b2e                  _initPorts
+                  0x007c72                  _initUART1
+                  0x007c94                  _initADC1
+                  0x007cb6                  _initPMP
+                  0x007ce0                  _initT1
+                  0x007cfe                  _initT2
+                  0x007d22                  _initT3
+                  0x007d38                  _initT5
+                  0x007d4e                  _initDCI_DAC
+                  0x007d90                  _initDMA0
+                  0x007e34                  _initSPI3_MEM
+ .text            0x007e76        0x1e8 build/default/production/utilitites.o
+                  0x007e76                  _scanMatrix
+                  0x007f64                  _readPots
+                  0x007fbc                  _display
+                  0x00803e                  _processRxData
+                  0x00804c                  _Delay_us
+ .text            0x00805e        0x19a build/default/production/audio.o
+                  0x00805e                  _mixer
+                  0x00810e                  _fx
 
-.dinit            0x0081f0        0x146
- .dinit           0x0081f0        0x146 data_init
+.dinit            0x0081f8        0x146
+ .dinit           0x0081f8        0x146 data_init
 
-.text             0x008336         0x9e
- .text            0x008336         0x9e build/default/debug/main.o
-                  0x008336                  _initBuffer
-                  0x008358                  _main
+.text             0x00833e         0xa4
+ .text            0x00833e         0xa4 build/default/production/main.o
+                  0x00833e                  _initBuffer
+                  0x008360                  _main

@@ -1,4 +1,4 @@
-build/default/debug/devInits.o:  \
+build/default/production/devInits.o:  \
 devInits.c  \
 common.h  \
 devInits.h  \

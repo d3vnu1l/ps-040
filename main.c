@@ -105,6 +105,7 @@ int main(void) {
         if(t2flag==TRUE){
             scanMatrix();                   //read button matrix
             readPots();                     //read control pots
+            if(_AD1IF) readPots();
             t2flag=FALSE;
         }
         if(t1flag==TRUE){
