@@ -62,22 +62,22 @@ fractional mixer(fractional sample){
         result1 = __builtin_add(result1,snare[snare_ptr++],0);
         sample=__builtin_sac(result1, 0);
     }
-    else if (pad[2]==1&&snare_playing==TRUE&&snare_ptr==snare_max){
+    else if (pad[1]==1&&snare_playing==TRUE&&snare_ptr==snare_max){
         snare_playing=FALSE;
         snare_ptr=0;
     }
     
     
     //VOLUME CONTROL
-    /*
-    if(pots[0]==0x001F)
+    
+    if(pots[2]==0x001F)
         sample=0;
-    else if(pots[0]>0xFFF0);
+    else if(pots[2]>0xFFF0);
     else{
-        result1 =__builtin_mpy(sample,pots[0], NULL, NULL, 0, NULL, NULL, 0);
+        result1 =__builtin_mpy(sample,pots[2], NULL, NULL, 0, NULL, NULL, 0);
         sample=__builtin_sac(result1, 0);
     }
-    */
+    
     if (TEST_SIN==TRUE){
         i++;
         if(i==1024)
@@ -95,7 +95,7 @@ fractional fx(fractional sample){
     static fractional delayed_sample;
     static fractional trem_mod;
     if(tremelo==TRUE){                                                          //TREMELO//
-        if (trem_var<=pots_scaled[1]){
+        if (trem_var<=pots[3]){
             trem_var++;
             result1 =__builtin_mpy(tremelo_depth,sintab[tremelo_ptr], NULL, NULL, 0, NULL, NULL, 0);
             trem_mod=__builtin_sac(result1, 0);

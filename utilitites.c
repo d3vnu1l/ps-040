@@ -81,26 +81,19 @@ void scanMatrix(void){
     pad[9]=(portrdD>>3)&1;
     pad[10]=(portrdD>>4)&1;
    
-    /*
-    if(pad[7]==0&&pad_last[7]==1){                                              //TREMELO CONTROL
-        pad_last[7]=0;
+    
+    if(pad[13]==0&&pad_last[13]==1){                                              //TREMELO CONTROL
+        pad_last[13]=0;
         if(tremelo==FALSE)
-            //tremelo=TRUE;
+            tremelo=TRUE;
         else tremelo=FALSE;
-        TREMELO_LED=tremelo;
     }
     else{
-        pad_last[7]=pad[7];
+        pad_last[13]=pad[13];
     }
     
-    if(pad[4]==0){                                                              //LOOPER CONTROL
-        //looper=TRUE;
-        YLED=looper;
-    }
-    else {
-        looper=FALSE;
-        YLED=looper;
-    }
+    if(pad[14]==0) looper=TRUE;
+    else looper=FALSE;
    
     if(pad[15]==0&&pad_last[15]==1){                                              //LPF CONTROL
         pad_last[15]=0;
@@ -111,10 +104,10 @@ void scanMatrix(void){
     else{
         pad_last[15]=pad[15];
     }
-    */
+    
     
     // SAMPLE TRIGGERS 
-    if(pad[15]==0&&kick_playing==FALSE){                                         //kick
+    if(pad[0]==0&&kick_playing==FALSE){                                         //kick
         kick_playing=TRUE;
     }
     /*
@@ -122,30 +115,31 @@ void scanMatrix(void){
         hat_playing=TRUE;
     }
     */
-    if(pad[2]==0&&snare_playing==FALSE){                                        //snare
+    if(pad[1]==0&&snare_playing==FALSE){                                        //snare
         snare_playing=TRUE;
     }
-    
-    lpf=TRUE;
 }
 
 void readPots(void){
     volatile register int scaled asm("A");
     _AD1IF = 0; // Clear conversion done status bit
     
-    pots[0]=(ADC1BUF0<<4)+0xF;
-    pots[1]=(ADC1BUF1<<4)+0xF;
-    pots[2]=(ADC1BUF2<<4)+0xF;
-    pots[3]=(ADC1BUF3<<4)+0xF;
-    pots[4]=(ADC1BUF4<<4)+0xF;
-    pots[5]=(ADC1BUF5<<4)+0xF;
+    pots[0]=(ADC1BUF0>>1)|0x7;
+    pots[1]=(ADC1BUF1>>1)|0x7;
+    pots[2]=(ADC1BUF2>>1)|0x7;
+    pots[3]=(ADC1BUF3>>1)|0x7;
+    pots[4]=(ADC1BUF4>>1)|0x7;
+    pots[5]=(ADC1BUF5>>1)|0x7;
     
-    loop_lim=154*pots_scaled[1];                                                //LOOPER CONTROL
+    loop_lim=pots_scaled[5];                                                //LOOPER CONTROL
     if(pots[0]>=310){                                                           //LPF CONTROL
         lpf_alpha=pots[0];
         lpf_inv_alpha=(32767-lpf_alpha); 
     }
-    //tremelo_depth=pots[4];
+    tremelo_depth=pots[1];
+    
+    scaled=__builtin_mpy(pots[5],Q15(0.33), NULL, NULL, 0, NULL, NULL, 0);
+    pots_scaled[5]=__builtin_sac(scaled, 0);
 }
 
 void display(void){

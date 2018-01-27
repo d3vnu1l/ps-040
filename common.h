@@ -24,9 +24,6 @@
 #define LOOP_BUF_SIZE 10000             //about 1/4th of a second               //FX settings
 
 #define SLED _LATF0                                                             //various status LED's
-#define YLED _LATE1
-#define GLED _LATC4
-#define RLED _LATC0
 #define HARD_CLIP_LED _LATC1            //Clip indicator LED
 #define TREMELO_LED _LATD15
 #define LCD_RS _LATE15

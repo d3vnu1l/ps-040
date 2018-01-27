@@ -59,12 +59,12 @@ void initPorts(void){
     
     /* Digital IO DIRECTION (1 = input) */
     TRISA=TRISB=TRISC=TRISD=TRISE=TRISF=TRISG=0x0000;
-    TRISA=0x0600;
+    TRISA=0x1600;
     TRISB=0x0000;
-    TRISC=0x2080;
+    TRISC=0x2087;
     TRISD=0x011E; CNPUD=0x001E;
-    TRISE=0x7000;
-    TRISF=CNPUF=0x00F0;
+    TRISE=0x7300;
+    TRISF=0x00F0;   CNPUF=0x00F1;
     TRISG=CNPUG=0xFFFF;   //PORTG all inputs,//weak pull ups on all of G
     
     /* DIGITAL OUTPUT LATCH */
@@ -112,7 +112,7 @@ void initADC1(void){
     AD1CON2 = 0x0408; // Sample alternately using channel scanning
     AD1CON2bits.SMPI=POTS-1; // Sample 5 channels
     AD1CON3 = 0x0F0F; // Sample for 15*TAD before converting
-    AD1CON1bits.FORM=0;         //signed fractional format 
+    AD1CON1bits.FORM=2;         //signed fractional format 
     AD1CON3bits.ADCS=0x3F;
     AD1CON3bits.SAMC=0x0F;
     //select  AN6,7,8
