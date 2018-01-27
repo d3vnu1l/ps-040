@@ -19,7 +19,7 @@
 #define BUTTONS 17
 
 //#define  SAMP_BUFF_SIZE	 		4		// Size of the input buffer per analog input
-#define  POTS			8		// Number of channels enabled for channel scan
+#define  POTS			6		// Number of channels enabled for channel scan
 
 #define LOOP_BUF_SIZE 10000             //about 1/4th of a second               //FX settings
 
@@ -31,6 +31,8 @@
 #define TREMELO_LED _LATD15
 #define LCD_RS _LATE15
 #define LCD_RS_P PORTEbits.RE15
+
+#define SS3L _LATF1
 
 //misc
 #define TRUE 0xFF

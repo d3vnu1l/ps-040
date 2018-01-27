@@ -34,8 +34,6 @@ unsigned int bpm=0, rw=0, frameReady=0, write_ptr=STREAMBUF;
 unsigned int idle=0, cycle=0;
 
 unsigned char hard_clipped=FALSE;                                               //STATUS VARIABLES//
-volatile unsigned char t1flag=FALSE;
-volatile unsigned char t2flag=FALSE;
 volatile unsigned char recording=TRUE;
 unsigned char UART_ON = FALSE;
 unsigned char TEST_SIN = FALSE;
@@ -45,7 +43,7 @@ volatile unsigned char looper=FALSE;
 volatile unsigned char lpf=FALSE;
 
 volatile unsigned char frame=FALSE;
-
+int temp1, temp2;
 
 void initBuffer(void){
     int i=0;
@@ -102,15 +100,15 @@ int main(void) {
             idle=0;
             frameReady=0;
         }
-        if(t2flag==TRUE){
+        if(_T2IF){
             scanMatrix();                   //read button matrix
             readPots();                     //read control pots
             if(_AD1IF) readPots();
-            t2flag=FALSE;
+            _T2IF=0;
         }
-        if(t1flag==TRUE){
+        if(_T1IF){
             display();
-            t1flag=FALSE; 
+            _T1IF=0;
         }
         if(IFS0bits.T3IF) lcdPoll();
     }

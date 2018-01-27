@@ -119,10 +119,10 @@ void lcdSetupPots(void){
     lcdSetCursorQ(8,2);
     lcdWriteStringQ("6:");
     lcdSetCursorQ(0,3);
-    lcdWriteStringQ("7:");
-    lcdSetCursorQ(8,3);
-    lcdWriteStringQ("8:");
-     
+    lcdWriteStringQ("SPI:");
+    lcdSetCursorQ(11,3);
+    if(TEST_SIN==TRUE)lcdWriteStringQ("SINE");
+    else lcdWriteStringQ("THRU");  
 }
 
 void lcdCustomSymbols(void){

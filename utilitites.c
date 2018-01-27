@@ -27,7 +27,7 @@ extern unsigned int cycle;
 extern unsigned char TEST_SIN;
 extern fractional sampin;
 extern fractional sampout;
-
+extern int temp1, temp2;
 
 //FX FLAGS & VARS
 extern unsigned char tremelo, looper, lpf;
@@ -47,10 +47,20 @@ void scanMatrix(void){
     portrdG = PORTG;
     portrdD = PORTD;
     portrdF = PORTF;
-    
-    int trash=SPI3BUF;
-    SPI3BUF=0xAAAA;
    
+    SS3L=0;
+    char trash=SPI3BUF;
+    SPI3BUF=0x05;
+    while(!_SPI3IF); _SPI3IF=0;
+    trash=SPI3BUF;
+    SPI3BUF=0x00;
+    while(!_SPI3IF); _SPI3IF=0;
+    temp1=SPI3BUF;
+    SPI3BUF=0x00;
+    while(!_SPI3IF); _SPI3IF=0;
+    temp2=SPI3BUF;
+    SS3L=1;
+    
     pad[0]=(portrdG)&1;
     pad[1]=(portrdG>>1)&1;
     pad[2]=(portrdG>>2)&1;
@@ -71,11 +81,11 @@ void scanMatrix(void){
     pad[9]=(portrdD>>3)&1;
     pad[10]=(portrdD>>4)&1;
    
-    
+    /*
     if(pad[7]==0&&pad_last[7]==1){                                              //TREMELO CONTROL
         pad_last[7]=0;
         if(tremelo==FALSE)
-            tremelo=TRUE;
+            //tremelo=TRUE;
         else tremelo=FALSE;
         TREMELO_LED=tremelo;
     }
@@ -84,7 +94,7 @@ void scanMatrix(void){
     }
     
     if(pad[4]==0){                                                              //LOOPER CONTROL
-        looper=TRUE;
+        //looper=TRUE;
         YLED=looper;
     }
     else {
@@ -101,9 +111,9 @@ void scanMatrix(void){
     else{
         pad_last[15]=pad[15];
     }
+    */
     
-    
-    /* SAMPLE TRIGGERS */
+    // SAMPLE TRIGGERS 
     if(pad[15]==0&&kick_playing==FALSE){                                         //kick
         kick_playing=TRUE;
     }
@@ -116,27 +126,23 @@ void scanMatrix(void){
         snare_playing=TRUE;
     }
     
-    //lpf=TRUE;
-    
-    
+    lpf=TRUE;
 }
 
 void readPots(void){
     volatile register int scaled asm("A");
     _AD1IF = 0; // Clear conversion done status bit
     
-    pots[0]=(ADC1BUF0>>1)+0x1F;
-    pots[1]=(ADC1BUF1>>1)+0x1F;
-    pots[2]=(ADC1BUF2>>1)+0x1F;
-    pots[3]=(ADC1BUF3>>1)+0x1F;
-    pots[4]=(ADC1BUF4>>1)+0x1F;
-    pots[5]=(ADC1BUF5>>1)+0x1F;
-    pots[6]=(ADC1BUF6>>1)+0x1F;
-    pots[7]=(ADC1BUF7>>1)+0x1F;
+    pots[0]=(ADC1BUF0<<4)+0xF;
+    pots[1]=(ADC1BUF1<<4)+0xF;
+    pots[2]=(ADC1BUF2<<4)+0xF;
+    pots[3]=(ADC1BUF3<<4)+0xF;
+    pots[4]=(ADC1BUF4<<4)+0xF;
+    pots[5]=(ADC1BUF5<<4)+0xF;
     
     loop_lim=154*pots_scaled[1];                                                //LOOPER CONTROL
-    if(pots[1]>=310){                                                           //LPF CONTROL
-        lpf_alpha=pots[1];
+    if(pots[0]>=310){                                                           //LPF CONTROL
+        lpf_alpha=pots[0];
         lpf_inv_alpha=(32767-lpf_alpha); 
     }
     //tremelo_depth=pots[4];
@@ -163,10 +169,6 @@ void display(void){
    lcdWriteWordQ(pots[4]);
    lcdSetCursorQ(10,2);
    lcdWriteWordQ(pots[5]);
-   lcdSetCursorQ(2,3);
-   lcdWriteWordQ(pots[6]);
-   lcdSetCursorQ(10,3);
-   lcdWriteWordQ(pots[7]);
    
    
    /*
@@ -174,10 +176,12 @@ void display(void){
    lcdWriteWordQ(sampin);
    lcdSetCursorQ(10,2);
    lcdWriteWordQ(sampout);
-   
+   */
    lcdSetCursorQ(4,3);
     
-    if(pad[14])lcdWriteWordQ(cycle);
+    //if(pad[14])lcdWriteWordQ(cycle);
+   int data=((temp1<<8)&0xFF00)+(temp2&0x00FF);
+    if(pad[14])lcdWriteWordQ(data);
 
     lcdSetCursorQ(11,3);
     if(hard_clipped==TRUE){                                                     //CLIP CONTROL    
@@ -186,8 +190,6 @@ void display(void){
     }
     else if(TEST_SIN==TRUE)lcdWriteStringQ("SINE");
     else lcdWriteStringQ("THRU");
-    */
-
     
    if(UART_ON==TRUE){
         //IC1CON2bits.TRIGSTAT = ~pad[4]; 

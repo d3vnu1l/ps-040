@@ -13,30 +13,11 @@ extern fractional streamA[STREAMBUF], streamB[STREAMBUF];
 extern unsigned int write_ptr, rw, frameReady;
 extern int txBufferA[STREAMBUF], txBufferB[STREAMBUF], rxBufferA[STREAMBUF], rxBufferB[STREAMBUF];  //doesnt work as fractional
 
-//STATUS VARIABLES
-extern unsigned char t1flag, t2flag, t3flag;
-
 //misc.
 volatile fractional sampin=0;
 volatile fractional sampout=0;
 volatile int rxBufferIndicator = 0;
 fractional *ping, *pong;
-
-//Description: This interrupt toggles status led, runs UART1 and handles display
-//Dependencies: initUART1();
-//Frequency: 60
-void __attribute__ ((interrupt, auto_psv)) _T1Interrupt(void){
-    t1flag=TRUE;
-    IFS0bits.T1IF = 0;              //clear interrupt flag & restart
-}
-
-//Description: This interrupt handles polling button input
-//Dependencies: initADC1(); 
-//Frequency: 512Hz
-void __attribute__ ((interrupt, auto_psv)) _T2Interrupt(void){
-    t2flag=TRUE;
-    IFS0bits.T2IF = 0;              //clear interrupt flag & restart
-}
 
 //Description: This interrupt triggers at the completion of DCI output
 //Dependancies: initSPI2(); 
@@ -64,11 +45,7 @@ void __attribute__ ((interrupt, auto_psv)) _DCIInterrupt(void){
     
     IFS3bits.DCIIF=0;
 }
-void __attribute__ ((interrupt, auto_psv)) _IC1Interrupt(void){
-    IFS0bits.IC1IF=0;   
-    //bpm=IC1BUF;
-    RLED=~RLED;
-}
+
 
 void __attribute__ ((interrupt, auto_psv)) _SPI3Interrupt(void){
     //SEG_SEL=1;
@@ -118,5 +95,11 @@ void __attribute__ ((interrupt, auto_psv)) _U1RXInterrupt(void){
 void __attribute__ ((interrupt, auto_psv)) _U1TXInterrupt(void){
     YLED=~YLED;
     IFS0bits.U1TXIF = 0;            //clear flag, restart
+} 
+  
+void __attribute__ ((interrupt, auto_psv)) _IC1Interrupt(void){
+    IFS0bits.IC1IF=0;   
+    //bpm=IC1BUF;
+    RLED=~RLED;
 } 
  */

@@ -36,6 +36,8 @@ void initPorts(void){
     RPINR29bits.SCK3R=0x39;      //SCK3 input on pin 84
     RPOR7bits.RP57R=0x20;        //SCK3 output on pin 84
     RPOR8bits.RP70R=0x1F;       //SDO3 on pin 83
+    RPOR9bits.RP97R=0x21;       //SS3 on pin 88
+    RPINR29bits.SDI3R=0x4C;     //SDI on pin 79, RPI76
 	__builtin_write_OSCCONL(OSCCON | (1<<6));       // Lock Registers
     /*PERIPHERAL ENABLE (0) - DISABLE (1)*/
     PMD1=PMD2=PMD3=PMD4=PMD6=PMD7=0xFFFF;
@@ -57,10 +59,10 @@ void initPorts(void){
     
     /* Digital IO DIRECTION (1 = input) */
     TRISA=TRISB=TRISC=TRISD=TRISE=TRISF=TRISG=0x0000;
-    TRISA=0x0603;
-    TRISB=0x0003;
+    TRISA=0x0600;
+    TRISB=0x0000;
     TRISC=0x2080;
-    TRISD=CNPUD=0x001E;
+    TRISD=0x011E; CNPUD=0x001E;
     TRISE=0x7000;
     TRISF=CNPUF=0x00F0;
     TRISG=CNPUG=0xFFFF;   //PORTG all inputs,//weak pull ups on all of G
@@ -71,13 +73,12 @@ void initPorts(void){
     
     /* ANALOG PINS (1 = analog) */
     ANSELA=ANSELB=ANSELC=ANSELD=ANSELE=ANSELF=ANSELG=0x0000;
-    ANSELAbits.ANSA0=1;
-    ANSELAbits.ANSA1=1;
-    ANSELBbits.ANSB1=1;
-    
-    ANSELCbits.ANSC0=1;
-    ANSELCbits.ANSC1=1;
-    ANSELCbits.ANSC2=1;
+    ANSELCbits.ANSC0=1;     //AN6
+    ANSELCbits.ANSC1=1;     //AN7
+    ANSELCbits.ANSC2=1;     //AN8
+    ANSELAbits.ANSA12=1;    //AN10 
+    ANSELEbits.ANSE8=1;     //AN21
+    ANSELEbits.ANSE9=1;     //AN20
     
     
     
@@ -108,18 +109,23 @@ void initADC1(void){
 
     /* Assign MUXA inputs */
     AD1CON1 = 0x04E4; // Enable 12-bit mode, auto-sample and auto-conversion
-    AD1CON2 = 0x0404; // Sample 2 channels alternately using channel scanning
+    AD1CON2 = 0x0408; // Sample alternately using channel scanning
+    AD1CON2bits.SMPI=POTS-1; // Sample 5 channels
     AD1CON3 = 0x0F0F; // Sample for 15*TAD before converting
-    AD1CON1bits.FORM=2;         //signed fractional format 
-    //AD1CON3bits.ADCS=0x3F;
-    //AD1CON3bits.SAMC=0x0F;
+    AD1CON1bits.FORM=0;         //signed fractional format 
+    AD1CON3bits.ADCS=0x3F;
+    AD1CON3bits.SAMC=0x0F;
     //select  AN6,7,8
-    AD1CSSLbits.CSS6=1;
-    AD1CSSLbits.CSS7=1;
-    AD1CSSLbits.CSS8=1;
+    AD1CSSLbits.CSS6=1; //AN6
+    AD1CSSLbits.CSS7=1; //AN7
+    AD1CSSLbits.CSS8=1; //AN8
+    AD1CSSLbits.CSS10=1;//AN10
+    AD1CSSHbits.CSS20=1;//AN20
+    AD1CSSHbits.CSS21=1;//AN21
+    //AD1CSSLbits.CSS9=1; //AN9
     /* Enable ADC module and provide ADC stabilization delay */
     AD1CON1bits.ADON = 1;
-    Delay_us(20);
+    Delay_us(30);
 }
 
 void initPMP(void){
@@ -161,7 +167,7 @@ void initT1(void){          //16 bit timer
     PR1 = Fcy/(256*Fdisp);    //period register
     //PR1=0x7FFF;
     IFS0bits.T1IF = 0;      //clear timer 1 interrupt flag
-    IEC0bits.T1IE = 1;      //enable timer 1 interrupt
+    IEC0bits.T1IE = 0;      //enable timer 1 interrupt
     IPC0bits.T1IP = 2;      //interrupt priority 2 (low)
     T1CONbits.TON = 1;      //start timer
 }
@@ -178,7 +184,7 @@ void initT2(void){          //16/32 bit timer
     T2CONbits.TGATE = 0;    //gate accumulation disabled
     PR2 = Fcy/(8*Fscan);      //period register about 512hz, PR2 = 0x3938 
     IFS0bits.T2IF = 0;      //clear timer 2 interrupt flag
-    IEC0bits.T2IE = 1;      //enable timer 2 interrupt
+    IEC0bits.T2IE = 0;      //enable timer 2 interrupt
     IPC1bits.T2IP = 2;      //interrupt priority 2 (low)
     T2CONbits.TON = 1;      //start timer
 }
@@ -299,26 +305,36 @@ void initDMA0(void){
 }
 
 void initSPI3_MEM(void){
+    SS3L=1;
     IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
     IEC5bits.SPI3IE = 0;        // Disable the interrupt
     SPI3CON1bits.MSTEN=1;       //master mode
     SPI3CON1bits.DISSCK = 0;    //Internal serial clock is enabled
-    SPI3CON1bits.MODE16=1;      //16 bit
+    SPI3CON1bits.MODE16=0;      //8 bit
     SPI3CON1bits.DISSDO=0;      //enable SDO 
-    SPI3CON1bits.SSEN=0;        //use SS
+    SPI3CON1bits.SSEN=1;        //use SS
     SPI3CON2bits.FRMEN=0;       //no enable framed mode
     SPI3CON2bits.SPIBEN=0;      //enhanced buffer mode
     SPI2STATbits.SISEL=5;       //interrupt when done sending
-    SPI3CON1bits.SMP=0;         //data sampled at end of output time
+    
+    SPI3CON1bits.SMP=1;         //data sampled at end of output time
     SPI3CON1bits.CKP=0;         //idle clock is low
     SPI3CON1bits.CKE=1;         //data changes from H to L
-    SPI3CON1bits.PPRE=1;        //4:1 primary prescale
-    SPI3CON1bits.SPRE=7;        //1:1 secondary
+    
+    SPI3CON1bits.PPRE=3;        //1:1 primary prescale
+    SPI3CON1bits.SPRE=6;        //2:1 secondary
     SPI3STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
     IPC22bits.SPI3IP = 3;        // Interrupt priority
     IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
     IEC5bits.SPI3IE = 0;        // Enable the interrupt
     SPI3STATbits.SPIEN = 1;     //start SPI module
+
+    Delay_us(20);
+    SS3L=0;
+    char trash=SPI3BUF;
+    SPI3BUF=0x06;               //WEL=1 for testing
+    while(!_SPI3IF); _SPI3IF=0;
+    SS3L=1;
 }
 /*
 void initCAP_BPM(void){
