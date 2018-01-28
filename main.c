@@ -65,7 +65,7 @@ int main(void) {
     initPMP();
     //||||||||----
     //initDMA0();
-    initDCI_DAC();                  //configure & enable DAC
+    //initDCI_DAC();                  //configure & enable DAC
     initT1();                       //configure & start T1 
     initT2();                       //configure & start T2 
     initSPI3_MEM();                  //start segment display

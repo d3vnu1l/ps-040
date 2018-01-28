@@ -47,19 +47,6 @@ void scanMatrix(void){
     portrdG = PORTG;
     portrdD = PORTD;
     portrdF = PORTF;
-   
-    SS3L=0;
-    char trash=SPI3BUF;
-    SPI3BUF=0x05;
-    while(!_SPI3IF); _SPI3IF=0;
-    trash=SPI3BUF;
-    SPI3BUF=0x00;
-    while(!_SPI3IF); _SPI3IF=0;
-    temp1=SPI3BUF;
-    SPI3BUF=0x00;
-    while(!_SPI3IF); _SPI3IF=0;
-    temp2=SPI3BUF;
-    SS3L=1;
     
     pad[0]=(portrdG)&1;
     pad[1]=(portrdG>>1)&1;

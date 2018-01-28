@@ -344,8 +344,23 @@ void initSPI3_MEM(void){
     
     SS3L=0;
     char trash=SPI3BUF;
-    SPI3BUF=0x06;               //WEL=1 for testing
+    SPI3BUF=0x06;               //WEL=1 for write enable
     while(!_SPI3IF); _SPI3IF=0;
+    SS3L=1;
+    
+    Delay_us(20);
+       
+    SS3L=0;
+    char trash=SPI3BUF;
+    SPI3BUF=0x05;
+    while(!_SPI3IF); _SPI3IF=0;
+    trash=SPI3BUF;
+    SPI3BUF=0x00;
+    while(!_SPI3IF); _SPI3IF=0;
+    temp1=SPI3BUF;
+    SPI3BUF=0x00;
+    while(!_SPI3IF); _SPI3IF=0;
+    temp2=SPI3BUF;
     SS3L=1;
 }
 /*
