@@ -14,11 +14,9 @@
 extern unsigned char TEST_SIN;
 extern unsigned char pad[BUTTONS];
 
-unsigned int statusReg = 0x0C;  //internal copy of pwr reg
-                                // 0b_0 0 0 0 - 1 D C B (display, cursor, blink)
-int  lcdBuf[LCDBUF]={0};
+int  lcdBuf[LCDBUF+1]={0};
 int *lcdWritePtr=lcdBuf;
-int *lcdSendPtr=lcdBuf;
+int *lcdReadPtr=lcdBuf;
 
 
 void lcdWriteQ(unsigned char data){
@@ -53,28 +51,16 @@ void lcdSetCursorQ(unsigned char col, unsigned char row) {
 
 void lcdPwrQ(signed int pwr){
     //lcd soft power on/off, does not reset device
-    if(pwr)
-        statusReg&=0x04;
-    else __builtin_btg(&statusReg, 2);
-    
-    lcdCommandQ(statusReg);
+    lcdCommandQ(0x04);
 }
 
 void lcdCursorEn(signed int pwr){
     //cursor on / off
-    if(pwr)
-        statusReg&=0x0A;
-    else __builtin_btg(&statusReg, 1);
-    
-    lcdCommandQ(statusReg);
+    lcdCommandQ(0x0A);
 }
 
 void lcdCursorBlinkQ(signed int pwr){
-    if(pwr)
-        statusReg&=0x09;
-    else __builtin_btg(&statusReg, 0);
-    
-    lcdCommandQ(statusReg);
+    lcdCommandQ(0x09);
 }
 
 void lcdWriteStringQ(char *string) {
@@ -190,12 +176,12 @@ void lcdDrawPads(unsigned char col){
 }
 
 void lcdPoll(void){  
-    if(lcdWritePtr!=lcdSendPtr){   
-        if((*lcdSendPtr>>8)&1) LCD_RS=0;
+    if(lcdWritePtr!=lcdReadPtr){   
+        if((*lcdReadPtr>>8)&1) LCD_RS=0;
         else LCD_RS=1;
-        PMDIN1=(*lcdSendPtr++)&0x00FF;
-        if(lcdSendPtr==&lcdBuf[LCDBUF]) lcdSendPtr=lcdBuf;
-        if((*lcdSendPtr>>9)&1)
+        PMDIN1=(*lcdReadPtr++)&0x00FF;
+        if(lcdReadPtr==&lcdBuf[LCDBUF]) lcdReadPtr=lcdBuf;
+        if((*lcdReadPtr>>9)&1)
             PR3=0x2D00; //2D00 for ~1.3mS
         else PR3=0x0120; //120 for ~40uS
     } 

@@ -6,8 +6,6 @@
 #include "audio.h"
 #include "utilities.h"
 //CONTROL VARIABLES//
-extern char pad[BUTTONS];
-extern fractional pots[4]; 
 extern fractional outputA[STREAMBUF], outputB[STREAMBUF];
 extern fractional streamA[STREAMBUF], streamB[STREAMBUF];
 extern unsigned int write_ptr, rw, frameReady;
@@ -41,18 +39,9 @@ void __attribute__ ((interrupt, auto_psv)) _DCIInterrupt(void){
     else {
         streamA[write_ptr]=sampin; 
         sampout=outputB[write_ptr];  
-    }               //get input
+    } 
     
-    IFS3bits.DCIIF=0;
-}
-
-
-void __attribute__ ((interrupt, auto_psv)) _SPI3Interrupt(void){
-    //SEG_SEL=1;
-    int trash=SPI3BUF;
-    SPI3STATbits.SPIROV = 0;                                //Clear SPI1 receive overflow flag if set
-    IFS5bits.SPI3IF=0;
-    
+    _DCIIF=0;
 }
 
 void __attribute__((__interrupt__,no_auto_psv)) _DMA2Interrupt(void){
@@ -70,21 +59,10 @@ void __attribute__((__interrupt__,no_auto_psv)) _DMA2Interrupt(void){
 }
 
 /*
-//Description: This interrupt handles polling button input
-//Dependencies: initADC1(); 
-//Frequency: 44.1kHz
-
-
-void __attribute__ ((interrupt, auto_psv)) _SPI2Interrupt(void){
-    //GLED=~GLED;                                             //check half freq w/ RLED                                        //returns SS2 to idle state
-    SPI2STATbits.SPIROV = 0;                                //Clear SPI1 receive overflow flag if set
-    IFS2bits.SPI2IF = 0;                                    //reset flag & restart
-}
 //Description: This interrupt handles UART reception
 //Dependencies: initUART1();
 void __attribute__ ((interrupt, auto_psv)) _U1RXInterrupt(void){
     unsigned char trash;
-    GLED=~GLED;
     trash=U1RXREG;
     printf("RECIEVED: %d\r\n", trash);
     IFS0bits.U1RXIF = 0;            //clear flag, restart
@@ -97,9 +75,11 @@ void __attribute__ ((interrupt, auto_psv)) _U1TXInterrupt(void){
     IFS0bits.U1TXIF = 0;            //clear flag, restart
 } 
   
-void __attribute__ ((interrupt, auto_psv)) _IC1Interrupt(void){
-    IFS0bits.IC1IF=0;   
-    //bpm=IC1BUF;
-    RLED=~RLED;
-} 
+void __attribute__ ((interrupt, auto_psv)) _SPI3Interrupt(void){
+    //SEG_SEL=1;
+    int trash=SPI3BUF;
+    SPI3STATbits.SPIROV = 0;                                //Clear SPI1 receive overflow flag if set
+    IFS5bits.SPI3IF=0;
+    
+}
  */

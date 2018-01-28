@@ -166,9 +166,7 @@ void initT1(void){          //16 bit timer
     T1CONbits.TGATE = 0;    //gate accumulation disabled
     PR1 = Fcy/(256*Fdisp);    //period register
     //PR1=0x7FFF;
-    IFS0bits.T1IF = 0;      //clear timer 1 interrupt flag
-    IEC0bits.T1IE = 0;      //enable timer 1 interrupt
-    IPC0bits.T1IP = 2;      //interrupt priority 2 (low)
+
     T1CONbits.TON = 1;      //start timer
 }
 
@@ -183,9 +181,7 @@ void initT2(void){          //16/32 bit timer
     T2CONbits.TCS = 0;      //use internal clock
     T2CONbits.TGATE = 0;    //gate accumulation disabled
     PR2 = Fcy/(8*Fscan);      //period register about 512hz, PR2 = 0x3938 
-    IFS0bits.T2IF = 0;      //clear timer 2 interrupt flag
-    IEC0bits.T2IE = 0;      //enable timer 2 interrupt
-    IPC1bits.T2IP = 2;      //interrupt priority 2 (low)
+
     T2CONbits.TON = 1;      //start timer
 }
 
@@ -225,24 +221,31 @@ void initT5()
 //Prereq: initSPI_ADC(void)
 //Dependencies: readDAC(void)
 void initDCI_DAC(void){
-    DCICON1bits.CSCKD=0;
     DCICON3bits.BCG=(Fcy/(64*Fout)-1);  //calculate baud rate (WILL TRUNCATE)
-    DCICON1bits.COFSM=1;    //i2s mode
-    DCICON1bits.CSCKE=1;    //sample on rising edge
-    DCICON2bits.WS=0xF;     //16 bit data word
-    DCICON2bits.COFSG=0;    //data frame has 1 words
+    DCICON1bits.COFSM=1;                //i2s mode
+    DCICON1bits.CSCKE=1;                //sample on rising edge
+    DCICON2bits.WS=0xF;                 //16 bit data word
+    DCICON2bits.COFSG=0;    //data frame has 1 word
+    DCICON1bits.DJST=0;     //align data
+    DCICON2bits.BLEN=1;     //2 words buffer btwn interrupts
+    
     TSCONbits.TSE0 = 1;     // Transmit on Time Slot 0     
     TSCONbits.TSE1 = 1;     // Transmit on Time Slot 1   
     RSCONbits.RSE0 = 1;     // rcv on Time Slot 0     
     RSCONbits.RSE1 = 1;     // rcv on Time Slot 1 
-    DCICON1bits.DJST=0;     //align data
-    DCICON2bits.BLEN=1;     //2 words buffer btwn interrupts
+    
+
+    
     IPC15bits.DCIIP = 6;    // Interrput priority
     IFS3bits.DCIIF=0;
     IEC3bits.DCIIE=1;       //=0 to let dma handle interrupt
+    
+    // Pre-load send registers.
     TXBUF0=0;
     TXBUF1=0;   
     DCICON1bits.DCIEN=1;    //ENABLE
+    // Stabilization delay
+    Delay_us(20);
 }
 
 void initDMA0(void){
@@ -305,7 +308,7 @@ void initDMA0(void){
 }
 
 void initSPI3_MEM(void){
-    SS3L=1;
+    SS3L=1;                     // Assert chip select (active low)
     IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
     IEC5bits.SPI3IE = 0;        // Disable the interrupt
     SPI3CON1bits.MSTEN=1;       //master mode
@@ -323,13 +326,16 @@ void initSPI3_MEM(void){
     
     SPI3CON1bits.PPRE=3;        //1:1 primary prescale
     SPI3CON1bits.SPRE=6;        //2:1 secondary
+    
     SPI3STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
-    IPC22bits.SPI3IP = 3;        // Interrupt priority
-    IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
-    IEC5bits.SPI3IE = 0;        // Enable the interrupt
+    //IPC22bits.SPI3IP = 3;        // Interrupt priority
+    //IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
+    //IEC5bits.SPI3IE = 0;        // Enable the interrupt
     SPI3STATbits.SPIEN = 1;     //start SPI module
-
+    // Stabilization Delay
     Delay_us(20);
+    
+    
     SS3L=0;
     char trash=SPI3BUF;
     SPI3BUF=0x06;               //WEL=1 for testing
