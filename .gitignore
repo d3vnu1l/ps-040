@@ -28,3 +28,7 @@
 *.app
 
 nbproject/private/private\.xml
+
+nbproject/
+
+dist/

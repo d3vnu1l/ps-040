@@ -69,7 +69,6 @@ int main(void) {
     initT1();                       //configure & start T1 
     initT2();                       //configure & start T2 
     initSPI3_MEM();                  //start segment display
-
     //initCAP_BPM();                  //configure bpm capture
     initT3();                       //configure & start T3 for lcd
     //initT5();
@@ -110,7 +109,10 @@ int main(void) {
             display();
             _T1IF=0;
         }
-        if(IFS0bits.T3IF) lcdPoll();
+        if(_T3IF) {
+            lcdPoll();
+            _T3IF=0;
+        }
     }
     return 0;
 }

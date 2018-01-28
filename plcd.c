@@ -186,7 +186,6 @@ void lcdPoll(void){
         else PR3=0x0120; //120 for ~40uS
     } 
     TMR3=0x0000; 
-    IFS0bits.T3IF = 0;              //clear flag, restart
 }
 
 //ALWAYS SENDS, blocks program

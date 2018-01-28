@@ -70,9 +70,9 @@ fractional mixer(fractional sample){
     
     //VOLUME CONTROL
     
-    if(pots[2]==0x001F)
+    if(pots[2]==0x0007)
         sample=0;
-    else if(pots[2]>0xFFF0);
+    else if(pots[2]>=0x7FF7);
     else{
         result1 =__builtin_mpy(sample,pots[2], NULL, NULL, 0, NULL, NULL, 0);
         sample=__builtin_sac(result1, 0);
