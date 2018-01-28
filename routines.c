@@ -12,18 +12,29 @@ extern unsigned int write_ptr, rw, frameReady;
 extern int txBufferA[STREAMBUF], txBufferB[STREAMBUF], rxBufferA[STREAMBUF], rxBufferB[STREAMBUF];  //doesnt work as fractional
 
 //misc.
-volatile fractional sampin=0;
-volatile fractional sampout=0;
+volatile fractional sampinA=0, sampinB=0;
+
 volatile int rxBufferIndicator = 0;
 fractional *ping, *pong;
 
 //Description: This interrupt triggers at the completion of DCI output
 //Dependancies: initSPI2(); 
 void __attribute__ ((interrupt, auto_psv)) _DCIInterrupt(void){
-    TXBUF0=TXBUF1=sampout;                                    //output buffered sample to DAC
-    sampin=RXBUF1;
-    __builtin_btg(&sampin, 15);                             //convert to Q1.15 compatible format
-    int trash=RXBUF0;
+    static fractional sampoutA=0, sampoutB=0;
+    
+    int trashA=RXBUF0;
+    sampinA=RXBUF1;
+    int trashB=RXBUF2;
+    sampinB=RXBUF3;
+    TXBUF0=TXBUF1=sampoutA;                                    //output buffered sample to DAC
+    TXBUF2=TXBUF3=sampoutB;
+
+
+    
+    __builtin_btg(&sampinA, 15);                             //convert to Q1.15 compatible format
+    __builtin_btg(&sampinB, 15);                             //convert to Q1.15 compatible format
+    
+
       
     
     if(write_ptr--==0){                       //reset pointer when out of bounds
@@ -33,12 +44,17 @@ void __attribute__ ((interrupt, auto_psv)) _DCIInterrupt(void){
     }
    
     if(rw){
-        streamB[write_ptr]=sampin;
-        sampout=outputA[write_ptr]; 
+        streamB[write_ptr]=sampinA;
+        sampoutA=outputA[write_ptr--]; 
+        streamB[write_ptr]=sampinB;
+        sampoutB=outputA[write_ptr];
+        
     }
     else {
-        streamA[write_ptr]=sampin; 
-        sampout=outputB[write_ptr];  
+        streamA[write_ptr]=sampinA; 
+        sampoutA=outputB[write_ptr--];  
+        streamA[write_ptr]=sampinB; 
+        sampoutB=outputB[write_ptr];  
     } 
     
     _DCIIF=0;

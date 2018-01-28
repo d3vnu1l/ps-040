@@ -225,14 +225,18 @@ void initDCI_DAC(void){
     DCICON1bits.COFSM=1;                //i2s mode
     DCICON1bits.CSCKE=1;                //sample on rising edge
     DCICON2bits.WS=0xF;                 //16 bit data word
-    DCICON2bits.COFSG=0;    //data frame has 1 word
+    DCICON2bits.COFSG=0;    //data frame has 1 word (per frame)
     DCICON1bits.DJST=0;     //align data
-    DCICON2bits.BLEN=1;     //2 words buffer btwn interrupts
+    DCICON2bits.BLEN=3;     //4 words buffer btwn interrupts
     
     TSCONbits.TSE0 = 1;     // Transmit on Time Slot 0     
     TSCONbits.TSE1 = 1;     // Transmit on Time Slot 1   
+    TSCONbits.TSE2 = 1;     // Transmit on Time Slot 2     
+    TSCONbits.TSE3 = 1;     // Transmit on Time Slot 3   
     RSCONbits.RSE0 = 1;     // rcv on Time Slot 0     
     RSCONbits.RSE1 = 1;     // rcv on Time Slot 1 
+    RSCONbits.RSE2 = 1;     // rcv on Time Slot 2     
+    RSCONbits.RSE3 = 1;     // rcv on Time Slot 3 
     
 
     
@@ -243,6 +247,8 @@ void initDCI_DAC(void){
     // Pre-load send registers.
     TXBUF0=0;
     TXBUF1=0;   
+    TXBUF2=0;
+    TXBUF3=0;
     DCICON1bits.DCIEN=1;    //ENABLE
     // Stabilization delay
     Delay_us(20);
