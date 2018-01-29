@@ -17,7 +17,12 @@
 #define FLASH_READ  0x03    // Read                     (0.78 MB/s @<=50MHZ)
 #define FLASH_PP    0x02    // Page program 512 bytes   (1.5 MB/s)
 
-void flashWrite(void);
+
+void flashWriteReg(char);
+char flashStatusCheck(void);
+void flashWritePage(int, int);
+void flashRead(char *, int);
+void flashBulkErase(void);
 
 
 #endif	/* XC_HEADER_TEMPLATE_H */

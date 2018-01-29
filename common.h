@@ -11,11 +11,11 @@
 #define BRGVAL  ((Fcy/BAUDRATE)/16)-1    //calculate baud value (MAY TRUNCATE)
 #define Fscan   256                       //target buttons & pots sampling rate
 #define Fout    44100                      //target output sampling rate (~45k last measured)
-#define Fdisp   15                        //15hz display update rate
+#define Fdisp   20                        //15hz display update rate
 
 /* BUFFERS */
 #define LOOP_BUF_SIZE 10000             //about 1/4th of a second               //FX settings
-#define STREAMBUF   128                   //input adc stack size, must be divisible by 2
+#define STREAMBUF   256                   //input adc stack size, must be divisible by 2
 #define LCDBUF      128                     //lcd command buffer size
 #define LCDBUFMASK  0x007F               //lcd buffer access mask
 

@@ -8,19 +8,14 @@
 #include "devInits.h"
 #include "utilities.h"
 #include "plcd.h"
+#include "flash.h"
 #include "dsp.h"
 
 extern unsigned char UART_ON;
 extern int txBufferA[STREAMBUF], txBufferB[STREAMBUF], rxBufferA[STREAMBUF], rxBufferB[STREAMBUF];  //doesnt work as fractional
-//extern int temp1, temp2;
 
 extern char flash_readback[512];
 
- 
-//Description: Responsible i/o, clock, & RP pin config setup
-//Prereq: NONE
-//Dependencies: NONE
-//*Note: This is ALWAYS the first function called in main*
 void initPorts(void){
     //CLOCK CONFIG
     CLKDIVbits.PLLPOST=0;
@@ -90,9 +85,6 @@ void initPorts(void){
     
 }
 
-//Description: Initializes UART1 device & interrupts
-//Prereq: NONE
-//Dependencies: NONE
 void initUART1(void){
     IFS0bits.U1TXIF = 0;        //clear flag
     IFS0bits.U1RXIF = 0;        //clear flag
@@ -108,9 +100,6 @@ void initUART1(void){
     
 }
 
-//Description: Initializes onboard ADC 
-//Prereq: NONE
-//Dependencies: NONE
 void initADC1(void){ 
 
     /* Assign MUXA inputs */
@@ -341,83 +330,24 @@ void initSPI3_MEM(void){
     SPI3CON1bits.PPRE=3;        //1:1 primary prescale
     SPI3CON1bits.SPRE=6;        //2:1 secondary
     
-    SPI3STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
-    //IPC22bits.SPI3IP = 3;        // Interrupt priority
-    //IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
-    //IEC5bits.SPI3IE = 0;        // Enable the interrupt
-    SPI3STATbits.SPIEN = 1;     //start SPI module
-    // Stabilization Delay
-    Delay_us(20);
+    SPI3STATbits.SPIROV = 0;        // Clear SPI1 receive overflow flag if set
+    //IPC22bits.SPI3IP = 3;         // Interrupt priority
+    //IFS5bits.SPI3IF = 0;          // Clear the Interrupt flag
+    //IEC5bits.SPI3IE = 0;          // Enable the interrupt
+    SPI3STATbits.SPIEN = 1;         //start SPI module
+   
+    Delay_us(20);                       // Stabilization Delay
     
-    
-    SS3L=0;
-    char trash=SPI3BUF;
-    SPI3BUF=0x06;               //WEL=1 for write enable
-    while(!_SPI3IF); _SPI3IF=0;
-    SS3L=1;
-    
-    Delay_us(200);
-    
+    flashWriteReg(FLASH_WREN);
     /*
-    SS3L=0;
-    trash=SPI3BUF;
-    SPI3BUF=0x60;               //erase
-    while(!_SPI3IF); _SPI3IF=0;
-    SS3L=1;
+    flashBulkErase();
+    while(flashStatusCheck()&1);
+
+    flashWritePage
+    while(flashStatusCheck()&1);
     */
     
-    /*
-    // WRITE   
-    SS3L=0;
-    trash=SPI3BUF;
-    SPI3BUF=0x02;
-    while(!_SPI3IF); _SPI3IF=0;
-    trash=SPI3BUF;
-    SPI3BUF=0x00;
-    while(!_SPI3IF); _SPI3IF=0;
-    trash=SPI3BUF;
-    SPI3BUF=0x00;
-    while(!_SPI3IF); _SPI3IF=0;
-    trash=SPI3BUF;
-    SPI3BUF=0x00;
-    while(!_SPI3IF); _SPI3IF=0;
-    
-    
-    for(i=0; i<512;i++){    //write 512 bytes
-        //send byte
-        trash=SPI3BUF;
-        SPI3BUF=0xAA;
-        while(!_SPI3IF); _SPI3IF=0;
-        Delay_us(1);
-    }
-    SS3L=1;
-    */
-    
-    Delay_us(20);
-    
-    //READBACK
-    SS3L=0;
-    trash=SPI3BUF;
-    SPI3BUF=0x03;
-    while(!_SPI3IF); _SPI3IF=0;
-    trash=SPI3BUF;
-    SPI3BUF=0x00;
-    while(!_SPI3IF); _SPI3IF=0;
-    trash=SPI3BUF;
-    SPI3BUF=0x00;
-    while(!_SPI3IF); _SPI3IF=0;
-    trash=SPI3BUF;
-    SPI3BUF=0x00;
-    while(!_SPI3IF); _SPI3IF=0;
-    
-    for(i=0; i<512;i++){    //read 512 bytes
-        //receive byte
-        flash_readback[i]=SPI3BUF;
-        SPI3BUF=0x00;
-        while(!_SPI3IF); _SPI3IF=0;
-        Delay_us(2);
-    }
-    SS3L=1;
+    flashRead(flash_readback, 256);     // READBACK
     
 }
 

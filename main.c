@@ -70,7 +70,7 @@ int main(void) {
     initDCI_DAC();                  //configure & enable DAC
     initT1();                       //configure & start T1 
     initT2();                       //configure & start T2 
-    //initSPI3_MEM();                  //start segment display
+    initSPI3_MEM();                  //start segment display
     //initCAP_BPM();                  //configure bpm capture
     initT3();                       //configure & start T3 for lcd
     initQEI_ENC();

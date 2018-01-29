@@ -3,4 +3,5 @@ devInits.c  \
 common.h  \
 devInits.h  \
  utilities.h  \
-plcd.h 
+plcd.h  \
+flash.h 

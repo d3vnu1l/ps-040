@@ -10,6 +10,7 @@
 #include "sounds.h"
 #include "audio.h"
 #include "plcd.h"
+#include "flash.h"
 
 #include "devInits.h"
 
@@ -154,23 +155,11 @@ void display(void){
     lcdSetCursorQ(7,2);
    lcdWriteWordQ(flash_readback[5]);
    
-   /*
+   
    lcdSetCursorQ(0,3);
    lcdWriteStringQ("Stat:");
-    SS3L=0; 
-    char trash=SPI3BUF; 
-    SPI3BUF=0x05; 
-    while(!_SPI3IF); _SPI3IF=0; 
-    trash=SPI3BUF; 
-    SPI3BUF=0x00; 
-    while(!_SPI3IF); _SPI3IF=0; 
-    temp1=SPI3BUF; 
-    SPI3BUF=0x00; 
-    while(!_SPI3IF); _SPI3IF=0; 
-    temp2=SPI3BUF; 
-    SS3L=1; 
-    lcdWriteWordQ(temp1);
-    */ 
+   lcdWriteWordQ(flashStatusCheck());
+    
 
     /*
     lcdSetCursorQ(0,3);
@@ -182,8 +171,7 @@ void display(void){
     else lcdWriteStringQ("THRU");
     */
    
-   lcdSetCursorQ(0,3);
-   lcdWriteWordQ(ENCODERCNTH);
+   lcdSetCursorQ(10,3);
    lcdWriteWordQ(ENCODERCNTL);
    
    if(UART_ON==TRUE){

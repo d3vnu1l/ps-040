@@ -1,3 +1,4 @@
 build/default/production/flash.o:  \
 flash.c  \
-flash.h 
+flash.h  \
+common.h 
