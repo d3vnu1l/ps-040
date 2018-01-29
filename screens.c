@@ -14,11 +14,37 @@
 
 extern unsigned char TEST_SIN;
 extern fractional pots[POTS];
+extern fractional pots_percent[POTS];
 extern enum screen state, laststate;
 extern char flash_readback[512];
+extern unsigned int cycle;
 
 void screenDebugAudio(){
 
+}
+
+void screenDebufBuffers(){
+    if(state!=laststate){
+        //setup here
+        lcdClearQ();
+        lcdSetCursorQ(0,0);
+        lcdWriteStringQ("Buffer Debug");
+        lcdSetCursorQ(0,1);
+        lcdWriteStringQ("Audio:");
+        lcdSetCursorQ(0,2);
+        lcdWriteStringQ("LCD:");
+        lcdSetCursorQ(0,3);
+        lcdWriteStringQ("Flash:");
+    } else {
+        //update here
+        lcdSetCursorQ(6,1);
+        lcdWriteDecimalQ(cycle,3);
+        lcdSetCursorQ(4,2);
+        //lcdWriteDecimalQ();
+        lcdSetCursorQ(6,3);
+        //lcdWriteDecimalQ();
+        
+    }
 }
 
 void screenDebugPots(void){
@@ -26,39 +52,39 @@ void screenDebugPots(void){
         // Setup here
         lcdClearQ();
         lcdSetCursorQ(0,0);
-        lcdWriteStringQ("1:");
-        lcdSetCursorQ(8,0);
-        lcdWriteStringQ("2:");
-        lcdSetCursorQ(0,1);
-        lcdWriteStringQ("3:");
-        lcdSetCursorQ(8,1);
-        lcdWriteStringQ("4:");
-        lcdSetCursorQ(0,2);
-        lcdWriteStringQ("5:");
-        lcdSetCursorQ(8,2);
-        lcdWriteStringQ("6:");
-        lcdSetCursorQ(11,3);
-        if(TEST_SIN==TRUE)lcdWriteStringQ("SINE");
-        else lcdWriteStringQ("THRU");  
-        lcdDrawPads(16);
+        lcdWriteStringQ("Potentiometer Debug");
+        lcdSetCursorQ(9,1);
+        lcdWriteStringQ("|");
+         lcdSetCursorQ(9,2);
+        lcdWriteStringQ("|");
+         lcdSetCursorQ(9,3);
+        lcdWriteStringQ("|");
     } else {
         // Update here
-        lcdSetCursorQ(2,0);
-        lcdWriteWordQ(pots[0]);
-        lcdSetCursorQ(10,0);
-        lcdWriteWordQ(pots[1]);
-        lcdSetCursorQ(2,1);
-        lcdWriteWordQ(pots[2]);
-        lcdSetCursorQ(10,1);
-        lcdWriteWordQ(pots[3]);
-        lcdSetCursorQ(2,2);
-        lcdWriteWordQ(pots[4]);
-        lcdSetCursorQ(10,2);
-        lcdWriteWordQ(pots[5]);
+        lcdSetCursorQ(0,1);
+        lcdWriteDecimalQ(pots_percent[0], 3);
+        lcdWriteQ(',');
+        lcdWriteWordUnsignedQ(pots[0]);
+        lcdSetCursorQ(11,1);
+        lcdWriteDecimalQ(pots_percent[1], 3);
+        lcdWriteQ(',');
+        lcdWriteWordUnsignedQ(pots[1]);
+        lcdSetCursorQ(0,2);
+        lcdWriteDecimalQ(pots_percent[2], 3);
+        lcdWriteQ(',');
+        lcdWriteWordUnsignedQ(pots[2]);
+        lcdSetCursorQ(11,2);
+        lcdWriteDecimalQ(pots_percent[3], 3);
+        lcdWriteQ(',');
+        lcdWriteWordUnsignedQ(pots[3]);
+        lcdSetCursorQ(0,3);
+        lcdWriteDecimalQ(pots_percent[4], 3);
+        lcdWriteQ(',');
+        lcdWriteWordUnsignedQ(pots[4]);
         lcdSetCursorQ(11,3);
-        if(TEST_SIN==TRUE)lcdWriteStringQ("SINE");
-        else lcdWriteStringQ("THRU");
-        lcdDrawPads(16);
+        lcdWriteDecimalQ(pots_percent[5], 3);
+        lcdWriteQ(',');
+        lcdWriteWordUnsignedQ(pots[5]);
     }
 }
 
@@ -70,10 +96,34 @@ void screenFX(void){
         lcdWriteStringQ("FX1:");
         lcdSetCursorQ(10,0);
         lcdWriteStringQ("FX2:");
+        
+        lcdSetCursorQ(0,1);
+        lcdWriteStringQ("1:");
+        lcdSetCursorQ(10,1);
+        lcdWriteStringQ("4:");
+        lcdSetCursorQ(0,2);
+        lcdWriteStringQ("2:");
+        lcdSetCursorQ(10,2);
+        lcdWriteStringQ("5:");
+        lcdSetCursorQ(0,3);
+        lcdWriteStringQ("3:");
+        lcdSetCursorQ(10,3);
+        lcdWriteStringQ("6:");
     } else {
         //update here
-        lcdSetCursorQ(0,2);
-        lcdWriteDecimalQ(pots[0]>>8);
+        lcdSetCursorQ(2,1);
+        lcdWriteDecimalQ(pots_percent[0], 3);
+        lcdSetCursorQ(12,1);
+        lcdWriteDecimalQ(pots_percent[1], 3);
+        lcdSetCursorQ(2,2);
+        lcdWriteDecimalQ(pots_percent[2], 3);
+        lcdSetCursorQ(12,2);
+        lcdWriteDecimalQ(pots_percent[3], 3);
+        lcdSetCursorQ(2,3);
+        lcdWriteDecimalQ(pots_percent[4], 3);
+        lcdSetCursorQ(12,3);
+        lcdWriteDecimalQ(pots_percent[5], 3);
+
     }
 }
 
@@ -113,11 +163,13 @@ void screenUpdate(void){
     switch(state){
         case start: break;
         case scrnFX:            screenFX(); 
-                                break;
+        break;
         case debugscrnPOTS:     screenDebugPots();
-                                break;
+        break;
         case debugscrnFLASH:    screenDebugFlash();
-                                break;
+        break;
+        case debugscrnBUFFERS:  screenDebufBuffers();
+        break;
                         
         default: break;
     }

@@ -9,6 +9,7 @@
 void screenDebugAudio(void);
 void screenDebugPots(void);
 void screenDebugFlash(void);
+void screenDebufBuffers(void);
 
 void screenFX(void);
 void screenStart(char);

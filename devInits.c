@@ -106,11 +106,11 @@ void initADC1(void){
     /* Assign MUXA inputs */
     AD1CON1 = 0x04E4; // Enable 12-bit mode, auto-sample and auto-conversion
     AD1CON2 = 0x0408; // Sample alternately using channel scanning
-    AD1CON2bits.SMPI=POTS-1; // Sample 5 channels
+    AD1CON2bits.SMPI=(POTS/2)-1; // Sample 6 channels
     AD1CON3 = 0x0F0F; // Sample for 15*TAD before converting
     AD1CON1bits.FORM=2;         //signed fractional format 
-    AD1CON3bits.ADCS=0x3F;
-    AD1CON3bits.SAMC=0x0F;
+    AD1CON3bits.ADCS=0x07;
+    AD1CON3bits.SAMC=0x03;
     //select  AN6,7,8
     AD1CSSLbits.CSS6=1; //AN6
     AD1CSSLbits.CSS7=1; //AN7
@@ -310,8 +310,6 @@ void initDMA0(void){
 }
 
 void initSPI3_MEM(void){
-    int i=0;
-    
     SS3=1;                     // Assert chip select (active low)
     IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
     IEC5bits.SPI3IE = 0;        // Disable the interrupt

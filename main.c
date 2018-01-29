@@ -20,7 +20,7 @@
 
 unsigned char pad[BUTTONS];                                                                   //CONTROL VARIABLES//
 fractional pots[POTS]={0};
-fractional pots_scaled[POTS]={0};
+fractional pots_percent[POTS]={0};
 fractional outputA[STREAMBUF], outputB[STREAMBUF];
 fractional streamA[STREAMBUF], streamB[STREAMBUF];
 
@@ -47,7 +47,7 @@ int temp1, temp2;
 
 char flash_readback[512]={0};
 
-enum screen state = debugscrnPOTS;
+enum screen state = scrnFX;
 enum screen laststate = invalid;
 
 void initBuffer(void){

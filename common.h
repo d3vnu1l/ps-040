@@ -10,9 +10,9 @@
 /* Timers and Frequencies */
 #define BAUDRATE 57600                  //target baud rate for *UART*           //peripheral configs
 #define BRGVAL  ((Fcy/BAUDRATE)/16)-1    //calculate baud value (MAY TRUNCATE)
-#define Fscan   256                       //target buttons & pots sampling rate
+#define Fscan   128                       //target buttons & pots sampling rate
 #define Fout    44100                      //target output sampling rate (~45k last measured)
-#define Fdisp   20                        //15hz display update rate
+#define Fdisp   15                        //15hz display update rate
 
 /* BUFFERS */
 #define LOOP_BUF_SIZE 10000             //about 1/4th of a second               //FX settings
@@ -32,15 +32,16 @@
 #define ENCODERCNTH POS1CNTH
 #define ENCODERCNTL POS1CNTL
 
-#define POT_SCALAR Q15(0.003051850947599)
+#define POT_PERCENT Q15(0.3937)      // For pot 0-100 display
 
 enum screen{
     invalid,
-    start,
     scrnFX,
     debugscrnPOTS,
+    debugscrnFLASH,
+    debugscrnBUFFERS,
     debugscrnAUDIO,
-    debugscrnFLASH
+    start
 };
 
 #endif	/* COMMON_H */

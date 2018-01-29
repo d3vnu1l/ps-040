@@ -90,19 +90,40 @@ void lcdWriteWordQ(int word){
    lcdWriteQ(inchar[0]);
 }
 
-void lcdWriteDecimalQ(char word){
-    char result[4];
+void lcdWriteWordUnsignedQ(unsigned int word){
+    int i;
+    char inchar[4];
+    
+   inchar[0] = word&0x000F; 
+   if (inchar[0] > 9) 
+       inchar[0]+=55;
+   else inchar[0]+=48;
+   
+   for(i=1; i<4; i++){ 
+      inchar[i] = ((word>>(i*4))&0x0000F); 
+      if (inchar[i] > 9) 
+          inchar[i]+=55;
+      else inchar[i]+=48;
+   } 
+   lcdWriteQ(inchar[3]);
+   lcdWriteQ(inchar[2]);
+   lcdWriteQ(inchar[1]);
+   lcdWriteQ(inchar[0]);
+}
+
+void lcdWriteDecimalQ(char word, int digits){
+    const char maxdigits = 4;
+    char result[maxdigits];
     char i = 3;
     do {
-
         result[i] = '0' + word % 10;
         word /= 10;
         i--;
     }
     while (word > 0);
-    while (i>=0) result[i--] = "0"; 
-    
-    for (i=0; i<4; i++) {
+    while (i>=0) result[i--] = ' '; 
+  
+    for (i=maxdigits-digits; i<maxdigits; i++) {
         lcdWriteQ(result[i]);
     }
 }

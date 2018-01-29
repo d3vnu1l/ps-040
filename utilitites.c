@@ -17,14 +17,13 @@
 //CONTROL VARIABLES//
 extern unsigned char pad[BUTTONS];
 extern fractional pots[POTS];
-extern fractional pots_scaled[POTS];
+extern fractional pots_percent[POTS];
 extern unsigned char UART_ON; 
 extern enum screen state;
 
 //STATUS VARIABLES//
 extern unsigned char hard_clipped;
 extern unsigned char UART_EN;
-extern unsigned int cycle;
 extern unsigned char TEST_SIN;
 extern fractional sampin;
 extern fractional sampout;
@@ -39,6 +38,7 @@ extern unsigned char kick_playing, snare_playing;
 extern unsigned char frame;
 
 void scanButtons(void){
+    
     static unsigned char pad_last[BUTTONS]={1};
     int portrdG, portrdD, portrdF;
 
@@ -127,16 +127,15 @@ void scanButtons(void){
 }
 
 void readPots(void){
-    volatile register int scaled asm("A");
     _AD1IF = 0; // Clear conversion done status bit
     
     if(pad[34]){
-        pots[0]=(ADC1BUF0>>1)|0x7;
-        pots[1]=(ADC1BUF1>>1)|0x7;
-        pots[2]=(ADC1BUF2>>1)|0x7;
-        pots[3]=(ADC1BUF3>>1)|0x7;
-        pots[4]=(ADC1BUF4>>1)|0x7;
-        pots[5]=(ADC1BUF5>>1)|0x7;
+        pots[5]=(ADC1BUF0>>1)|0x7;
+        pots[3]=(ADC1BUF1>>1)|0x7;
+        pots[1]=(ADC1BUF2>>1)|0x7;
+        pots[4]=(ADC1BUF3>>1)|0x7;
+        pots[2]=(ADC1BUF4>>1)|0x7;
+        pots[0]=(ADC1BUF5>>1)|0x7;
     } else {
         pots[6]=(ADC1BUF0>>1)|0x7;
         pots[7]=(ADC1BUF1>>1)|0x7;
@@ -146,21 +145,41 @@ void readPots(void){
         pots[11]=(ADC1BUF5>>1)|0x7;
     }
     
-    loop_lim=pots_scaled[5];               //LOOPER CONTROL
+    loop_lim=pots_percent[5];               //LOOPER CONTROL
     if(pots[0]>=310){                      //LPF CONTROL
         lpf_alpha=pots[0];
         lpf_inv_alpha=(32767-lpf_alpha); 
     }
     tremelo_depth=pots[1];
     
-    scaled=__builtin_mpy(pots[5],Q15(0.33), NULL, NULL, 0, NULL, NULL, 0);
-    pots_scaled[5]=__builtin_sac(scaled, 0);
+}
+
+void scalePots(void){
+    /* Potentiometer scaling for fx or lcd display */
+    volatile register int scaled asm("A");
+    
+    scaled=__builtin_mpy(pots[0],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
+    pots_percent[0]=__builtin_sac(scaled, 7);
+    scaled=__builtin_mpy(pots[1],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
+    pots_percent[1]=__builtin_sac(scaled, 7);
+    scaled=__builtin_mpy(pots[2],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
+    pots_percent[2]=__builtin_sac(scaled, 7);
+    scaled=__builtin_mpy(pots[3],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
+    pots_percent[3]=__builtin_sac(scaled, 7);
+    scaled=__builtin_mpy(pots[4],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
+    pots_percent[4]=__builtin_sac(scaled, 7);
+    scaled=__builtin_mpy(pots[5],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
+    pots_percent[5]=__builtin_sac(scaled, 7);
+    
+    //scaled=__builtin_mpy(pots[5],Q15(0.33), NULL, NULL, 0, NULL, NULL, 0);
+    //pots_percent[5]=__builtin_sac(scaled, 0);
 }
 
 void display(void){
     IFS0bits.SPI1IF=0;
     SPI1STATbits.SPIROV = 0;
-   
+    scalePots();
+    
     // Update ui state logic here
     state = (ENCODERCNTL/4)+1;
     

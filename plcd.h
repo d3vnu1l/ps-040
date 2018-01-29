@@ -26,7 +26,8 @@ void lcdWriteStringQ(char *);
 void lcdCustomSymbols(void);
 void lcdSetCursorQ(unsigned char, unsigned char);
 void lcdWriteWordQ(int);
-void lcdWriteDecimalQ(char);
+void lcdWriteWordUnsignedQ(unsigned int);
+void lcdWriteDecimalQ(char, int);
 void lcdDrawPads(unsigned char);
 
 void lcdFrameQ(char);

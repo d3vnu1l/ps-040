@@ -4,7 +4,7 @@
 
 extern char pad[8];                                                             //CONTROL VARIABLES//
 extern fractional pots[4];
-extern fractional pots_scaled[4];
+extern fractional pots_percent[4];
 
 volatile unsigned int loop_ptr = 0;                                             //FX FLAGS & VARS//
 unsigned int loop_lim=0;
