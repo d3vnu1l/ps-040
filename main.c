@@ -45,6 +45,8 @@ volatile unsigned char lpf=FALSE;
 volatile unsigned char frame=FALSE;
 int temp1, temp2;
 
+char flash_readback[512]={0};
+
 void initBuffer(void){
     int i=0;
     for(; i<STREAMBUF; i++){
@@ -65,10 +67,10 @@ int main(void) {
     initPMP();
     //||||||||----
     //initDMA0();
-    //initDCI_DAC();                  //configure & enable DAC
+    initDCI_DAC();                  //configure & enable DAC
     initT1();                       //configure & start T1 
     initT2();                       //configure & start T2 
-    initSPI3_MEM();                  //start segment display
+    //initSPI3_MEM();                  //start segment display
     //initCAP_BPM();                  //configure bpm capture
     initT3();                       //configure & start T3 for lcd
     //initT5();

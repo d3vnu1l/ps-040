@@ -1,7 +1,6 @@
 /*
  ** This file contains functions to initialize various peripheral devices
  */
-
 #include <xc.h>
 #include <p33EP512GM310.h>
 #include <libpic30.h>
@@ -9,9 +8,14 @@
 #include "devInits.h"
 #include "utilities.h"
 #include "plcd.h"
+#include "dsp.h"
 
 extern unsigned char UART_ON;
 extern int txBufferA[STREAMBUF], txBufferB[STREAMBUF], rxBufferA[STREAMBUF], rxBufferB[STREAMBUF];  //doesnt work as fractional
+//extern int temp1, temp2;
+
+extern char flash_readback[512];
+
  
 //Description: Responsible i/o, clock, & RP pin config setup
 //Prereq: NONE
@@ -151,7 +155,7 @@ void initPMP(void){
     lcdInit();
     
     /* SETUP SCREEN */
-    lcdSetupPots();
+    //lcdSetupPots();
 }
 
 
@@ -314,6 +318,8 @@ void initDMA0(void){
 }
 
 void initSPI3_MEM(void){
+    int i=0;
+    
     SS3L=1;                     // Assert chip select (active low)
     IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
     IEC5bits.SPI3IE = 0;        // Disable the interrupt
@@ -348,20 +354,69 @@ void initSPI3_MEM(void){
     while(!_SPI3IF); _SPI3IF=0;
     SS3L=1;
     
-    Delay_us(20);
-       
+    Delay_us(200);
+    
+    /*
     SS3L=0;
-    char trash=SPI3BUF;
-    SPI3BUF=0x05;
+    trash=SPI3BUF;
+    SPI3BUF=0x60;               //erase
+    while(!_SPI3IF); _SPI3IF=0;
+    SS3L=1;
+    */
+    
+    /*
+    // WRITE   
+    SS3L=0;
+    trash=SPI3BUF;
+    SPI3BUF=0x02;
     while(!_SPI3IF); _SPI3IF=0;
     trash=SPI3BUF;
     SPI3BUF=0x00;
     while(!_SPI3IF); _SPI3IF=0;
-    temp1=SPI3BUF;
+    trash=SPI3BUF;
     SPI3BUF=0x00;
     while(!_SPI3IF); _SPI3IF=0;
-    temp2=SPI3BUF;
+    trash=SPI3BUF;
+    SPI3BUF=0x00;
+    while(!_SPI3IF); _SPI3IF=0;
+    
+    
+    for(i=0; i<512;i++){    //write 512 bytes
+        //send byte
+        trash=SPI3BUF;
+        SPI3BUF=0xAA;
+        while(!_SPI3IF); _SPI3IF=0;
+        Delay_us(1);
+    }
     SS3L=1;
+    */
+    
+    Delay_us(20);
+    
+    //READBACK
+    SS3L=0;
+    trash=SPI3BUF;
+    SPI3BUF=0x03;
+    while(!_SPI3IF); _SPI3IF=0;
+    trash=SPI3BUF;
+    SPI3BUF=0x00;
+    while(!_SPI3IF); _SPI3IF=0;
+    trash=SPI3BUF;
+    SPI3BUF=0x00;
+    while(!_SPI3IF); _SPI3IF=0;
+    trash=SPI3BUF;
+    SPI3BUF=0x00;
+    while(!_SPI3IF); _SPI3IF=0;
+    
+    for(i=0; i<512;i++){    //read 512 bytes
+        //receive byte
+        flash_readback[i]=SPI3BUF;
+        SPI3BUF=0x00;
+        while(!_SPI3IF); _SPI3IF=0;
+        Delay_us(2);
+    }
+    SS3L=1;
+    
 }
 /*
 void initCAP_BPM(void){

@@ -19,6 +19,9 @@ extern unsigned char pad[8];
 extern fractional pots[POTS];
 extern fractional pots_scaled[POTS];
 extern unsigned char UART_ON; 
+extern int temp1, temp2;
+
+extern char flash_readback[512];
 
 //STATUS VARIABLES//
 extern unsigned char hard_clipped;
@@ -27,7 +30,6 @@ extern unsigned int cycle;
 extern unsigned char TEST_SIN;
 extern fractional sampin;
 extern fractional sampout;
-extern int temp1, temp2;
 
 //FX FLAGS & VARS
 extern unsigned char tremelo, looper, lpf;
@@ -133,36 +135,39 @@ void display(void){
     IFS0bits.SPI1IF=0;
     SPI1STATbits.SPIROV = 0;
    
-    int trash = SPI1BUF;
-    SPI1BUF=0xFAAF;
     
    lcdDrawPads(16);
    
-   lcdSetCursorQ(2,0);
-   lcdWriteWordQ(pots[0]);
-   lcdSetCursorQ(10,0);
-   lcdWriteWordQ(pots[1]);
-   lcdSetCursorQ(2,1);
-   lcdWriteWordQ(pots[2]);
-   lcdSetCursorQ(10,1);
-   lcdWriteWordQ(pots[3]);
-   lcdSetCursorQ(2,2);
-   lcdWriteWordQ(pots[4]);
-   lcdSetCursorQ(10,2);
-   lcdWriteWordQ(pots[5]);
-   
+   lcdSetCursorQ(0,0);
+   lcdWriteWordQ(flash_readback[0]);
+    lcdSetCursorQ(7,0);
+   lcdWriteWordQ(flash_readback[1]);
+    lcdSetCursorQ(0,1);
+   lcdWriteWordQ(flash_readback[2]);
+    lcdSetCursorQ(7,1);
+   lcdWriteWordQ(flash_readback[3]);
+    lcdSetCursorQ(0,2);
+   lcdWriteWordQ(flash_readback[4]);
+    lcdSetCursorQ(7,2);
+   lcdWriteWordQ(flash_readback[5]);
    
    /*
-   lcdSetCursorQ(2,2);
-   lcdWriteWordQ(sampin);
-   lcdSetCursorQ(10,2);
-   lcdWriteWordQ(sampout);
-   */
-   lcdSetCursorQ(4,3);
-    
-    //if(pad[14])lcdWriteWordQ(cycle);
-   int data=((temp1<<8)&0xFF00)+(temp2&0x00FF);
-    if(pad[14])lcdWriteWordQ(data);
+   lcdSetCursorQ(0,3);
+   lcdWriteStringQ("Stat:");
+    SS3L=0; 
+    char trash=SPI3BUF; 
+    SPI3BUF=0x05; 
+    while(!_SPI3IF); _SPI3IF=0; 
+    trash=SPI3BUF; 
+    SPI3BUF=0x00; 
+    while(!_SPI3IF); _SPI3IF=0; 
+    temp1=SPI3BUF; 
+    SPI3BUF=0x00; 
+    while(!_SPI3IF); _SPI3IF=0; 
+    temp2=SPI3BUF; 
+    SS3L=1; 
+    lcdWriteWordQ(temp1);
+    */ 
 
     lcdSetCursorQ(11,3);
     if(hard_clipped==TRUE){                                                     //CLIP CONTROL    
