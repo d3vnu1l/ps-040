@@ -9,6 +9,5 @@
 #include "xc.h"
 #include "flash.h"
 
-int flashWrite(void) {
-    return 0;
+void flashWrite(void) {
 }

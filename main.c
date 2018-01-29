@@ -73,6 +73,7 @@ int main(void) {
     //initSPI3_MEM();                  //start segment display
     //initCAP_BPM();                  //configure bpm capture
     initT3();                       //configure & start T3 for lcd
+    initQEI_ENC();
     //initT5();
     fractional temp;
     int writePtr;

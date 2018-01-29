@@ -37,11 +37,13 @@ void initPorts(void){
     RPOR2bits.RP39R=0x0D;       //DCI frame sync
     RPOR3bits.RP41R=0x0B;       //DCI output
     RPINR7bits.IC1R=0x5F;       //Capture input on pin 95 re15
-    RPINR29bits.SCK3R=0x39;      //SCK3 input on pin 84
-    RPOR7bits.RP57R=0x20;        //SCK3 output on pin 84
+    RPINR29bits.SCK3R=0x39;     //SCK3 input on pin 84
+    RPOR7bits.RP57R=0x20;       //SCK3 output on pin 84
     RPOR8bits.RP70R=0x1F;       //SDO3 on pin 83
     RPOR9bits.RP97R=0x21;       //SS3 on pin 88
     RPINR29bits.SDI3R=0x4C;     //SDI on pin 79, RPI76
+    RPINR14bits.QEA1R=0x10;     //QEA on pin 22, RPI16
+    RPINR14bits.QEB1R=0x1B;     //QEB on pin 21, RPI27
 	__builtin_write_OSCCONL(OSCCON | (1<<6));       // Lock Registers
     /*PERIPHERAL ENABLE (0) - DISABLE (1)*/
     PMD1=PMD2=PMD3=PMD4=PMD6=PMD7=0xFFFF;
@@ -63,12 +65,12 @@ void initPorts(void){
     
     /* Digital IO DIRECTION (1 = input) */
     TRISA=TRISB=TRISC=TRISD=TRISE=TRISF=TRISG=0x0000;
-    TRISA=0x1600;
-    TRISB=0x0000;
+    TRISA=0x1E01; CNPUA=0x0801;
+    TRISB=0x0000; CNPUB=0x0000;
     TRISC=0x2087;
     TRISD=0x011E; CNPUD=0x001E;
     TRISE=0x7300;
-    TRISF=0x00F0;   CNPUF=0x00F1;
+    TRISF=0x00F0; CNPUF=0x00F1;
     TRISG=CNPUG=0xFFFF;   //PORTG all inputs,//weak pull ups on all of G
     
     /* DIGITAL OUTPUT LATCH */
@@ -418,63 +420,10 @@ void initSPI3_MEM(void){
     SS3L=1;
     
 }
-/*
-void initCAP_BPM(void){
-    IFS0bits.IC1IF=0;
-    IPC0bits.IC1IP=3;
-    IC1CON1bits.ICTSEL=0;   //Fp is clock source (7))
-    IC1CON1bits.ICM=2;      //capture every falling edge
-    IC1CON2bits.ICTRIG=1;
-    IC1CON2bits.SYNCSEL=0xD;
-    IEC0bits.IC1IE=1;
-}
 
-//Description: Initializes 16 bit SPI ADC 
-//Prereq: NONE
-//Dependencies: NONE
-void initSPI2_ADC(void){
-    //ADC_CONV=1;                 //prevent shift as per errata
-    PORTBbits.RB10=1;           //prevent shift as per errata
-    IFS2bits.SPI2IF = 0;        // Clear the Interrupt flag
-    IEC2bits.SPI2IE = 0;        // Disable the interrupt
-    SPI2CON1bits.MSTEN=1;       //master mode
-    SPI2CON1bits.DISSCK = 0;    //Internal serial clock is enabled
-    SPI2CON1bits.MODE16=1;      //16 bit
-    SPI2CON1bits.DISSDO=1;      //no SDO 
-    SPI2CON1bits.SSEN=0;        //no use SS
-    SPI2CON2bits.FRMEN=0;       //no enable framed mode
-    SPI2CON2bits.SPIBEN=1;      //enhanced buffer mode
-    SPI2STATbits.SISEL=5;       //interrupt when done sending
-    SPI2CON1bits.SMP=1;         //data sampled at end of output time
-    SPI2CON1bits.CKP=1;         //idle clock is high
-    SPI2CON1bits.CKE=1;         //data changes from H to L
-    SPI2CON1bits.PPRE=2;        //4:1 primary prescale
-    SPI2CON1bits.SPRE=0;        //8:1 secondary
-    SPI2STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
-    IPC8bits.SPI2IP = 5;        // Interrupt priority
-    IFS2bits.SPI2IF = 0;        // Clear the Interrupt flag
-    IEC2bits.SPI2IE = 1;        // Enable the interrupt
-    SPI2STATbits.SPIEN = 1;     //start SPI module
+void initQEI_ENC(void){
+    QEI1CONbits.INTDIV=6;       // 1:64 prescaler
+    QEI1IOCbits.FLTREN=1;       // Enable input filter
+    QEI1CONbits.QEIEN=1;        // Enable Quad encoder inteface
 }
- * 
- * void initSPI1_MEM(void){
-    IFS0bits.SPI1IF = 0;        // Clear the Interrupt flag
-    IEC0bits.SPI1IE = 0;        // Disable the interrupt
-    SPI1CON1bits.MSTEN=1;       //master mode
-    SPI1CON1bits.DISSCK = 0;    //Internal serial clock is enabled
-    SPI1CON1bits.MODE16=1;      //16 bit
-    SPI1CON1bits.SSEN=0;        //no use SS
-    SPI1CON2bits.FRMEN=0;       //no enable framed mode
-    SPI1CON2bits.SPIBEN=0;      //enhanced buffer mode
-    SPI1STATbits.SISEL=5;       //interrupt when done sending
-    SPI1CON1bits.SMP=1;         //data sampled at end of output time
-    SPI1CON1bits.CKP=1;         //idle clock is high
-    SPI1CON1bits.CKE=1;         //data changes from H to L
-    SPI1CON1bits.PPRE=1;        //4:1 primary prescale
-    SPI1CON1bits.SPRE=1;        //8:1 secondary
-    SPI1STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
-
-    SPI1STATbits.SPIEN = 1;     //start SPI module
-}
-*/
 

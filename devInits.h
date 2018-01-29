@@ -19,8 +19,7 @@ void initADC1(void);
 void initSPI2_ADC(void);
 void initSPI3_MEM(void);
 void initDCI_DAC(void);
-void initCAP_BPM(void);
 void initPMP(void);
-void Delay_us(unsigned int);
+void initQEI_ENC(void);
 
 #endif	/* DEVINITS_H */

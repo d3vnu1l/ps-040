@@ -15,7 +15,7 @@
 
 
 //CONTROL VARIABLES//
-extern unsigned char pad[8];
+extern unsigned char pad[BUTTONS];
 extern fractional pots[POTS];
 extern fractional pots_scaled[POTS];
 extern unsigned char UART_ON; 
@@ -43,9 +43,9 @@ extern unsigned char frame;
 int  scanCounter=0;
 
 void scanMatrix(void){
-    static unsigned char pad_last[17]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+    static unsigned char pad_last[BUTTONS]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
     int portrdG, portrdD, portrdF;
-    //
+
     portrdG = PORTG;
     portrdD = PORTD;
     portrdF = PORTF;
@@ -54,6 +54,7 @@ void scanMatrix(void){
     pad[1]=(portrdG>>1)&1;
     pad[2]=(portrdG>>2)&1;
     pad[3]=(portrdG>>3)&1;
+    pad[17]=(portrdG>>10)&1;    // Encoder button
     pad[11]=(portrdG>>11)&1;
     pad[12]=(portrdG>>12)&1;
     pad[13]=(portrdG>>13)&1;
@@ -63,12 +64,14 @@ void scanMatrix(void){
     pad[4]=(portrdF>>4)&1;
     pad[5]=(portrdF>>5)&1;
     pad[6]=(portrdF>>6)&1;
-    pad[16]=(portrdF>>7)&1;
+    pad[16]=(portrdF>>7)&1;     // Special function button
     
     pad[7]=(portrdD>>1)&1;
     pad[8]=(portrdD>>2)&1;
     pad[9]=(portrdD>>3)&1;
     pad[10]=(portrdD>>4)&1;
+    
+
    
     
     if(pad[13]==0&&pad_last[13]==1){                                              //TREMELO CONTROL
@@ -169,14 +172,20 @@ void display(void){
     lcdWriteWordQ(temp1);
     */ 
 
-    lcdSetCursorQ(11,3);
+    /*
+    lcdSetCursorQ(0,3);
     if(hard_clipped==TRUE){                                                     //CLIP CONTROL    
         lcdWriteStringQ("CLIP");
         hard_clipped=FALSE;  
     }
     else if(TEST_SIN==TRUE)lcdWriteStringQ("SINE");
     else lcdWriteStringQ("THRU");
-    
+    */
+   
+   lcdSetCursorQ(0,3);
+   lcdWriteWordQ(ENCODERCNTH);
+   lcdWriteWordQ(ENCODERCNTL);
+   
    if(UART_ON==TRUE){
         //IC1CON2bits.TRIGSTAT = ~pad[4]; 
         //printf("b1 %d, b2 %d, b3 %d, b4 %d\r\n", pad[0], pad[1], pad[2], pad[3]);

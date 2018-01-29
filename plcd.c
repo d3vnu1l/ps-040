@@ -168,7 +168,11 @@ void lcdDrawPads(unsigned char col){
     if(!pad[5])lcdWriteStringQ(" "); else {lcdWriteQ(0xFF);}
     if(!pad[6])lcdWriteStringQ(" "); else {lcdWriteQ(0xFF);}
     if(!pad[7])lcdWriteStringQ(" "); else {lcdWriteQ(0xFF);}
-    lcdSetCursorQ(col, 3);
+    lcdSetCursorQ(col-4, 3);
+    if(!pad[16])lcdWriteStringQ(" "); else {lcdWriteQ(0xFF);}
+    if(!pad[17])lcdWriteStringQ(" "); else {lcdWriteQ(0xFF);}
+    if(!pad[18])lcdWriteStringQ(" "); else {lcdWriteQ(0xFF);}
+    if(!pad[19])lcdWriteStringQ(" "); else {lcdWriteQ(0xFF);}
     if(!pad[0])lcdWriteStringQ(" "); else {lcdWriteQ(0xFF);}
     if(!pad[1])lcdWriteStringQ(" "); else {lcdWriteQ(0xFF);}
     if(!pad[2])lcdWriteStringQ(" "); else {lcdWriteQ(0xFF);}
