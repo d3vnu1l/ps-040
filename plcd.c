@@ -10,8 +10,8 @@
 #include "plcd.h"
 #include "common.h"
 #include "utilities.h"
+#include "screens.h"
 
-extern unsigned char TEST_SIN;
 extern unsigned char pad[BUTTONS];
 
 int  lcdBuf[LCDBUF+1]={0};
@@ -32,11 +32,9 @@ void lcdCommandQ(unsigned char data){
 }
 
 void lcdClearQ(void){
-    *lcdWritePtr++=(LCD_CLEARDISPLAY)|0x0300;  //flag for rs=0 & long delay
-}
-
-void lcdReturnQ(void){
-    *lcdWritePtr++=(LCD_RETURNHOME)|0x0300;  //flag for rs=0 & long delay
+    *lcdWritePtr++=LCD_CLEARDISPLAY|0x0300;     //flag for rs=1 & long delay
+    if(lcdWritePtr==&lcdBuf[LCDBUF])
+        lcdWritePtr=lcdBuf;
 }
 
 void lcdSetCursorQ(unsigned char col, unsigned char row) {
@@ -49,66 +47,11 @@ void lcdSetCursorQ(unsigned char col, unsigned char row) {
         lcdWritePtr=lcdBuf; 
 }
 
-void lcdPwrQ(signed int pwr){
-    //lcd soft power on/off, does not reset device
-    lcdCommandQ(0x04);
-}
-
-void lcdCursorEn(signed int pwr){
-    //cursor on / off
-    lcdCommandQ(0x0A);
-}
-
-void lcdCursorBlinkQ(signed int pwr){
-    lcdCommandQ(0x09);
-}
-
 void lcdWriteStringQ(char *string) {
     char *it = string;
     for (; *it; it++) {
         lcdWriteQ(*it);
   }
-}
-
-void lcdSetupDebug(){
-    lcdSetCursorQ(0,0);
-    lcdWriteStringQ("P1:");
-    lcdSetCursorQ(8,0);
-    lcdWriteStringQ("P2:");
-    lcdSetCursorQ(0,1);
-    lcdWriteStringQ("P3:");
-    lcdSetCursorQ(8,1);
-    lcdWriteStringQ("P4:");
-
-    lcdSetCursorQ(0,2);
-    lcdWriteStringQ("I:");
-    lcdSetCursorQ(8,2);
-    lcdWriteStringQ("O:");
-    lcdSetCursorQ(0,3);
-    lcdWriteStringQ("Cyc:");
-    lcdSetCursorQ(11,3);
-    if(TEST_SIN==TRUE)lcdWriteStringQ("SINE");
-    else lcdWriteStringQ("THRU");  
-}
-
-void lcdSetupPots(void){
-    lcdSetCursorQ(0,0);
-    lcdWriteStringQ("1:");
-    lcdSetCursorQ(8,0);
-    lcdWriteStringQ("2:");
-    lcdSetCursorQ(0,1);
-    lcdWriteStringQ("3:");
-    lcdSetCursorQ(8,1);
-    lcdWriteStringQ("4:");
-    lcdSetCursorQ(0,2);
-    lcdWriteStringQ("5:");
-    lcdSetCursorQ(8,2);
-    lcdWriteStringQ("6:");
-    lcdSetCursorQ(0,3);
-    lcdWriteStringQ("SPI:");
-    lcdSetCursorQ(11,3);
-    if(TEST_SIN==TRUE)lcdWriteStringQ("SINE");
-    else lcdWriteStringQ("THRU");  
 }
 
 void lcdCustomSymbols(void){
@@ -147,14 +90,27 @@ void lcdWriteWordQ(int word){
    lcdWriteQ(inchar[0]);
 }
 
-void lcdVUvertical(unsigned char col, unsigned char row, int data){
-    lcdSetCursorQ(col,row);
+void lcdWriteDecimalQ(char word){
+    char result[4];
+    char i = 3;
+    do {
+
+        result[i] = '0' + word % 10;
+        word /= 10;
+        i--;
+    }
+    while (word > 0);
+    while (i>=0) result[i--] = "0"; 
+    
+    for (i=0; i<4; i++) {
+        lcdWriteQ(result[i]);
+    }
 }
 
 //4x4 pad debug
 void lcdDrawPads(unsigned char col){
     char block=0xFF;
-    if(!pad[16]||!pad[17]) block='*';
+    if(!pad[34]||!pad[16]) block='*';
     
     lcdSetCursorQ(col, 0);
     if(!pad[12])lcdWriteStringQ(" "); else lcdWriteQ(block);
@@ -182,49 +138,48 @@ void lcdPoll(void){
     if(lcdWritePtr!=lcdReadPtr){   
         if((*lcdReadPtr>>8)&1) LCD_RS=0;
         else LCD_RS=1;
+        if((*lcdReadPtr>>9)&1) PR3=0x2DF0; //2DF0 for ~1.3mS
+        else PR3=0x0120; //120 for ~40uS
         PMDIN1=(*lcdReadPtr++)&0x00FF;
         if(lcdReadPtr==&lcdBuf[LCDBUF]) lcdReadPtr=lcdBuf;
-        if((*lcdReadPtr>>9)&1)
-            PR3=0x2D00; //2D00 for ~1.3mS
-        else PR3=0x0120; //120 for ~40uS
     } 
     TMR3=0x0000; 
 }
 
 //ALWAYS SENDS, blocks program
-void lcdSend(unsigned char data){
+void lcdBlockingSend(unsigned char data){
     while(PMMODEbits.BUSY)Delay_us(2);
     PMDIN1=data; 
 }
 //ALWAYS SENDS, blocks program
-void lcdClear(void){
+void lcdBlockingClear(void){
     while(PMMODEbits.BUSY)Delay_us(2);
     PMDIN1=LCD_CLEARDISPLAY; 
 }
 
 //ALWAYS SENDS, blocks program
-void lcdReturn(void){
+void lcdBlockingReturn(void){
     while(PMMODEbits.BUSY)Delay_us(2);
     PMDIN1=LCD_RETURNHOME;
 }
 
 void lcdInit(void){
     LCD_RS=0;
-    lcdSend(0x38);              //function set, 8 bits, 2 line disp, 5x8
+    lcdBlockingSend(0x38);              //function set, 8 bits, 2 line disp, 5x8
     Delay_us(4500);                //>4.1 mS required
-    lcdSend(0x0C);              //display on, cursor on, blink on   (0f for blink+cursor)
+    lcdBlockingSend(0x0C);              //display on, cursor on, blink on   (0f for blink+cursor)
     Delay_us(4500);
-    lcdClear();                    //Display Clear  
+    lcdBlockingClear();                    //Display Clear  
     Delay_us(1800);                //>1.64mS required
-    lcdSend(0x06);               // entry Mode Set
+    lcdBlockingSend(0x06);               // entry Mode Set
     Delay_us(200);
-    lcdReturn();
+    lcdBlockingReturn();
     Delay_us(1500);
     
     //lcdCustomSymbols();
     Delay_us(200);
-    lcdClear();                         //Display Clear  
+    lcdBlockingClear();                         //Display Clear  
     Delay_us(1500);
-    lcdReturn();
+    lcdBlockingReturn();
     Delay_us(200);
 }

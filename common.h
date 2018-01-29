@@ -1,6 +1,7 @@
 #ifndef COMMON_H
 #define	COMMON_H
 #include <xc.h> 
+#include <dsp.h>
 
 #define Fin     73728000
 #define Fosc    138240000
@@ -15,21 +16,32 @@
 
 /* BUFFERS */
 #define LOOP_BUF_SIZE 10000             //about 1/4th of a second               //FX settings
-#define STREAMBUF   256                   //input adc stack size, must be divisible by 2
-#define LCDBUF      128                     //lcd command buffer size
+#define STREAMBUF   512                   //input adc stack size, must be divisible by 2
+#define LCDBUF      256                     //lcd command buffer size
 #define LCDBUFMASK  0x007F               //lcd buffer access mask
 
 
 //misc
 #define TRUE    0xFF
 #define FALSE   0x00
-#define BUTTONS 18
-#define POTS	6                       // Number of channels enabled for channel scan
+#define BUTTONS 35
+#define POTS	12                       // Number of channels enabled for channel scan
 #define SLED _LATF0                                                            
 #define LCD_RS _LATE15
-#define SS3L _LATF1
+#define SS3 _LATF1
 #define ENCODERCNTH POS1CNTH
 #define ENCODERCNTL POS1CNTL
+
+#define POT_SCALAR Q15(0.003051850947599)
+
+enum screen{
+    invalid,
+    start,
+    scrnFX,
+    debugscrnPOTS,
+    debugscrnAUDIO,
+    debugscrnFLASH
+};
 
 #endif	/* COMMON_H */
 

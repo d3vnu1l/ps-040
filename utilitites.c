@@ -1,4 +1,3 @@
-#include "utilities.h"
 #include <xc.h>
 #include <p33EP512GM310.h>
 #include <libpic30.h>
@@ -9,9 +8,9 @@
 #include "common.h"
 #include "sounds.h"
 #include "audio.h"
-#include "plcd.h"
 #include "flash.h"
-
+#include "screens.h"
+#include "utilities.h"
 #include "devInits.h"
 
 
@@ -20,9 +19,7 @@ extern unsigned char pad[BUTTONS];
 extern fractional pots[POTS];
 extern fractional pots_scaled[POTS];
 extern unsigned char UART_ON; 
-extern int temp1, temp2;
-
-extern char flash_readback[512];
+extern enum screen state;
 
 //STATUS VARIABLES//
 extern unsigned char hard_clipped;
@@ -41,37 +38,53 @@ extern fractional tremelo_depth;
 extern unsigned char kick_playing, snare_playing;   
 extern unsigned char frame;
 
-int  scanCounter=0;
-
-void scanMatrix(void){
-    static unsigned char pad_last[BUTTONS]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+void scanButtons(void){
+    static unsigned char pad_last[BUTTONS]={1};
     int portrdG, portrdD, portrdF;
 
     portrdG = PORTG;
     portrdD = PORTD;
     portrdF = PORTF;
     
-    pad[0]=(portrdG)&1;
-    pad[1]=(portrdG>>1)&1;
-    pad[2]=(portrdG>>2)&1;
-    pad[3]=(portrdG>>3)&1;
-    pad[17]=(portrdG>>10)&1;    // Encoder button
-    pad[11]=(portrdG>>11)&1;
-    pad[12]=(portrdG>>12)&1;
-    pad[13]=(portrdG>>13)&1;
-    pad[14]=(portrdG>>14)&1;
-    pad[15]=(portrdG>>15)&1;
+    pad[34]=(portrdF>>7)&1;     // Special function button
     
-    pad[4]=(portrdF>>4)&1;
-    pad[5]=(portrdF>>5)&1;
-    pad[6]=(portrdF>>6)&1;
-    pad[16]=(portrdF>>7)&1;     // Special function button
-    
-    pad[7]=(portrdD>>1)&1;
-    pad[8]=(portrdD>>2)&1;
-    pad[9]=(portrdD>>3)&1;
-    pad[10]=(portrdD>>4)&1;
-    
+    if(pad[34]){
+        pad[6]=(portrdF>>6)&1;
+        pad[5]=(portrdF>>5)&1;
+        pad[4]=(portrdF>>4)&1;
+        pad[0]=(portrdG)&1;
+        pad[1]=(portrdG>>1)&1;
+        pad[2]=(portrdG>>2)&1;
+        pad[3]=(portrdG>>3)&1;
+        pad[16]=(portrdG>>10)&1;    // Encoder button
+        pad[11]=(portrdG>>11)&1;
+        pad[12]=(portrdG>>12)&1;
+        pad[13]=(portrdG>>13)&1;
+        pad[14]=(portrdG>>14)&1;
+        pad[15]=(portrdG>>15)&1;
+        pad[7]=(portrdD>>1)&1;
+        pad[8]=(portrdD>>2)&1;
+        pad[9]=(portrdD>>3)&1;
+        pad[10]=(portrdD>>4)&1;
+    } else {
+        pad[23]=(portrdF>>6)&1;
+        pad[22]=(portrdF>>5)&1;
+        pad[21]=(portrdF>>4)&1;
+        pad[17]=(portrdG)&1;
+        pad[18]=(portrdG>>1)&1;
+        pad[19]=(portrdG>>2)&1;
+        pad[20]=(portrdG>>3)&1;
+        pad[33]=(portrdG>>10)&1;    // Encoder button
+        pad[28]=(portrdG>>11)&1;
+        pad[29]=(portrdG>>12)&1;
+        pad[30]=(portrdG>>13)&1;
+        pad[31]=(portrdG>>14)&1;
+        pad[32]=(portrdG>>15)&1;
+        pad[24]=(portrdD>>1)&1;
+        pad[25]=(portrdD>>2)&1;
+        pad[26]=(portrdD>>3)&1;
+        pad[27]=(portrdD>>4)&1;
+    }
 
    
     
@@ -117,15 +130,24 @@ void readPots(void){
     volatile register int scaled asm("A");
     _AD1IF = 0; // Clear conversion done status bit
     
-    pots[0]=(ADC1BUF0>>1)|0x7;
-    pots[1]=(ADC1BUF1>>1)|0x7;
-    pots[2]=(ADC1BUF2>>1)|0x7;
-    pots[3]=(ADC1BUF3>>1)|0x7;
-    pots[4]=(ADC1BUF4>>1)|0x7;
-    pots[5]=(ADC1BUF5>>1)|0x7;
+    if(pad[34]){
+        pots[0]=(ADC1BUF0>>1)|0x7;
+        pots[1]=(ADC1BUF1>>1)|0x7;
+        pots[2]=(ADC1BUF2>>1)|0x7;
+        pots[3]=(ADC1BUF3>>1)|0x7;
+        pots[4]=(ADC1BUF4>>1)|0x7;
+        pots[5]=(ADC1BUF5>>1)|0x7;
+    } else {
+        pots[6]=(ADC1BUF0>>1)|0x7;
+        pots[7]=(ADC1BUF1>>1)|0x7;
+        pots[8]=(ADC1BUF2>>1)|0x7;
+        pots[9]=(ADC1BUF3>>1)|0x7;
+        pots[10]=(ADC1BUF4>>1)|0x7;
+        pots[11]=(ADC1BUF5>>1)|0x7;
+    }
     
-    loop_lim=pots_scaled[5];                                                //LOOPER CONTROL
-    if(pots[0]>=310){                                                           //LPF CONTROL
+    loop_lim=pots_scaled[5];               //LOOPER CONTROL
+    if(pots[0]>=310){                      //LPF CONTROL
         lpf_alpha=pots[0];
         lpf_inv_alpha=(32767-lpf_alpha); 
     }
@@ -139,43 +161,13 @@ void display(void){
     IFS0bits.SPI1IF=0;
     SPI1STATbits.SPIROV = 0;
    
+    // Update ui state logic here
+    state = (ENCODERCNTL/4)+1;
     
-   lcdDrawPads(16);
-   
-   lcdSetCursorQ(0,0);
-   lcdWriteWordQ(flash_readback[0]);
-    lcdSetCursorQ(7,0);
-   lcdWriteWordQ(flash_readback[1]);
-    lcdSetCursorQ(0,1);
-   lcdWriteWordQ(flash_readback[2]);
-    lcdSetCursorQ(7,1);
-   lcdWriteWordQ(flash_readback[3]);
-    lcdSetCursorQ(0,2);
-   lcdWriteWordQ(flash_readback[4]);
-    lcdSetCursorQ(7,2);
-   lcdWriteWordQ(flash_readback[5]);
-   
-   
-   lcdSetCursorQ(0,3);
-   lcdWriteStringQ("Stat:");
-   lcdWriteWordQ(flashStatusCheck());
-    
-
-    /*
-    lcdSetCursorQ(0,3);
-    if(hard_clipped==TRUE){                                                     //CLIP CONTROL    
-        lcdWriteStringQ("CLIP");
-        hard_clipped=FALSE;  
-    }
-    else if(TEST_SIN==TRUE)lcdWriteStringQ("SINE");
-    else lcdWriteStringQ("THRU");
-    */
-   
-   lcdSetCursorQ(10,3);
-   lcdWriteWordQ(ENCODERCNTL);
+    // Update screen here
+    screenUpdate();
    
    if(UART_ON==TRUE){
-        //IC1CON2bits.TRIGSTAT = ~pad[4]; 
         //printf("b1 %d, b2 %d, b3 %d, b4 %d\r\n", pad[0], pad[1], pad[2], pad[3]);
         //printf("b4 %d, b5 %d, b6 %d, b7 %d\r\n", pad[4], pad[5], pad[6], pad[7]);
         //printf("P1 %x  P1 %d bpm %d\r\n", pots[0], pots[0], bpm);   //check pots

@@ -3,4 +3,5 @@ main.c  \
 common.h  \
 devInits.h  \
 utilities.h  \
- audio.h 
+ audio.h  \
+plcd.h 

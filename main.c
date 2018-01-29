@@ -6,7 +6,7 @@
 #include "devInits.h"
 #include "utilities.h"
 #include "audio.h"
-//#include "fatfs/src/ff.h"
+#include "plcd.h"
 
 #pragma config ICS = PGD1       //pgeDC 1 is used
 #pragma config JTAGEN = OFF     //disable jtag
@@ -18,7 +18,7 @@
 #pragma config OSCIOFNC = OFF   //OSC2 is clock output
 #pragma config FNOSC = FRCPLL   //clock source
 
-unsigned char pad[BUTTONS]={1};                                                                   //CONTROL VARIABLES//
+unsigned char pad[BUTTONS];                                                                   //CONTROL VARIABLES//
 fractional pots[POTS]={0};
 fractional pots_scaled[POTS]={0};
 fractional outputA[STREAMBUF], outputB[STREAMBUF];
@@ -47,9 +47,12 @@ int temp1, temp2;
 
 char flash_readback[512]={0};
 
+enum screen state = debugscrnPOTS;
+enum screen laststate = invalid;
+
 void initBuffer(void){
-    int i=0;
-    for(; i<STREAMBUF; i++){
+    int i;
+    for(i=0; i<STREAMBUF; i++){
         streamA[i]=0;
         streamB[i]=0;
         txBufferA[i]=0;
@@ -57,6 +60,9 @@ void initBuffer(void){
         rxBufferA[i]=0;
         rxBufferB[i]=0;
     }
+    
+    for(i=0; i<BUTTONS; i++)
+        pad[i]=1;
 }
 
 int main(void) {
@@ -103,7 +109,7 @@ int main(void) {
             frameReady=0;
         }
         if(_T2IF){
-            scanMatrix();                   //read button matrix
+            scanButtons();                   //read button matrix
             readPots();                     //read control pots
             if(_AD1IF) readPots();
             _T2IF=0;

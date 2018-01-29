@@ -1,9 +1,9 @@
 build/default/production/utilitites.o:  \
 utilitites.c  \
-utilities.h  \
 common.h  \
- sounds.h  \
-audio.h  \
-plcd.h  \
+sounds.h  \
+ audio.h  \
 flash.h  \
+screens.h  \
+utilities.h  \
 devInits.h 

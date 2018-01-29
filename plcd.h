@@ -19,27 +19,23 @@
 
 void lcdInit(void);
 void lcdWriteQ(unsigned char);
-void lcdCommandQ(unsigned char);
 void lcdClearQ(void);
-void lcdReturnQ(void);
-void lcdPwrQ(signed int);
-void lcdCursorPwrQ(void);
-void lcdCursorBlinkQ(signed int);
+void lcdCommandQ(unsigned char);
+void lcdBlockingReturn(void);
 void lcdWriteStringQ(char *);
 void lcdCustomSymbols(void);
 void lcdSetCursorQ(unsigned char, unsigned char);
 void lcdWriteWordQ(int);
-void lcdVU(char, char, int);
+void lcdWriteDecimalQ(char);
 void lcdDrawPads(unsigned char);
+
+void lcdFrameQ(char);
 void lcdPoll(void);
 
-void lcdSetupDebug(void);
-void lcdSetupPots(void);
-
-/* Blocking Functions */
-void lcdSend(unsigned char);
-void lcdClear(void);
-void lcdReturn(void);
+/* Blocking send functions */
+void lcdBlockingSend(unsigned char);
+void lcdBlockingClear(void);
+void lcdBlockingReturn(void);
 
 
 

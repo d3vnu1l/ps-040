@@ -12,6 +12,7 @@
       <itemPath>audio.h</itemPath>
       <itemPath>plcd.h</itemPath>
       <itemPath>flash.h</itemPath>
+      <itemPath>screens.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -28,6 +29,7 @@
       <itemPath>audio.c</itemPath>
       <itemPath>plcd.c</itemPath>
       <itemPath>flash.c</itemPath>
+      <itemPath>screens.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

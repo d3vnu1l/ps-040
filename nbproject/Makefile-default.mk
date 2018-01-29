@@ -51,17 +51,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=devInits.c main.c utilitites.c routines.c sounds.c audio.c plcd.c flash.c
+SOURCEFILES_QUOTED_IF_SPACED=devInits.c main.c utilitites.c routines.c sounds.c audio.c plcd.c flash.c screens.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/devInits.o ${OBJECTDIR}/main.o ${OBJECTDIR}/utilitites.o ${OBJECTDIR}/routines.o ${OBJECTDIR}/sounds.o ${OBJECTDIR}/audio.o ${OBJECTDIR}/plcd.o ${OBJECTDIR}/flash.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/devInits.o.d ${OBJECTDIR}/main.o.d ${OBJECTDIR}/utilitites.o.d ${OBJECTDIR}/routines.o.d ${OBJECTDIR}/sounds.o.d ${OBJECTDIR}/audio.o.d ${OBJECTDIR}/plcd.o.d ${OBJECTDIR}/flash.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/devInits.o ${OBJECTDIR}/main.o ${OBJECTDIR}/utilitites.o ${OBJECTDIR}/routines.o ${OBJECTDIR}/sounds.o ${OBJECTDIR}/audio.o ${OBJECTDIR}/plcd.o ${OBJECTDIR}/flash.o ${OBJECTDIR}/screens.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/devInits.o.d ${OBJECTDIR}/main.o.d ${OBJECTDIR}/utilitites.o.d ${OBJECTDIR}/routines.o.d ${OBJECTDIR}/sounds.o.d ${OBJECTDIR}/audio.o.d ${OBJECTDIR}/plcd.o.d ${OBJECTDIR}/flash.o.d ${OBJECTDIR}/screens.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/devInits.o ${OBJECTDIR}/main.o ${OBJECTDIR}/utilitites.o ${OBJECTDIR}/routines.o ${OBJECTDIR}/sounds.o ${OBJECTDIR}/audio.o ${OBJECTDIR}/plcd.o ${OBJECTDIR}/flash.o
+OBJECTFILES=${OBJECTDIR}/devInits.o ${OBJECTDIR}/main.o ${OBJECTDIR}/utilitites.o ${OBJECTDIR}/routines.o ${OBJECTDIR}/sounds.o ${OBJECTDIR}/audio.o ${OBJECTDIR}/plcd.o ${OBJECTDIR}/flash.o ${OBJECTDIR}/screens.o
 
 # Source Files
-SOURCEFILES=devInits.c main.c utilitites.c routines.c sounds.c audio.c plcd.c flash.c
+SOURCEFILES=devInits.c main.c utilitites.c routines.c sounds.c audio.c plcd.c flash.c screens.c
 
 
 CFLAGS=
@@ -144,6 +144,13 @@ ${OBJECTDIR}/flash.o: flash.c  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} $(MP_EXTRA_CC_PRE)  flash.c  -o ${OBJECTDIR}/flash.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/flash.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/flash.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
+${OBJECTDIR}/screens.o: screens.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/screens.o.d 
+	@${RM} ${OBJECTDIR}/screens.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  screens.c  -o ${OBJECTDIR}/screens.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/screens.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off  
+	@${FIXDEPS} "${OBJECTDIR}/screens.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
 else
 ${OBJECTDIR}/devInits.o: devInits.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
@@ -200,6 +207,13 @@ ${OBJECTDIR}/flash.o: flash.c  nbproject/Makefile-${CND_CONF}.mk
 	@${RM} ${OBJECTDIR}/flash.o 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  flash.c  -o ${OBJECTDIR}/flash.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/flash.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/flash.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
+${OBJECTDIR}/screens.o: screens.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/screens.o.d 
+	@${RM} ${OBJECTDIR}/screens.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  screens.c  -o ${OBJECTDIR}/screens.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/screens.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off  
+	@${FIXDEPS} "${OBJECTDIR}/screens.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 endif
 

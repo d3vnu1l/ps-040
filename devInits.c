@@ -8,6 +8,7 @@
 #include "devInits.h"
 #include "utilities.h"
 #include "plcd.h"
+#include "screens.h"
 #include "flash.h"
 #include "dsp.h"
 
@@ -311,7 +312,7 @@ void initDMA0(void){
 void initSPI3_MEM(void){
     int i=0;
     
-    SS3L=1;                     // Assert chip select (active low)
+    SS3=1;                     // Assert chip select (active low)
     IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
     IEC5bits.SPI3IE = 0;        // Disable the interrupt
     SPI3CON1bits.MSTEN=1;       //master mode

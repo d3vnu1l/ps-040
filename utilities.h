@@ -9,10 +9,11 @@
 
 //
 //function definitions
-void scanMatrix(void);
+void scanButtons(void);
 void readPots(void);
 void display(void);
 void processRxData(int *, int *);
+void Delay_us(unsigned int);
 
 #endif	/* UTILITIES_H */
 
