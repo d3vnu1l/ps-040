@@ -10,7 +10,7 @@
 /* Timers and Frequencies */
 #define BAUDRATE 57600                  //target baud rate for *UART*           //peripheral configs
 #define BRGVAL  ((Fcy/BAUDRATE)/16)-1    //calculate baud value (MAY TRUNCATE)
-#define Fscan   128                       //target buttons & pots sampling rate
+#define Fscan   256                       //target buttons & pots sampling rate
 #define Fout    44100                      //target output sampling rate (~45k last measured)
 #define Fdisp   15                        //15hz display update rate
 
@@ -34,12 +34,31 @@
 
 #define POT_PERCENT Q15(0.3937)      // For pot 0-100 display
 
+/* Potentiometer mapping 
+    0   1  |  6   7
+    2   3  |  8   9
+    4   5  |  10  11      */
+#define POT_VOLUME          7
+#define POT_FX_SELECT1      10
+#define POT_FX_SELECT2      11
+
+
+
+/* Button Mapping
+    12  13  14  15  |   28  29  30  31      Encoder:
+    8   9   10  11  |   24  25  26  27              32  |   33
+    4   5   6   7   |   20  21  22  23      Function:
+ `` 0   1   2   3   |   16  17  18  19              34
+ */
+#define BTN_SPECIAL         34
+
 enum screen{
     invalid,
     scrnFX,
     debugscrnPOTS,
     debugscrnFLASH,
     debugscrnBUFFERS,
+    debugscrnINPUT,
     debugscrnAUDIO,
     start
 };

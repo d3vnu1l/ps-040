@@ -15,6 +15,7 @@
 extern unsigned char TEST_SIN;
 extern fractional pots[POTS];
 extern fractional pots_percent[POTS];
+extern unsigned char pad[BUTTONS];
 extern enum screen state, laststate;
 extern char flash_readback[512];
 extern unsigned int process_time;
@@ -24,7 +25,7 @@ void screenDebugAudio(){
 
 }
 
-void screenDebufBuffers(){
+void screenDebugBuffers(){
     if(state!=laststate){
         //setup here
         lcdClearQ();
@@ -51,6 +52,8 @@ void screenDebufBuffers(){
 }
 
 void screenDebugPots(void){
+    int bank=0;
+    
     if(state!=laststate){
         // Setup here
         lcdClearQ();
@@ -64,30 +67,31 @@ void screenDebugPots(void){
         lcdWriteStringQ("|");
     } else {
         // Update here
+        if(!pad[34])bank=POTS/2;
         lcdSetCursorQ(0,1);
-        lcdWriteDecimalQ(pots_percent[0], 3);
+        lcdWriteDecimalQ(pots_percent[bank], 3);
         lcdWriteQ(',');
-        lcdWriteWordUnsignedQ(pots[0]);
+        lcdWriteWordUnsignedQ(pots[bank++]);
         lcdSetCursorQ(11,1);
-        lcdWriteDecimalQ(pots_percent[1], 3);
+        lcdWriteDecimalQ(pots_percent[bank], 3);
         lcdWriteQ(',');
-        lcdWriteWordUnsignedQ(pots[1]);
+        lcdWriteWordUnsignedQ(pots[bank++]);
         lcdSetCursorQ(0,2);
-        lcdWriteDecimalQ(pots_percent[2], 3);
+        lcdWriteDecimalQ(pots_percent[bank], 3);
         lcdWriteQ(',');
-        lcdWriteWordUnsignedQ(pots[2]);
+        lcdWriteWordUnsignedQ(pots[bank++]);
         lcdSetCursorQ(11,2);
-        lcdWriteDecimalQ(pots_percent[3], 3);
+        lcdWriteDecimalQ(pots_percent[bank], 3);
         lcdWriteQ(',');
-        lcdWriteWordUnsignedQ(pots[3]);
+        lcdWriteWordUnsignedQ(pots[bank++]);
         lcdSetCursorQ(0,3);
-        lcdWriteDecimalQ(pots_percent[4], 3);
+        lcdWriteDecimalQ(pots_percent[bank], 3);
         lcdWriteQ(',');
-        lcdWriteWordUnsignedQ(pots[4]);
+        lcdWriteWordUnsignedQ(pots[bank++]);
         lcdSetCursorQ(11,3);
-        lcdWriteDecimalQ(pots_percent[5], 3);
+        lcdWriteDecimalQ(pots_percent[bank], 3);
         lcdWriteQ(',');
-        lcdWriteWordUnsignedQ(pots[5]);
+        lcdWriteWordUnsignedQ(pots[bank++]);
     }
 }
 
@@ -162,6 +166,20 @@ void screenDebugFlash(void){
     }
 }
 
+void screenDebugInput(void){
+    if(state!=laststate){
+        //setup here
+        lcdClearQ();
+        lcdSetCursorQ(0,0);
+        lcdWriteStringQ("Input Debug");
+        lcdSetCursorQ(0,1);
+        lcdWriteStringQ("ADC variance: ");
+    } else {
+        //update here
+        lcdDrawPads(16);
+    }
+}
+
 void screenUpdate(void){
     switch(state){
         case start: break;
@@ -171,7 +189,9 @@ void screenUpdate(void){
         break;
         case debugscrnFLASH:    screenDebugFlash();
         break;
-        case debugscrnBUFFERS:  screenDebufBuffers();
+        case debugscrnBUFFERS:  screenDebugBuffers();
+        break;
+        case debugscrnINPUT:    screenDebugInput();
         break;
                         
         default: break;

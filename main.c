@@ -31,7 +31,7 @@ fractional rxBufferB[STREAMBUF] __attribute__((space(eds)));
 
 
 /* Debug Variables */
-unsigned int idle=0, process_time=0;
+unsigned int process_time=0;
 
 unsigned char hard_clipped=FALSE;                                              
 volatile unsigned char recording=TRUE;
@@ -85,38 +85,27 @@ int main(void) {
     initQEI_ENC();
     //initT5();
     fractional temp;
-    int writePtr;
     fractional *ping, *pong;
     
     while(1){    
         if(frameReady) {
-            writePtr=STREAMBUF-1;
-            process_time=writePtr;  //DEBUG
+            process_time=(STREAMBUF-1);             //DEBUG
             if(rw){
-                ping = streamA+writePtr;
-                pong = outputB+writePtr;
+                ping = streamA+(STREAMBUF-1);
+                pong = outputB+(STREAMBUF-1);
             }else{
-                ping = streamB+writePtr;
-                pong = outputA+writePtr;
+                ping = streamB+(STREAMBUF-1);
+                pong = outputA+(STREAMBUF-1);
             }
             
-            for(; writePtr>=0; writePtr--){
-                temp=*ping--; //!rw
-                if(temp<=-32766||temp>=32766)hard_clipped=TRUE;
-                temp=fx(temp);    //run fx on latest sample
-                *pong--=mixer(temp); //rw
-                
-            }
-            process_time-=write_ptr;    //DEBUG
-            temp = 8*idle/STREAMBUF;
-            idle=0;
+            processAudio(ping, pong); 
+            process_time=(STREAMBUF-1)-write_ptr;    //DEBUG
             frameReady=0;
             
             
         }
         if(_T2IF){
             scanButtons();                   //read button matrix
-            readPots();                     //read control pots
             if(_AD1IF) readPots();
             _T2IF=0;
         }

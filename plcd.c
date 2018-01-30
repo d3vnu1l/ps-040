@@ -130,29 +130,29 @@ void lcdWriteDecimalQ(char word, int digits){
 
 //4x4 pad debug
 void lcdDrawPads(unsigned char col){
-    char block=0xFF;
+    unsigned char block=0xFF;
     if(!pad[34]||!pad[16]) block='*';
     
     lcdSetCursorQ(col, 0);
-    if(!pad[12])lcdWriteStringQ(" "); else lcdWriteQMac(block);
-    if(!pad[13])lcdWriteStringQ(" "); else lcdWriteQMac(block);
-    if(!pad[14])lcdWriteStringQ(" "); else lcdWriteQMac(block);
-    if(!pad[15])lcdWriteStringQ(" "); else lcdWriteQMac(block);
+    if(!pad[12]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!pad[13]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!pad[14]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!pad[15]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
     lcdSetCursorQ(col, 1);
-    if(!pad[8])lcdWriteStringQ(" "); else lcdWriteQMac(block);
-    if(!pad[9])lcdWriteStringQ(" "); else lcdWriteQMac(block);
-    if(!pad[10])lcdWriteStringQ(" "); else lcdWriteQMac(block);
-    if(!pad[11])lcdWriteStringQ(" "); else lcdWriteQMac(block);
+    if(!pad[8]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!pad[9]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!pad[10]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!pad[11]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
     lcdSetCursorQ(col, 2);
-    if(!pad[4])lcdWriteStringQ(" "); else lcdWriteQMac(block);
-    if(!pad[5])lcdWriteStringQ(" "); else lcdWriteQMac(block);
-    if(!pad[6])lcdWriteStringQ(" "); else lcdWriteQMac(block);
-    if(!pad[7])lcdWriteStringQ(" "); else lcdWriteQMac(block);
+    if(!pad[4]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!pad[5]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!pad[6]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!pad[7]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
     lcdSetCursorQ(col, 3);
-    if(!pad[0])lcdWriteStringQ(" "); else lcdWriteQMac(block);
-    if(!pad[1])lcdWriteStringQ(" "); else lcdWriteQMac(block);
-    if(!pad[2])lcdWriteStringQ(" "); else lcdWriteQMac(block);
-    if(!pad[3])lcdWriteStringQ(" "); else lcdWriteQMac(block);
+    if(!pad[0]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!pad[1]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!pad[2]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!pad[3]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
 }
 
 void lcdPoll(void){  

@@ -126,37 +126,53 @@ void scanButtons(void){
 }
 
 void readPots(void){
+    volatile register int result asm("A");
+    static fractional pots_buf[POTS/2];
+    const fractional pot_alpha = 0x0F00;    //larger = rougher, lower = more latency
+    const fractional pot_alpha_inv = 32767-pot_alpha;
+    int i;
     _AD1IF = 0; // Clear conversion done status bit
+    if(pad[34])i=0;
+    else i=POTS/2;
+    pots_buf[i++]=(ADC1BUF5>>1)|0x7;
+    pots_buf[i++]=(ADC1BUF2>>1)|0x7;
+    pots_buf[i++]=(ADC1BUF4>>1)|0x7;
+    pots_buf[i++]=(ADC1BUF1>>1)|0x7;
+    pots_buf[i++]=(ADC1BUF3>>1)|0x7;
+    pots_buf[i]=(ADC1BUF0>>1)|0x7;
+
+    result =__builtin_mpy(pots_buf[i],pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
+    result =__builtin_mac(result, pots[i], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
+    pots[i--]=__builtin_sac(result, 0);
+    result =__builtin_mpy(pots_buf[i],pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
+    result =__builtin_mac(result, pots[i], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
+    pots[i--]=__builtin_sac(result, 0);
+    result =__builtin_mpy(pots_buf[i],pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
+    result =__builtin_mac(result, pots[i], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
+    pots[i--]=__builtin_sac(result, 0);
+    result =__builtin_mpy(pots_buf[i],pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
+    result =__builtin_mac(result, pots[i], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
+    pots[i--]=__builtin_sac(result, 0);
+    result =__builtin_mpy(pots_buf[i],pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
+    result =__builtin_mac(result, pots[i], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
+    pots[i--]=__builtin_sac(result, 0);
+    result =__builtin_mpy(pots_buf[i],pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
+    result =__builtin_mac(result, pots[i], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
+    pots[i]=__builtin_sac(result, 0);
     
-    if(pad[34]){
-        pots[5]=(ADC1BUF0>>1)|0x7;
-        pots[3]=(ADC1BUF1>>1)|0x7;
-        pots[1]=(ADC1BUF2>>1)|0x7;
-        pots[4]=(ADC1BUF3>>1)|0x7;
-        pots[2]=(ADC1BUF4>>1)|0x7;
-        pots[0]=(ADC1BUF5>>1)|0x7;
-    } else {
-        pots[6]=(ADC1BUF0>>1)|0x7;
-        pots[7]=(ADC1BUF1>>1)|0x7;
-        pots[8]=(ADC1BUF2>>1)|0x7;
-        pots[9]=(ADC1BUF3>>1)|0x7;
-        pots[10]=(ADC1BUF4>>1)|0x7;
-        pots[11]=(ADC1BUF5>>1)|0x7;
-    }
-    
-    loop_lim=pots_percent[5];               //LOOPER CONTROL
+    loop_lim=pots[5];               //LOOPER CONTROL
     if(pots[0]>=310){                      //LPF CONTROL
         lpf_alpha=pots[0];
         lpf_inv_alpha=(32767-lpf_alpha); 
     }
     tremelo_depth=pots[1];
+
     
 }
 
-void scalePots(void){
+void scalePotsPercent(void){
     /* Potentiometer scaling for fx or lcd display */
     volatile register int scaled asm("A");
-    
     scaled=__builtin_mpy(pots[0],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
     pots_percent[0]=__builtin_sac(scaled, 7);
     scaled=__builtin_mpy(pots[1],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
@@ -169,13 +185,10 @@ void scalePots(void){
     pots_percent[4]=__builtin_sac(scaled, 7);
     scaled=__builtin_mpy(pots[5],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
     pots_percent[5]=__builtin_sac(scaled, 7);
-    
-    //scaled=__builtin_mpy(pots[5],Q15(0.33), NULL, NULL, 0, NULL, NULL, 0);
-    //pots_percent[5]=__builtin_sac(scaled, 0);
 }
 
 void display(void){
-    scalePots();
+    scalePotsPercent();
     
     // Update ui state logic here
     state = (ENCODERCNTL/4)+1;

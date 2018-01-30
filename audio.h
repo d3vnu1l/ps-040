@@ -3,8 +3,8 @@
 
 #include <xc.h> // include processor files - each processor file is guarded.  
  
-fractional fx(fractional);
-fractional mixer(fractional);
+void runFX(fractional *, fractional *);
+void processAudio(fractional *, fractional *);
 
 #endif	/* XC_HEADER_TEMPLATE_H */
 
