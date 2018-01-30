@@ -17,7 +17,8 @@ extern fractional pots[POTS];
 extern fractional pots_percent[POTS];
 extern enum screen state, laststate;
 extern char flash_readback[512];
-extern unsigned int cycle;
+extern unsigned int process_time;
+
 
 void screenDebugAudio(){
 
@@ -30,18 +31,20 @@ void screenDebufBuffers(){
         lcdSetCursorQ(0,0);
         lcdWriteStringQ("Buffer Debug");
         lcdSetCursorQ(0,1);
-        lcdWriteStringQ("Audio:");
+        lcdWriteStringQ("FX time:");
+        lcdSetCursorQ(11,1);
+        lcdWriteStringQ("/256");
         lcdSetCursorQ(0,2);
         lcdWriteStringQ("LCD:");
         lcdSetCursorQ(0,3);
         lcdWriteStringQ("Flash:");
     } else {
         //update here
-        lcdSetCursorQ(6,1);
-        lcdWriteDecimalQ(cycle,3);
-        lcdSetCursorQ(4,2);
+        lcdSetCursorQ(8,1);
+        lcdWriteDecimalQ(process_time,3);
+        //lcdSetCursorQ(4,2);
         //lcdWriteDecimalQ();
-        lcdSetCursorQ(6,3);
+        //lcdSetCursorQ(6,3);
         //lcdWriteDecimalQ();
         
     }

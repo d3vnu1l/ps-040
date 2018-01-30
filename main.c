@@ -18,11 +18,10 @@
 #pragma config OSCIOFNC = OFF   //OSC2 is clock output
 #pragma config FNOSC = FRCPLL   //clock source
 
-unsigned char pad[BUTTONS];                                                                   //CONTROL VARIABLES//
-fractional pots[POTS]={0};
-fractional pots_percent[POTS]={0};
+/* Data Buffers & index variables */
 fractional outputA[STREAMBUF], outputB[STREAMBUF];
 fractional streamA[STREAMBUF], streamB[STREAMBUF];
+unsigned int write_ptr=STREAMBUF, rw=0, frameReady=0;
 
 /* DMA BUFFERS */
 fractional txBufferA[STREAMBUF]__attribute__((space(eds)));
@@ -30,25 +29,29 @@ fractional txBufferB[STREAMBUF] __attribute__((space(eds)));
 fractional rxBufferA[STREAMBUF] __attribute__((space(eds)));
 fractional rxBufferB[STREAMBUF] __attribute__((space(eds)));
 
-unsigned int bpm=0, rw=0, frameReady=0, write_ptr=STREAMBUF;
-unsigned int idle=0, cycle=0;
 
-unsigned char hard_clipped=FALSE;                                               //STATUS VARIABLES//
+/* Debug Variables */
+unsigned int idle=0, process_time=0;
+
+unsigned char hard_clipped=FALSE;                                              
 volatile unsigned char recording=TRUE;
 unsigned char UART_ON = FALSE;
 unsigned char TEST_SIN = FALSE;
 
-volatile unsigned char tremelo=FALSE;                                           //FX FLAGS//
+volatile unsigned char tremelo=FALSE;                                       
 volatile unsigned char looper=FALSE;
 volatile unsigned char lpf=FALSE;
 
-volatile unsigned char frame=FALSE;
-int temp1, temp2;
-
 char flash_readback[512]={0};
 
+/* Screen state variables */
 enum screen state = scrnFX;
 enum screen laststate = invalid;
+
+/* Buttons & Potentiometers */
+unsigned char pad[BUTTONS];                                                            
+fractional pots[POTS]={0};
+fractional pots_percent[POTS]={0};
 
 void initBuffer(void){
     int i;
@@ -88,6 +91,7 @@ int main(void) {
     while(1){    
         if(frameReady) {
             writePtr=STREAMBUF-1;
+            process_time=writePtr;  //DEBUG
             if(rw){
                 ping = streamA+writePtr;
                 pong = outputB+writePtr;
@@ -103,10 +107,12 @@ int main(void) {
                 *pong--=mixer(temp); //rw
                 
             }
+            process_time-=write_ptr;    //DEBUG
             temp = 8*idle/STREAMBUF;
-            cycle=STREAMBUF/(STREAMBUF-write_ptr);
             idle=0;
             frameReady=0;
+            
+            
         }
         if(_T2IF){
             scanButtons();                   //read button matrix

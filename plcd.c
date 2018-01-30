@@ -13,18 +13,18 @@
 #include "screens.h"
 
 extern unsigned char pad[BUTTONS];
-
-int  lcdBuf[LCDBUF+1]={0};
+int lcdBuf[LCDBUF+1]={0};
 int *lcdWritePtr=lcdBuf;
 int *lcdReadPtr=lcdBuf;
 
-
+// There are write and command macros in the header, make sure these match.
 void lcdWriteQ(unsigned char data){
     *lcdWritePtr++=data|0x0000;
     if(lcdWritePtr==&lcdBuf[LCDBUF])
         lcdWritePtr=lcdBuf;
 }
 
+// There are write and command macros in the header, make sure these match.
 void lcdCommandQ(unsigned char data){
     *lcdWritePtr++=data|0x0100;     //flag for rs=1
     if(lcdWritePtr==&lcdBuf[LCDBUF])
@@ -50,13 +50,13 @@ void lcdSetCursorQ(unsigned char col, unsigned char row) {
 void lcdWriteStringQ(char *string) {
     char *it = string;
     for (; *it; it++) {
-        lcdWriteQ(*it);
+        lcdWriteQMac(*it);
   }
 }
 
 void lcdCustomSymbols(void){
     int i=0;
-    lcdCommandQ(0x40);
+    lcdCommandQMac(0x40);
     Delay_us(200);
    // for(; i<8; i++)lcdWriteString(loadingOne[i]);
     //lcdWriteString(loadingTwo);
@@ -69,9 +69,9 @@ void lcdWriteWordQ(int word){
     char inchar[4];
     
     if(word<0) {
-        lcdWriteQ('-');
+        lcdWriteQMac('-');
         word=~word+1;
-    }else lcdWriteQ(' ');
+    }else lcdWriteQMac(' ');
    
    inchar[0] = word&0x000F; 
    if (inchar[0] > 9) 
@@ -84,10 +84,10 @@ void lcdWriteWordQ(int word){
           inchar[i]+=55;
       else inchar[i]+=48;
    } 
-   lcdWriteQ(inchar[3]);
-   lcdWriteQ(inchar[2]);
-   lcdWriteQ(inchar[1]);
-   lcdWriteQ(inchar[0]);
+   lcdWriteQMac(inchar[3]);
+   lcdWriteQMac(inchar[2]);
+   lcdWriteQMac(inchar[1]);
+   lcdWriteQMac(inchar[0]);
 }
 
 void lcdWriteWordUnsignedQ(unsigned int word){
@@ -105,10 +105,10 @@ void lcdWriteWordUnsignedQ(unsigned int word){
           inchar[i]+=55;
       else inchar[i]+=48;
    } 
-   lcdWriteQ(inchar[3]);
-   lcdWriteQ(inchar[2]);
-   lcdWriteQ(inchar[1]);
-   lcdWriteQ(inchar[0]);
+   lcdWriteQMac(inchar[3]);
+   lcdWriteQMac(inchar[2]);
+   lcdWriteQMac(inchar[1]);
+   lcdWriteQMac(inchar[0]);
 }
 
 void lcdWriteDecimalQ(char word, int digits){
@@ -124,7 +124,7 @@ void lcdWriteDecimalQ(char word, int digits){
     while (i>=0) result[i--] = ' '; 
   
     for (i=maxdigits-digits; i<maxdigits; i++) {
-        lcdWriteQ(result[i]);
+        lcdWriteQMac(result[i]);
     }
 }
 
@@ -134,25 +134,25 @@ void lcdDrawPads(unsigned char col){
     if(!pad[34]||!pad[16]) block='*';
     
     lcdSetCursorQ(col, 0);
-    if(!pad[12])lcdWriteStringQ(" "); else lcdWriteQ(block);
-    if(!pad[13])lcdWriteStringQ(" "); else lcdWriteQ(block);
-    if(!pad[14])lcdWriteStringQ(" "); else lcdWriteQ(block);
-    if(!pad[15])lcdWriteStringQ(" "); else lcdWriteQ(block);
+    if(!pad[12])lcdWriteStringQ(" "); else lcdWriteQMac(block);
+    if(!pad[13])lcdWriteStringQ(" "); else lcdWriteQMac(block);
+    if(!pad[14])lcdWriteStringQ(" "); else lcdWriteQMac(block);
+    if(!pad[15])lcdWriteStringQ(" "); else lcdWriteQMac(block);
     lcdSetCursorQ(col, 1);
-    if(!pad[8])lcdWriteStringQ(" "); else lcdWriteQ(block);
-    if(!pad[9])lcdWriteStringQ(" "); else lcdWriteQ(block);
-    if(!pad[10])lcdWriteStringQ(" "); else lcdWriteQ(block);
-    if(!pad[11])lcdWriteStringQ(" "); else lcdWriteQ(block);
+    if(!pad[8])lcdWriteStringQ(" "); else lcdWriteQMac(block);
+    if(!pad[9])lcdWriteStringQ(" "); else lcdWriteQMac(block);
+    if(!pad[10])lcdWriteStringQ(" "); else lcdWriteQMac(block);
+    if(!pad[11])lcdWriteStringQ(" "); else lcdWriteQMac(block);
     lcdSetCursorQ(col, 2);
-    if(!pad[4])lcdWriteStringQ(" "); else lcdWriteQ(block);
-    if(!pad[5])lcdWriteStringQ(" "); else lcdWriteQ(block);
-    if(!pad[6])lcdWriteStringQ(" "); else lcdWriteQ(block);
-    if(!pad[7])lcdWriteStringQ(" "); else lcdWriteQ(block);
+    if(!pad[4])lcdWriteStringQ(" "); else lcdWriteQMac(block);
+    if(!pad[5])lcdWriteStringQ(" "); else lcdWriteQMac(block);
+    if(!pad[6])lcdWriteStringQ(" "); else lcdWriteQMac(block);
+    if(!pad[7])lcdWriteStringQ(" "); else lcdWriteQMac(block);
     lcdSetCursorQ(col, 3);
-    if(!pad[0])lcdWriteStringQ(" "); else lcdWriteQ(block);
-    if(!pad[1])lcdWriteStringQ(" "); else lcdWriteQ(block);
-    if(!pad[2])lcdWriteStringQ(" "); else lcdWriteQ(block);
-    if(!pad[3])lcdWriteStringQ(" "); else lcdWriteQ(block);
+    if(!pad[0])lcdWriteStringQ(" "); else lcdWriteQMac(block);
+    if(!pad[1])lcdWriteStringQ(" "); else lcdWriteQMac(block);
+    if(!pad[2])lcdWriteStringQ(" "); else lcdWriteQMac(block);
+    if(!pad[3])lcdWriteStringQ(" "); else lcdWriteQMac(block);
 }
 
 void lcdPoll(void){  

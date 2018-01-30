@@ -16,9 +16,9 @@
 
 /* BUFFERS */
 #define LOOP_BUF_SIZE 10000             //about 1/4th of a second               //FX settings
-#define STREAMBUF   512                   //input adc stack size, must be divisible by 2
+#define STREAMBUF   256                   //input adc stack size, must be divisible by 2
 #define LCDBUF      256                     //lcd command buffer size
-#define LCDBUFMASK  0x007F               //lcd buffer access mask
+#define LCDBUFMASK  0x00FF               //lcd buffer access mask
 
 
 //misc

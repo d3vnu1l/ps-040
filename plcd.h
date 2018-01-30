@@ -20,7 +20,7 @@
 void lcdInit(void);
 void lcdWriteQ(unsigned char);
 void lcdClearQ(void);
-void lcdCommandQ(unsigned char);
+void lcdCommandQMac(unsigned char);
 void lcdBlockingReturn(void);
 void lcdWriteStringQ(char *);
 void lcdCustomSymbols(void);
@@ -38,7 +38,17 @@ void lcdBlockingSend(unsigned char);
 void lcdBlockingClear(void);
 void lcdBlockingReturn(void);
 
+#define lcdWriteQMac(data) {\
+    *lcdWritePtr++=data|0x0000;\
+    if(lcdWritePtr==&lcdBuf[LCDBUF])\
+        lcdWritePtr=lcdBuf;\
+}
 
+#define lcdCommandQMac(data){\
+    *lcdWritePtr++=data|0x0100;\
+    if(lcdWritePtr==&lcdBuf[LCDBUF])\
+        lcdWritePtr=lcdBuf;\
+}
 
 #endif	/* XC_HEADER_TEMPLATE_H */
 

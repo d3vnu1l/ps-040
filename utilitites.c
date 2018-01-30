@@ -35,7 +35,6 @@ extern unsigned int loop_lim;
 extern fractional lpf_alpha, lpf_inv_alpha;
 extern fractional tremelo_depth;
 extern unsigned char kick_playing, snare_playing;   
-extern unsigned char frame;
 
 void scanButtons(void){
     
@@ -176,8 +175,6 @@ void scalePots(void){
 }
 
 void display(void){
-    IFS0bits.SPI1IF=0;
-    SPI1STATbits.SPIROV = 0;
     scalePots();
     
     // Update ui state logic here
