@@ -14,7 +14,7 @@
 
 extern unsigned char TEST_SIN;
 extern fractional pots[POTS];
-extern fractional pots_percent[POTS];
+extern fractional pots_scaled[POTS];
 extern unsigned char pad[BUTTONS];
 extern enum screen state, laststate;
 extern char flash_readback[512];
@@ -69,27 +69,27 @@ void screenDebugPots(void){
         // Update here
         if(!pad[34])bank=POTS/2;
         lcdSetCursorQ(0,1);
-        lcdWriteDecimalQ(pots_percent[bank], 3);
+        lcdWriteDecimalQ(pots_scaled[bank], 3);
         lcdWriteQ(',');
         lcdWriteWordUnsignedQ(pots[bank++]);
         lcdSetCursorQ(11,1);
-        lcdWriteDecimalQ(pots_percent[bank], 3);
+        lcdWriteDecimalQ(pots_scaled[bank], 3);
         lcdWriteQ(',');
         lcdWriteWordUnsignedQ(pots[bank++]);
         lcdSetCursorQ(0,2);
-        lcdWriteDecimalQ(pots_percent[bank], 3);
+        lcdWriteDecimalQ(pots_scaled[bank], 3);
         lcdWriteQ(',');
         lcdWriteWordUnsignedQ(pots[bank++]);
         lcdSetCursorQ(11,2);
-        lcdWriteDecimalQ(pots_percent[bank], 3);
+        lcdWriteDecimalQ(pots_scaled[bank], 3);
         lcdWriteQ(',');
         lcdWriteWordUnsignedQ(pots[bank++]);
         lcdSetCursorQ(0,3);
-        lcdWriteDecimalQ(pots_percent[bank], 3);
+        lcdWriteDecimalQ(pots_scaled[bank], 3);
         lcdWriteQ(',');
         lcdWriteWordUnsignedQ(pots[bank++]);
         lcdSetCursorQ(11,3);
-        lcdWriteDecimalQ(pots_percent[bank], 3);
+        lcdWriteDecimalQ(pots_scaled[bank], 3);
         lcdWriteQ(',');
         lcdWriteWordUnsignedQ(pots[bank++]);
     }
@@ -119,17 +119,17 @@ void screenFX(void){
     } else {
         //update here
         lcdSetCursorQ(2,1);
-        lcdWriteDecimalQ(pots_percent[0], 3);
+        lcdWriteDecimalQ(pots_scaled[0], 3);
         lcdSetCursorQ(12,1);
-        lcdWriteDecimalQ(pots_percent[1], 3);
+        lcdWriteDecimalQ(pots_scaled[1], 3);
         lcdSetCursorQ(2,2);
-        lcdWriteDecimalQ(pots_percent[2], 3);
+        lcdWriteDecimalQ(pots_scaled[2], 3);
         lcdSetCursorQ(12,2);
-        lcdWriteDecimalQ(pots_percent[3], 3);
+        lcdWriteDecimalQ(pots_scaled[3], 3);
         lcdSetCursorQ(2,3);
-        lcdWriteDecimalQ(pots_percent[4], 3);
+        lcdWriteDecimalQ(pots_scaled[4], 3);
         lcdSetCursorQ(12,3);
-        lcdWriteDecimalQ(pots_percent[5], 3);
+        lcdWriteDecimalQ(pots_scaled[5], 3);
 
     }
 }

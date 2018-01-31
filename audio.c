@@ -4,7 +4,7 @@
 
 extern char pad[BUTTONS];                                                             //CONTROL VARIABLES//
 extern fractional pots[POTS];
-extern fractional pots_percent[POTS];
+extern fractional pots_scaled[POTS];
 
 volatile unsigned int loop_ptr = 0;                                             //FX FLAGS & VARS//
 unsigned int loop_lim=0;

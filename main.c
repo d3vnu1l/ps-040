@@ -51,7 +51,8 @@ enum screen laststate = invalid;
 /* Buttons & Potentiometers */
 unsigned char pad[BUTTONS];                                                            
 fractional pots[POTS]={0};
-fractional pots_percent[POTS]={0};
+fractional pots_scaled[POTS]={0};
+fractional pots_custom[POTS]={0};
 
 void initBuffer(void){
     int i;

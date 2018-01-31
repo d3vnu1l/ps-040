@@ -11,7 +11,8 @@
 //function definitions
 void scanButtons(void);
 void readPots(void);
-void scalePotsPercent(void);
+void scalePots(void);
+void scalePotsCustom(unsigned int);
 void display(void);
 void processRxData(int *, int *);
 void Delay_us(unsigned int);

@@ -25,7 +25,9 @@
 #define TRUE    0xFF
 #define FALSE   0x00
 #define BUTTONS 35
-#define POTS	12                       // Number of channels enabled for channel scan
+#define POTS	12                       
+#define NUMFX   4
+
 #define SLED _LATF0                                                            
 #define LCD_RS _LATE15
 #define SS3 _LATF1
