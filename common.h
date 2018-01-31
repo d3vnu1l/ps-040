@@ -10,7 +10,7 @@
 /* Timers and Frequencies */
 #define BAUDRATE 57600                  //target baud rate for *UART*           //peripheral configs
 #define BRGVAL  ((Fcy/BAUDRATE)/16)-1    //calculate baud value (MAY TRUNCATE)
-#define Fscan   256                       //target buttons & pots sampling rate
+#define Fscan   300                       //target buttons & pots sampling rate
 #define Fout    44100                      //target output sampling rate (~45k last measured)
 #define Fdisp   15                        //15hz display update rate
 

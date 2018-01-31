@@ -110,7 +110,7 @@ void initADC1(void){
     AD1CON3 = 0x0F0F; // Sample for 15*TAD before converting
     AD1CON1bits.FORM=2;         //signed fractional format 
     AD1CON3bits.ADCS=0x07;
-    AD1CON3bits.SAMC=0x03;
+    AD1CON3bits.SAMC=0x1F;
     //select  AN6,7,8
     AD1CSSLbits.CSS6=1; //AN6
     AD1CSSLbits.CSS7=1; //AN7
