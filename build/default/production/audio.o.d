@@ -1,3 +1,4 @@
 build/default/production/audio.o:  \
 audio.c  \
-common.h 
+common.h  \
+audio.h 

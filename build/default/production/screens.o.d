@@ -1,5 +1,6 @@
 build/default/production/screens.o:  \
 screens.c  \
+screens.h  \
 common.h  \
 plcd.h  \
-flash.h 
+ flash.h 

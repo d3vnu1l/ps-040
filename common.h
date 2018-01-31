@@ -27,6 +27,7 @@
 #define BUTTONS 35
 #define POTS	12                       
 #define NUMFX   4
+#define NUMFXUNITS 2
 
 #define SLED _LATF0                                                            
 #define LCD_RS _LATE15
@@ -43,6 +44,12 @@
 #define POT_VOLUME          7
 #define POT_FX_SELECT1      10
 #define POT_FX_SELECT2      11
+#define FX_1                0
+#define FX_2                2
+#define FX_3                4
+#define FX_4                1
+#define FX_5                3
+#define FX_6                5
 
 
 
@@ -54,7 +61,7 @@
  */
 #define BTN_SPECIAL         34
 
-enum screen{
+enum screenStruc{
     invalid,
     scrnFX,
     debugscrnPOTS,
@@ -63,6 +70,13 @@ enum screen{
     debugscrnINPUT,
     debugscrnAUDIO,
     start
+};
+
+enum fxStruct{
+    off,
+    lpf,
+    trm,
+    lop
 };
 
 #endif	/* COMMON_H */

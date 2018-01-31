@@ -7,6 +7,7 @@
 
 
 #include <xc.h>
+#include "screens.h"
 #include "common.h"
 #include "plcd.h"
 #include "dsp.h"
@@ -16,10 +17,16 @@ extern unsigned char TEST_SIN;
 extern fractional pots[POTS];
 extern fractional pots_scaled[POTS];
 extern unsigned char pad[BUTTONS];
-extern enum screen state, laststate;
+extern enum screenStruc state, laststate;
 extern char flash_readback[512];
 extern unsigned int process_time;
 
+extern enum fxStruct fxUnits[NUMFXUNITS];
+
+int fxLast=0;
+int fxNow=0;
+
+void (*fxModPointers[NUMFX])(unsigned int, fractional, fractional, fractional) = {screenNoFXmod, screenLPFmod, screenTRMmod, screenLOPmod};
 
 void screenDebugAudio(){
 
@@ -95,44 +102,6 @@ void screenDebugPots(void){
     }
 }
 
-void screenFX(void){
-    if(state!=laststate){
-        //setup here
-        lcdClearQ();
-        lcdSetCursorQ(0,0);
-        lcdWriteStringQ("FX1:");
-        lcdSetCursorQ(10,0);
-        lcdWriteStringQ("FX2:");
-        
-        lcdSetCursorQ(0,1);
-        lcdWriteStringQ("1:");
-        lcdSetCursorQ(10,1);
-        lcdWriteStringQ("4:");
-        lcdSetCursorQ(0,2);
-        lcdWriteStringQ("2:");
-        lcdSetCursorQ(10,2);
-        lcdWriteStringQ("5:");
-        lcdSetCursorQ(0,3);
-        lcdWriteStringQ("3:");
-        lcdSetCursorQ(10,3);
-        lcdWriteStringQ("6:");
-    } else {
-        //update here
-        lcdSetCursorQ(2,1);
-        lcdWriteDecimalQ(pots_scaled[0], 3);
-        lcdSetCursorQ(12,1);
-        lcdWriteDecimalQ(pots_scaled[1], 3);
-        lcdSetCursorQ(2,2);
-        lcdWriteDecimalQ(pots_scaled[2], 3);
-        lcdSetCursorQ(12,2);
-        lcdWriteDecimalQ(pots_scaled[3], 3);
-        lcdSetCursorQ(2,3);
-        lcdWriteDecimalQ(pots_scaled[4], 3);
-        lcdSetCursorQ(12,3);
-        lcdWriteDecimalQ(pots_scaled[5], 3);
-
-    }
-}
 
 void screenDebugFlash(void){
         if(state!=laststate){
@@ -180,7 +149,118 @@ void screenDebugInput(void){
     }
 }
 
+void screenNoFXmod(unsigned int col, fractional param1, fractional param2, fractional param3){
+        if(fxNow!=fxLast){
+        // Setup here
+            
+        lcdSetCursorQ(col+5,0);
+        lcdWriteStringQ("OFF");
+        lcdSetCursorQ(col,1);
+        lcdWriteStringQ("        ");
+        lcdSetCursorQ(col,2);
+        lcdWriteStringQ("        ");
+        lcdSetCursorQ(col,3);
+        lcdWriteStringQ("        ");
+
+    } else {
+        // Update here
+        lcdSetCursorQ(col+5,0);
+        lcdWriteStringQ("OFF");
+    }
+}
+
+void screenLPFmod(unsigned int col, fractional param1, fractional param2, fractional param3){
+    if(fxNow!=fxLast){
+        // Setup here
+        lcdSetCursorQ(col+5,0);
+        lcdWriteStringQ("LPF");
+        lcdSetCursorQ(col,1);
+        lcdWriteStringQ("frq");
+        lcdSetCursorQ(col,2);
+        lcdWriteStringQ("d/w");
+        lcdSetCursorQ(col,3);
+        lcdWriteStringQ("pwr");
+    } else {
+        // Update here
+        lcdSetCursorQ(col+5,1);
+        lcdWriteDecimalQ(param1, 3);
+        lcdSetCursorQ(col+5,2);
+        lcdWriteDecimalQ(param2, 3);
+        lcdSetCursorQ(col+5,3);
+        if(param3>=50)
+            lcdWriteStringQ(" ON");
+        else lcdWriteStringQ("OFF");
+    }
+}
+
+void screenTRMmod(unsigned int col, fractional param1, fractional param2, fractional param3){
+    if(fxNow!=fxLast){
+        // Setup here
+        lcdSetCursorQ(col+5,0);
+        lcdWriteStringQ("TRM");
+        lcdSetCursorQ(col,1);
+        lcdWriteStringQ("rat");
+        lcdSetCursorQ(col,2);
+        lcdWriteStringQ("dep");
+        lcdSetCursorQ(col,3);
+        lcdWriteStringQ("pwr");
+    } else {
+        // Update here
+        lcdSetCursorQ(col+5,1);
+        lcdWriteDecimalQ(param1, 3);
+        lcdSetCursorQ(col+5,2);
+        lcdWriteDecimalQ(param2, 3);
+        lcdSetCursorQ(col+5,3);
+        if(param3>=50)
+            lcdWriteStringQ(" ON");
+        else lcdWriteStringQ("OFF");
+    }
+}
+
+void screenLOPmod(unsigned int col, fractional param1, fractional param2, fractional param3){
+    if(fxNow!=fxLast){
+        // Setup here
+        lcdSetCursorQ(col+5,0);
+        lcdWriteStringQ("LOP");
+        lcdSetCursorQ(col,1);
+        lcdWriteStringQ("siz");
+        lcdSetCursorQ(col,2);
+        lcdWriteStringQ("d/w");
+        lcdSetCursorQ(col,3);
+        lcdWriteStringQ("pwr");
+    } else {
+        // Update here
+        lcdSetCursorQ(col+5,1);
+        lcdWriteDecimalQ(param1, 3);
+        lcdSetCursorQ(col+5,2);
+        lcdWriteDecimalQ(param2, 3);
+        lcdSetCursorQ(col+5,3);
+        if(param3>=50)
+            lcdWriteStringQ(" ON");
+        else lcdWriteStringQ("OFF");
+    }
+}
+
+void screenFX(void){
+    if(state!=laststate){
+        //setup here
+        lcdClearQ();
+        lcdSetCursorQ(0,0);
+        lcdWriteStringQ("Fx1:");
+        lcdSetCursorQ(10,0);
+        lcdWriteStringQ("Fx2:");
+        
+    } else {
+        //update here 
+        fxModPointers[fxUnits[0]](0,  pots_scaled[FX_1], pots_scaled[FX_2], pots_scaled[FX_3]);
+        fxModPointers[fxUnits[1]](10, pots_scaled[FX_4], pots_scaled[FX_5], pots_scaled[FX_6]);
+    }
+         
+}
+
 void screenUpdate(void){
+    fxNow=fxUnits[0]+fxUnits[1];
+    
     switch(state){
         case start: break;
         case scrnFX:            screenFX(); 
@@ -198,8 +278,8 @@ void screenUpdate(void){
     }
     
     laststate=state;
+    fxLast=fxUnits[0]+fxUnits[1];
 }
-
     /*
     lcdSetCursorQ(0,3);
     if(hard_clipped==TRUE){                                                     //CLIP CONTROL    

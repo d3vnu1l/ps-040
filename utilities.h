@@ -13,6 +13,7 @@ void scanButtons(void);
 void readPots(void);
 void scalePots(void);
 void scalePotsCustom(unsigned int);
+void changeFX(void);
 void display(void);
 void processRxData(int *, int *);
 void Delay_us(unsigned int);

@@ -1,6 +1,7 @@
 #include "xc.h"
 #include "common.h"
 #include <dsp.h>
+#include "audio.h"
 
 extern char pad[BUTTONS];                                                             //CONTROL VARIABLES//
 extern fractional pots[POTS];
@@ -8,12 +9,9 @@ extern fractional pots_scaled[POTS];
 
 volatile unsigned int loop_ptr = 0;                                             //FX FLAGS & VARS//
 unsigned int loop_lim=0;
-unsigned int tremelo_ptr=0, tremelo_length=0, trem_var=0;
-extern unsigned char hard_clipped, tremelo, looper, lpf;
+extern unsigned char hard_clipped;
 volatile fractional loop[LOOP_BUF_SIZE]={0};
-unsigned int delay_samples=0;
 fractional lpf_alpha=Q15(0.5), lpf_inv_alpha=Q15(0.5);
-fractional tremelo_depth=Q15(1.0);
 
 extern fractional sintab[1024];     //misc//
 extern unsigned char TEST_SIN;
@@ -30,6 +28,125 @@ extern fractional hat[5552];
 extern unsigned char snare_playing;
 extern unsigned int snare_max, snare_ptr;
 extern fractional snare[5552];
+extern enum fxStruct fxUnits[NUMFXUNITS];
+
+void (*fxFuncPointers[NUMFX])(fractional *, fractional *, fractional, fractional, fractional) = {NULL, runLPF, runTRM, runLOP};
+
+void runBufferLooper(fractional *source){
+    static fractional delayed_sample;
+    volatile fractional sample;
+    
+    int *readPTR=source;
+    
+    int counter=(STREAMBUF-1);
+    for(; counter>=0; counter--){
+        sample=*readPTR--; //!rw
+        if(loop_ptr<LOOP_BUF_SIZE)
+            loop[loop_ptr++]=sample;
+        else {
+            loop_ptr=0;
+            loop[loop_ptr++]=sample;
+        }
+    }
+}
+
+void runLPF(fractional *source, fractional *destination, fractional param1, fractional param2, fractional param3){
+    volatile register int result asm("A");
+    static fractional delayed_sample;
+    volatile fractional sample;
+    if(param3>=0x3FFF){     //LPF CONTROL
+        if(param1>=310){                      
+            lpf_alpha=param1;
+            lpf_inv_alpha=(32767-lpf_alpha); 
+        }
+
+
+        int *readPTR=source;
+        int *rewritePTR=destination;
+
+
+        int counter=(STREAMBUF-1);
+        for(; counter>=0; counter--){
+            sample=*readPTR--; //!rw
+
+            //LPF-EMA//   y(i)= ??x(i)+(1-?)?y(i-1)
+            result =__builtin_mpy(sample,lpf_alpha, NULL, NULL, 0, NULL, NULL, 0);
+            result =__builtin_mac(result, delayed_sample, lpf_inv_alpha, NULL, NULL, 0, NULL, NULL, 0, 0, result);
+            delayed_sample=__builtin_sac(result, 0);
+            sample=delayed_sample;
+
+            *rewritePTR--=sample; //rw
+        }
+    }
+    
+}
+
+void runTRM(fractional *source, fractional *destination, fractional param1, fractional param2, fractional param3){
+    volatile register int result1 asm("A");
+    volatile register int result2 asm("B");
+    volatile fractional sample, trem_mod;
+    int *readPTR=source;
+    int *rewritePTR=destination;
+    int counter=(STREAMBUF-1);
+    static unsigned int trem_delay=0, tremelo_ptr=0;;
+    const int pot_offset = 5;
+    
+    if(param3>=0x3FFF){     // TREM CONTROL
+        result1 =__builtin_mpy(param1,Q15(0.0006), NULL, NULL, 0, NULL, NULL, 0);
+        param1=__builtin_sac(result1, 0);
+        if(param2<-0x7) param2=0;
+        
+        for(; counter>=0; counter--){
+            sample=*readPTR--; //!rw
+                                                           //TREMELO//
+            if (trem_delay<=param1+pot_offset){
+                trem_delay++;
+                result1 =__builtin_mpy(param2,sintab[tremelo_ptr], NULL, NULL, 0, NULL, NULL, 0);
+                trem_mod=__builtin_sac(result1, 0);
+                trem_mod=0x7FF0-trem_mod;
+                result2 =__builtin_mpy(trem_mod,sample, NULL, NULL, 0, NULL, NULL, 0);
+                sample=__builtin_sac(result2, 0);
+            }
+            else{
+                trem_delay=0;
+                if(tremelo_ptr==1024)
+                    tremelo_ptr=0;
+                else tremelo_ptr++;
+                
+                result1 =__builtin_mpy(param2,sintab[tremelo_ptr], NULL, NULL, 0, NULL, NULL, 0);
+                trem_mod=__builtin_sac(result1, 0);
+                trem_mod=0x7FF0-trem_mod;
+                result2 =__builtin_mpy(trem_mod,sample, NULL, NULL, 0, NULL, NULL, 0);
+                sample=__builtin_sac(result2, 0);
+            }
+
+            *rewritePTR--=sample; //rw
+        }
+    }
+}
+
+void runLOP(fractional *source, fractional *destination, fractional param1, fractional param2, fractional param3){
+    volatile fractional sample;
+    
+    int *readPTR=source;
+    int *rewritePTR=destination;
+    
+    int counter=(STREAMBUF-1);
+    for(; counter>=0; counter--){
+        sample=*readPTR--; //!rw                                                   
+        if(loop_lim>=LOOP_BUF_SIZE)
+            loop_lim=LOOP_BUF_SIZE;
+        if(loop_ptr<loop_lim){
+            sample = (loop[loop_ptr++]);
+        }
+        else {
+            loop_ptr=0;
+            sample = (loop[loop_ptr++]);
+        }
+        
+        *rewritePTR--=sample; //rw
+    }                                                                          
+}
 
 void processAudio(fractional *source, fractional *destination){
     volatile register int result1 asm("A");
@@ -37,8 +154,13 @@ void processAudio(fractional *source, fractional *destination){
     volatile fractional sample;
     int counter=(STREAMBUF-1);
     
-    runFX(source, source);
     
+    //Run each FX unit
+    if(fxUnits[0]==0); else fxFuncPointers[fxUnits[0]](source, source, pots[FX_1], pots[FX_2], pots[FX_3]);
+    if(fxUnits[1]==0); else fxFuncPointers[fxUnits[1]](source, source, pots[FX_4], pots[FX_5], pots[FX_6]);
+    //Run looper Buffer
+    if(fxUnits[0]==lop)runBufferLooper(source); 
+    if(fxUnits[1]==lop)runBufferLooper(source); 
 
     for(; counter>=0; counter--){
         sample=*source--; //!rw
@@ -83,7 +205,7 @@ void processAudio(fractional *source, fractional *destination){
         }
 
         //VOLUME CONTROL
-        if(pots[POT_VOLUME]==0x0007)
+        if(pots[POT_VOLUME]<=0x0007)
             sample=0;
         else if(pots[POT_VOLUME]>=0x7FF7);
         else{
@@ -95,71 +217,3 @@ void processAudio(fractional *source, fractional *destination){
         *destination--=sample; //rw
     }
 }
-
-void runFX(fractional *source, fractional *destination){
-    volatile register int result1 asm("A");
-    volatile register int result2 asm("B");
-    static fractional delayed_sample;
-    static fractional trem_mod; 
-    volatile fractional sample;
-    
-    
-    int *readPTR=source;
-    int *rewritePTR=destination;
-    
-    
-    int counter=(STREAMBUF-1);
-    for(; counter>=0; counter--){
-        sample=*readPTR--; //!rw
-
-        if(tremelo==TRUE){                                                          //TREMELO//
-            if (trem_var<=pots[3]){
-                trem_var++;
-                result1 =__builtin_mpy(tremelo_depth,sintab[tremelo_ptr], NULL, NULL, 0, NULL, NULL, 0);
-                trem_mod=__builtin_sac(result1, 0);
-                result2 =__builtin_mpy(trem_mod,sample, NULL, NULL, 0, NULL, NULL, 0);
-                sample=__builtin_sac(result2, 0);
-            }
-            else{
-                trem_var=0;
-                if(tremelo_ptr==1024)
-                    tremelo_ptr=0;
-                result1 =__builtin_mpy(tremelo_depth,sintab[tremelo_ptr++], NULL, NULL, 0, NULL, NULL, 0);
-                trem_mod=__builtin_sac(result1, 0);
-                result2 =__builtin_mpy(trem_mod,sample, NULL, NULL, 0, NULL, NULL, 0);
-                sample=__builtin_sac(result2, 0);
-            }
-        }
-        if(looper==TRUE){                           //LOOPER// 
-            if(loop_lim>=LOOP_BUF_SIZE)
-                loop_lim=LOOP_BUF_SIZE;
-            if(loop_ptr<loop_lim){
-                sample = (loop[loop_ptr++]);
-            }
-            else {
-                loop_ptr=0;
-                sample = (loop[loop_ptr++]);
-            }
-        }                                                                           
-        else {                                      //buffer
-            if(loop_ptr<LOOP_BUF_SIZE)
-                loop[loop_ptr++]=sample;
-            else {
-                loop_ptr=0;
-                loop[loop_ptr++]=sample;
-            }
-        }
-
-        //LPF-EMA//   y(i)= ??x(i)+(1-?)?y(i-1)
-        if(lpf==TRUE){
-            result2 =__builtin_mpy(sample,lpf_alpha, NULL, NULL, 0, NULL, NULL, 0);
-            result2 =__builtin_mac(result2, delayed_sample, lpf_inv_alpha, NULL, NULL, 0, NULL, NULL, 0, 0, result2);
-            delayed_sample=__builtin_sac(result2, 0);
-            sample=delayed_sample;
-        }
-        
-        *rewritePTR--=sample; //rw
-    }
-}
-
-//test

@@ -21,7 +21,7 @@ extern fractional pots[POTS];
 extern fractional pots_scaled[POTS];
 extern fractional pots_custom[POTS];
 extern unsigned char UART_ON; 
-extern enum screen state;
+extern enum screenStruc state;
 
 //STATUS VARIABLES//
 extern unsigned char hard_clipped;
@@ -30,12 +30,10 @@ extern unsigned char TEST_SIN;
 extern fractional sampin;
 extern fractional sampout;
 
+extern enum fxStruct fxUnits[NUMFXUNITS];
+
+
 //FX FLAGS & VARS
-extern unsigned char tremelo, looper, lpf;
-extern unsigned int tremelo_ptr, tremelo_length, trem_var;
-extern unsigned int loop_lim;
-extern fractional lpf_alpha, lpf_inv_alpha;
-extern fractional tremelo_depth;
 extern unsigned char kick_playing, snare_playing;   
 
 void scanButtons(void){
@@ -86,32 +84,6 @@ void scanButtons(void){
         pad[26]=(portrdD>>3)&1;
         pad[27]=(portrdD>>4)&1;
     }
-
-   
-    
-    if(pad[13]==0&&pad_last[13]==1){                                              //TREMELO CONTROL
-        pad_last[13]=0;
-        if(tremelo==FALSE)
-            tremelo=TRUE;
-        else tremelo=FALSE;
-    }
-    else{
-        pad_last[13]=pad[13];
-    }
-    
-    if(pad[14]==0) looper=TRUE;
-    else looper=FALSE;
-   
-    if(pad[15]==0&&pad_last[15]==1){                                              //LPF CONTROL
-        pad_last[15]=0;
-        if(lpf==FALSE)
-            lpf=TRUE;
-        else lpf=FALSE;
-    }
-    else{
-        pad_last[15]=pad[15];
-    }
-    
     
     // SAMPLE TRIGGERS 
     if(pad[0]==0&&kick_playing==FALSE){                                         //kick
@@ -146,6 +118,7 @@ void readPots(void){
     result =__builtin_mpy(pots_buf[i],pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
     result =__builtin_mac(result, pots[i], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
     pots[i--]=__builtin_sac(result, 0);
+    
     result =__builtin_mpy(pots_buf[i],pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
     result =__builtin_mac(result, pots[i], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
     pots[i--]=__builtin_sac(result, 0);
@@ -161,15 +134,6 @@ void readPots(void){
     result =__builtin_mpy(pots_buf[i],pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
     result =__builtin_mac(result, pots[i], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
     pots[i]=__builtin_sac(result, 0);
-    
-    loop_lim=pots[5];               //LOOPER CONTROL
-    if(pots[0]>=310){                      //LPF CONTROL
-        lpf_alpha=pots[0];
-        lpf_inv_alpha=(32767-lpf_alpha); 
-    }
-    tremelo_depth=pots[1];
-
-    
 }
 
 void scalePots(void){
@@ -204,8 +168,14 @@ void scalePotsCustom(unsigned int steps){
     pots_scaled[4]=__builtin_sac(scaled, 0);
 }
 
+void changeFX(void){
+    fxUnits[0]=pots_scaled[POT_FX_SELECT1];
+    fxUnits[1]=pots_scaled[POT_FX_SELECT2];
+}
+
 void display(void){
     scalePots();
+    changeFX();
     // Update ui state logic here
     state = (ENCODERCNTL/4)+1;
     

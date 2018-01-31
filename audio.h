@@ -3,7 +3,10 @@
 
 #include <xc.h> // include processor files - each processor file is guarded.  
  
-void runFX(fractional *, fractional *);
+void runBufferLooper(fractional *);
+void runLPF(fractional *, fractional *, fractional, fractional, fractional);
+void runTRM(fractional *, fractional *, fractional, fractional, fractional);
+void runLOP(fractional *, fractional *, fractional, fractional, fractional);
 void processAudio(fractional *, fractional *);
 
 #endif	/* XC_HEADER_TEMPLATE_H */

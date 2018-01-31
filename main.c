@@ -38,15 +38,12 @@ volatile unsigned char recording=TRUE;
 unsigned char UART_ON = FALSE;
 unsigned char TEST_SIN = FALSE;
 
-volatile unsigned char tremelo=FALSE;                                       
-volatile unsigned char looper=FALSE;
-volatile unsigned char lpf=FALSE;
-
 char flash_readback[512]={0};
 
 /* Screen state variables */
-enum screen state = scrnFX;
-enum screen laststate = invalid;
+enum screenStruc state = scrnFX;
+enum screenStruc laststate = invalid;
+enum fxStruct fxUnits[NUMFXUNITS]={0,0};
 
 /* Buttons & Potentiometers */
 unsigned char pad[BUTTONS];                                                            
