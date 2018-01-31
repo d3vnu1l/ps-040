@@ -27,8 +27,6 @@ extern enum screenStruc state;
 extern unsigned char hard_clipped;
 extern unsigned char UART_EN;
 extern unsigned char TEST_SIN;
-extern fractional sampin;
-extern fractional sampout;
 
 extern enum fxStruct fxUnits[NUMFXUNITS];
 
@@ -101,7 +99,8 @@ void scanButtons(void){
 
 void readPots(void){
     volatile register int result asm("A");
-    fractional pots_buf[POTS];
+    fractional pots_buf[POTS], pots_smoothed[POTS];
+    unsigned char pots_last[POTS];
     const fractional pot_alpha = 0x0F00;    //larger = rougher, lower = more latency
     const fractional pot_alpha_inv = 32767-pot_alpha;
     int i;
@@ -114,32 +113,44 @@ void readPots(void){
     pots_buf[i++]=(ADC1BUF1>>1)|0x7;
     pots_buf[i++]=(ADC1BUF3>>1)|0x7;
     pots_buf[i]=(ADC1BUF0>>1)|0x7;
-
-    result =__builtin_mpy(pots_buf[i],pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
-    result =__builtin_mac(result, pots[i], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
-    pots[i--]=__builtin_sac(result, 0);
     
     result =__builtin_mpy(pots_buf[i],pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
-    result =__builtin_mac(result, pots[i], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
-    pots[i--]=__builtin_sac(result, 0);
+    result =__builtin_mac(result, pots_smoothed[i], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
+    pots_smoothed[i--]=__builtin_sac(result, 0);
     result =__builtin_mpy(pots_buf[i],pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
-    result =__builtin_mac(result, pots[i], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
-    pots[i--]=__builtin_sac(result, 0);
+    result =__builtin_mac(result, pots_smoothed[i], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
+    pots_smoothed[i--]=__builtin_sac(result, 0);
     result =__builtin_mpy(pots_buf[i],pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
-    result =__builtin_mac(result, pots[i], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
-    pots[i--]=__builtin_sac(result, 0);
+    result =__builtin_mac(result, pots_smoothed[i], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
+    pots_smoothed[i--]=__builtin_sac(result, 0);
     result =__builtin_mpy(pots_buf[i],pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
-    result =__builtin_mac(result, pots[i], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
-    pots[i--]=__builtin_sac(result, 0);
+    result =__builtin_mac(result, pots_smoothed[i], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
+    pots_smoothed[i--]=__builtin_sac(result, 0);
     result =__builtin_mpy(pots_buf[i],pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
-    result =__builtin_mac(result, pots[i], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
-    pots[i]=__builtin_sac(result, 0);
+    result =__builtin_mac(result, pots_smoothed[i], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
+    pots_smoothed[i--]=__builtin_sac(result, 0);
+    result =__builtin_mpy(pots_buf[i],pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
+    result =__builtin_mac(result, pots_smoothed[i], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
+    pots_smoothed[i]=__builtin_sac(result, 0);
+    
+    if(pots_smoothed[i]>>8!=pots_last[i]) pots[i]=pots_smoothed[i++];
+    if(pots_smoothed[i]>>8!=pots_last[i]) pots[i]=pots_smoothed[i++];
+    if(pots_smoothed[i]>>8!=pots_last[i]) pots[i]=pots_smoothed[i++];
+    if(pots_smoothed[i]>>8!=pots_last[i]) pots[i]=pots_smoothed[i++];
+    if(pots_smoothed[i]>>8!=pots_last[i]) pots[i]=pots_smoothed[i++];
+    if(pots_smoothed[i]>>8!=pots_last[i]) pots[i]=pots_smoothed[i];
+            
+    pots_last[i]=pots[i--]>>8;
+    pots_last[i]=pots[i--]>>8;
+    pots_last[i]=pots[i--]>>8;
+    pots_last[i]=pots[i--]>>8;
+    pots_last[i]=pots[i--]>>8;
+    pots_last[i]=pots[i]>>8;
 }
 
 void scalePots(void){
     /* Potentiometer scaling for fx or lcd display */
     volatile register int scaled asm("A");
-    
     
     scaled=__builtin_mpy(pots[0],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
     pots_scaled[0]=__builtin_sac(scaled, 7);
