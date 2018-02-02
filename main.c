@@ -21,7 +21,7 @@
 /* Data Buffers & index variables */
 fractional outputA[STREAMBUF], outputB[STREAMBUF];
 fractional streamA[STREAMBUF], streamB[STREAMBUF];
-unsigned int write_ptr=STREAMBUF, rw=0, frameReady=0;
+unsigned int write_ptr=0, rw=0, frameReady=0;
 
 /* DMA BUFFERS */
 fractional txBufferA[STREAMBUF]__attribute__((space(eds)));
@@ -89,11 +89,11 @@ int main(void) {
         if(frameReady) {
             process_time=(STREAMBUF-1);             //DEBUG
             if(rw){
-                ping = streamA+(STREAMBUF-1);
-                pong = outputB+(STREAMBUF-1);
+                ping = streamA;
+                pong = outputB;
             }else{
-                ping = streamB+(STREAMBUF-1);
-                pong = outputA+(STREAMBUF-1);
+                ping = streamB;
+                pong = outputA;
             }
             
             processAudio(ping, pong); 

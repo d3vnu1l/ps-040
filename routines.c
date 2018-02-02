@@ -29,32 +29,25 @@ void __attribute__ ((interrupt, auto_psv)) _DCIInterrupt(void){
     TXBUF0=TXBUF1=sampoutA;                                    //output buffered sample to DAC
     TXBUF2=TXBUF3=sampoutB;
 
-
-    
     __builtin_btg(&sampinA, 15);                             //convert to Q1.15 compatible format
     __builtin_btg(&sampinB, 15);                             //convert to Q1.15 compatible format
     
-
-      
-    
-    if(write_ptr--==0){                       //reset pointer when out of bounds
-        write_ptr=STREAMBUF-1;
+    if(write_ptr== STREAMBUF){                       //reset pointer when out of bounds
+        write_ptr=0;
         __builtin_btg(&rw,0);
         frameReady=1;
     }
    
     if(rw){
         streamB[write_ptr]=sampinA;
-        sampoutA=outputA[write_ptr--]; 
+        sampoutA=outputA[write_ptr++]; 
         streamB[write_ptr]=sampinB;
-        sampoutB=outputA[write_ptr];
-        
-    }
-    else {
+        sampoutB=outputA[write_ptr++];  
+    } else {
         streamA[write_ptr]=sampinA; 
-        sampoutA=outputB[write_ptr--];  
+        sampoutA=outputB[write_ptr++];  
         streamA[write_ptr]=sampinB; 
-        sampoutB=outputB[write_ptr];  
+        sampoutB=outputB[write_ptr++];  
     } 
     
     _DCIIF=0;
