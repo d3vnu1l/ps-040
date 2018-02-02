@@ -26,7 +26,7 @@ extern enum fxStruct fxUnits[NUMFXUNITS];
 int fxLast=0;
 int fxNow=0;
 
-void (*fxModPointers[NUMFX])(unsigned int, fractional, fractional, fractional) = {screenNoFXmod, screenLPFmod, screenTRMmod, screenLOPmod};
+void (*fxModPointers[NUMFX])(unsigned int, fractional, fractional, fractional) = {screenNoFXmod, screenLPFmod, screenTRMmod, screenLOPmod, screenBITmod};
 
 void screenDebugAudio(){
 
@@ -222,6 +222,30 @@ void screenLOPmod(unsigned int col, fractional param1, fractional param2, fracti
         // Setup here
         lcdSetCursorQ(col+5,0);
         lcdWriteStringQ("LOP");
+        lcdSetCursorQ(col,1);
+        lcdWriteStringQ("siz");
+        lcdSetCursorQ(col,2);
+        lcdWriteStringQ("d/w");
+        lcdSetCursorQ(col,3);
+        lcdWriteStringQ("pwr");
+    } else {
+        // Update here
+        lcdSetCursorQ(col+5,1);
+        lcdWriteDecimalQ(param1, 3);
+        lcdSetCursorQ(col+5,2);
+        lcdWriteDecimalQ(param2, 3);
+        lcdSetCursorQ(col+5,3);
+        if(param3>=50)
+            lcdWriteStringQ(" ON");
+        else lcdWriteStringQ("OFF");
+    }
+}
+
+void screenBITmod(unsigned int col, fractional param1, fractional param2, fractional param3){
+    if(fxNow!=fxLast){
+        // Setup here
+        lcdSetCursorQ(col+5,0);
+        lcdWriteStringQ("BIT");
         lcdSetCursorQ(col,1);
         lcdWriteStringQ("siz");
         lcdSetCursorQ(col,2);

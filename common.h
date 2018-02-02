@@ -26,7 +26,7 @@
 #define FALSE   0x00
 #define BUTTONS 35
 #define POTS	12                       
-#define NUMFX   4
+#define NUMFX   5
 #define NUMFXUNITS 2
 
 #define SLED _LATF0                                                            
@@ -76,7 +76,8 @@ enum fxStruct{
     off,
     lpf,
     trm,
-    lop
+    lop,
+    bit
 };
 
 #endif	/* COMMON_H */

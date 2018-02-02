@@ -179,12 +179,12 @@ void scalePots(void){
     pots_scaled[POT_FX_SELECT2]=__builtin_sac(scaled, 0);
 }
 
-void scalePotsCustom(unsigned int steps){
+fractional scalePotsCustom(unsigned int steps, fractional scaleme){
     volatile register int scaled asm("A");
     fractional scale = Q15(steps*0.000030518509476);
     
-    scaled=__builtin_mpy(pots[4],scale, NULL, NULL, 0, NULL, NULL, 0);
-    pots_scaled[4]=__builtin_sac(scaled, 0);
+    scaled=__builtin_mpy(scaleme,scale, NULL, NULL, 0, NULL, NULL, 0);
+    return(__builtin_sac(scaled, 0));
 }
 
 void changeFX(void){

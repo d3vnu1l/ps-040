@@ -1,14 +1,15 @@
 #include "xc.h"
+#include "audio.h"
 #include "common.h"
 #include <dsp.h>
-#include "audio.h"
+
+
 
 extern char pad[BUTTONS];                                                             //CONTROL VARIABLES//
 extern fractional pots[POTS];
 extern fractional pots_scaled[POTS];
 
 volatile unsigned int loop_ptr = 0;                                             //FX FLAGS & VARS//
-unsigned int loop_lim=0;
 extern unsigned char hard_clipped;
 volatile fractional loop[LOOP_BUF_SIZE]={0};
 fractional lpf_alpha=Q15(0.5), lpf_inv_alpha=Q15(0.5);
@@ -30,7 +31,7 @@ extern unsigned int snare_max, snare_ptr;
 extern fractional snare[5552];
 extern enum fxStruct fxUnits[NUMFXUNITS];
 
-void (*fxFuncPointers[NUMFX])(fractional *, fractional *, fractional, fractional, fractional) = {NULL, runLPF, runTRM, runLOP};
+void (*fxFuncPointers[NUMFX])(fractional *, fractional *, fractional, fractional, fractional) = {NULL, runLPF, runTRM, runLOP, runBIT};
 
 void runBufferLooper(fractional *source){
     static fractional delayed_sample;
@@ -88,7 +89,7 @@ void runTRM(fractional *source, fractional *destination, fractional param1, frac
     int *readPTR=source;
     int *rewritePTR=destination;
     int counter=(STREAMBUF-1);
-    static unsigned int trem_delay=0, tremelo_ptr=0;;
+    static unsigned int trem_delay=0, tremelo_ptr=0;
     const int pot_offset = 5;
     
     if(param3>=0x3FFF){     // TREM CONTROL
@@ -125,27 +126,60 @@ void runTRM(fractional *source, fractional *destination, fractional param1, frac
     }
 }
 
-void runLOP(fractional *source, fractional *destination, fractional param1, fractional param2, fractional param3){
+void runBIT(fractional *source, fractional *destination, fractional param1, fractional param2, fractional param3){
     volatile fractional sample;
     
     int *readPTR=source;
     int *rewritePTR=destination;
-    
     int counter=(STREAMBUF-1);
+    int shift = scalePotsCustom(14, param1);
+    fractional shiftedsample, sign;
+    
     for(; counter>=0; counter--){
-        sample=*readPTR--; //!rw                                                   
-        if(loop_lim>=LOOP_BUF_SIZE)
-            loop_lim=LOOP_BUF_SIZE;
-        if(loop_ptr<loop_lim){
-            sample = (loop[loop_ptr++]);
-        }
-        else {
-            loop_ptr=0;
-            sample = (loop[loop_ptr++]);
-        }
+        sample=*readPTR--; //!rw
         
+        if(param3>=0x3FFF){     // BIT CONTROL
+            sign = sample&0x8000;
+            sample=sample&(-1<<(16-shift));
+        }
+
         *rewritePTR--=sample; //rw
-    }                                                                          
+    }
+}
+
+void runLOP(fractional *source, fractional *destination, fractional param1, fractional param2, fractional param3){
+    volatile register int result asm("A");
+    volatile fractional sample;
+    
+    result =__builtin_mpy(param1,Q15(0.3052), NULL, NULL, 0, NULL, NULL, 0);
+    int loop_lim = __builtin_sac(result, 0);
+    
+    int *readPTR=source;
+    int *rewritePTR=destination;
+    int counter=(STREAMBUF-1);
+    
+    //Run looper Buffer
+    if(param3<0x3FFF){
+        runBufferLooper(source); 
+    }
+    else {
+        for(; counter>=0; counter--){
+            sample=*readPTR--; //!rw    
+
+            if(param3>=0x3FFF){
+                if(loop_lim>=LOOP_BUF_SIZE)
+                    loop_lim=LOOP_BUF_SIZE;
+                if(loop_ptr<loop_lim){
+                    sample = (loop[loop_ptr++]);
+                }
+                else {
+                    loop_ptr=0;
+                    sample = (loop[loop_ptr++]);
+                }
+            }
+            *rewritePTR--=sample; //rw
+        }               
+    }
 }
 
 void processAudio(fractional *source, fractional *destination){
@@ -154,14 +188,10 @@ void processAudio(fractional *source, fractional *destination){
     volatile fractional sample;
     int counter=(STREAMBUF-1);
     
-    
     //Run each FX unit
     if(fxUnits[0]==0); else fxFuncPointers[fxUnits[0]](source, source, pots[FX_1], pots[FX_2], pots[FX_3]);
     if(fxUnits[1]==0); else fxFuncPointers[fxUnits[1]](source, source, pots[FX_4], pots[FX_5], pots[FX_6]);
-    //Run looper Buffer
-    if(fxUnits[0]==lop)runBufferLooper(source); 
-    if(fxUnits[1]==lop)runBufferLooper(source); 
-
+   
     for(; counter>=0; counter--){
         sample=*source--; //!rw
 
@@ -204,16 +234,16 @@ void processAudio(fractional *source, fractional *destination){
             sample=sintab[i];
         }
 
-        //VOLUME CONTROL
-        if(pots[POT_VOLUME]<=0x0007)
-            sample=0;
-        else if(pots[POT_VOLUME]>=0x7FF7);
-        else{
-            result1 =__builtin_mpy(sample,pots[POT_VOLUME], NULL, NULL, 0, NULL, NULL, 0);
-            sample=__builtin_sac(result1, 0);
-        }
+
         
         //return sample;
         *destination--=sample; //rw
+    }
+    
+    //VOLUME CONTROL
+    //if(pots[POT_VOLUME]<=0x000F); 
+    if(pots[POT_VOLUME]>=0x7FF7);
+    else{
+        VectorScale(STREAMBUF, destination+1, destination+1, pots[POT_VOLUME]);
     }
 }

@@ -6,13 +6,14 @@
 #define	UTILITIES_H
 #include <xc.h> // include processor files 
 #include "common.h"
+#include <dsp.h>
 
 //
 //function definitions
 void scanButtons(void);
 void readPots(void);
 void scalePots(void);
-void scalePotsCustom(unsigned int);
+fractional scalePotsCustom(unsigned int, fractional);
 void changeFX(void);
 void display(void);
 void processRxData(int *, int *);
