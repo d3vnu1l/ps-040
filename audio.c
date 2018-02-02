@@ -192,47 +192,37 @@ void processAudio(fractional *source, fractional *destination){
     if(fxUnits[0]==0); else fxFuncPointers[fxUnits[0]](source, source, pots[FX_1], pots[FX_2], pots[FX_3]);
     if(fxUnits[1]==0); else fxFuncPointers[fxUnits[1]](source, source, pots[FX_4], pots[FX_5], pots[FX_6]);
    
+    
+    if(kick_playing==TRUE&&kick_ptr<kick_max){
+        result1 =__builtin_mpy(sample,Q15(0.85), NULL, NULL, 0, NULL, NULL, 0);
+        result1 = __builtin_add(result1,kick[kick_ptr++],0);
+        sample=__builtin_sac(result1, 0);
+    }
+    else if (pad[0]==1&&kick_playing==TRUE&&kick_ptr==kick_max){
+        kick_playing=FALSE;
+        kick_ptr=0;
+    }
+
+    if(snare_playing==TRUE){
+        result1 =__builtin_mpy(sample,Q15(0.85), NULL, NULL, 0, NULL, NULL, 0);
+
+        result1 = __builtin_add(result1,snare[snare_ptr++],0);
+        sample=__builtin_sac(result1, 0);
+
+        snare_playing=FALSE;
+    }
+
+
+    if (TEST_SIN==TRUE){
+        i++;
+        if(i==1024)
+            i=0;
+        sample=sintab[i];
+    }
+    
     for(; counter>=0; counter--){
         sample=*source--; //!rw
 
-        if(kick_playing==TRUE&&kick_ptr<kick_max){
-            result1 =__builtin_mpy(sample,Q15(0.90), NULL, NULL, 0, NULL, NULL, 0);
-            result1 = __builtin_add(result1,kick[kick_ptr++],0);
-            sample=__builtin_sac(result1, 0);
-        }
-        else if (pad[0]==1&&kick_playing==TRUE&&kick_ptr==kick_max){
-            kick_playing=FALSE;
-            kick_ptr=0;
-        }
-        /*
-        if(hat_playing==TRUE&&hat_ptr<hat_max){
-            result1 =__builtin_mpy(sample,Q15(0.85), NULL, NULL, 0, NULL, NULL, 0);
-            result1 = __builtin_add(result1,hat[hat_ptr++],0);
-            sample=__builtin_sac(result1, 0);
-        }
-        else if (pad[2]==1&&hat_playing==TRUE&&hat_ptr==hat_max){
-            hat_playing=FALSE;
-            hat_ptr=0;
-        }
-         */
-
-        if(snare_playing==TRUE&&snare_ptr<snare_max){
-            result1 =__builtin_mpy(sample,Q15(0.85), NULL, NULL, 0, NULL, NULL, 0);
-            result1 = __builtin_add(result1,snare[snare_ptr++],0);
-            sample=__builtin_sac(result1, 0);
-        }
-        else if (pad[1]==1&&snare_playing==TRUE&&snare_ptr==snare_max){
-            snare_playing=FALSE;
-            snare_ptr=0;
-        }
-
-
-        if (TEST_SIN==TRUE){
-            i++;
-            if(i==1024)
-                i=0;
-            sample=sintab[i];
-        }
 
 
         
