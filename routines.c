@@ -10,7 +10,8 @@
 extern fractional outputA[STREAMBUF], outputB[STREAMBUF];
 extern fractional streamA[STREAMBUF], streamB[STREAMBUF];
 extern unsigned int write_ptr, rw, frameReady;
-extern int txBufferA[STREAMBUF], txBufferB[STREAMBUF], rxBufferA[STREAMBUF], rxBufferB[STREAMBUF];  //doesnt work as fractional
+extern int txBufferA[STREAMBUF], txBufferB[STREAMBUF],
+            RxBufferA[STREAMBUF], RxBufferB[STREAMBUF];  //doesnt work as fractional
 
 //misc.
 volatile fractional sampinA=0, sampinB=0;
@@ -54,18 +55,31 @@ void __attribute__ ((interrupt, auto_psv)) _DCIInterrupt(void){
     _DCIIF=0;
 }
 
-void __attribute__((__interrupt__,auto_psv)) _DMA2Interrupt(void){
-    _DMA2IF = 0; /* Received one frame of data*/    
-    
-    if(rxBufferIndicator == 0)
+void __attribute__((__interrupt__)) _SPI3Interrupt(void)
+{
+    IFS5bits.SPI3IF = 0;
+}
+
+void __attribute__((__interrupt__)) _DMA0Interrupt(void) {
+    static unsigned int BufferCount = 0; // Keep record of the buffer that contains TX data
+    if(BufferCount == 0);
     {
-         processRxData((int *)rxBufferA, (int*)txBufferA);
+        //TxData(TxBufferA); // Transmit SPI data in DMA RAM Primary buffer
+        //TxData(TxBufferB); // Transmit SPI data in DMA RAM Secondary buffer
     }
-    else
-    {
-         processRxData((int *)rxBufferB, (int*)txBufferB);
-    }
-    rxBufferIndicator ^= 1; /* Toggle the indicator*/    
+    BufferCount ^= 1;
+    IFS0bits.DMA0IF = 0; // Clear the DMA0 Interrupt flag
+}
+
+void __attribute__((__interrupt__)) _DMA1Interrupt(void){
+    static unsigned int BufferCount = 0; // Keep record of the buffer that contains RX data
+    if(BufferCount == 0) ;
+        //ProcessRxData(TxBufferA); // Process received SPI data in DMA RAM Primary buffer
+    else;
+        //ProcessRxData(TxBufferB); // Process received SPI data in DMA RAM Secondary buffer
+ 
+    BufferCount ^= 1;
+    IFS0bits.DMA1IF = 0; // Clear the DMA1 Interrupt flag
 }
 
 /*

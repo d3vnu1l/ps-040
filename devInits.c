@@ -13,7 +13,8 @@
 #include "dsp.h"
 
 extern unsigned char UART_ON;
-extern int txBufferA[STREAMBUF], txBufferB[STREAMBUF], rxBufferA[STREAMBUF], rxBufferB[STREAMBUF];  //doesnt work as fractional
+extern unsigned int TxBufferA[STREAMBUF], TxBufferB[STREAMBUF], 
+            RxBufferA[STREAMBUF], RxBufferB[STREAMBUF];  //doesnt work as fractional
 
 extern char flash_readback[512];
 
@@ -250,63 +251,34 @@ void initDCI_DAC(void){
     Delay_us(20);
 }
 
-void initDMA0(void){
-    unsigned long address;
+void initDMA(void){
     
-    /*
-    DMA0CONbits.AMODE = 2; // Configure DMA for Peripheral indirect mode
-    DMA0CONbits.MODE = 0; // Configure DMA for Continuous no Ping-Pong mode
-    DMA0PAD =  0X0608; // Point DMA to PMP
-    DMA0CNT = 2; //2 // 3 DMA request (3 buffers, each with 1 words)
-    DMA0REQ = 13; // Select ADC1 as DMA Request source
-    //DMA0STA = __builtin_dmaoffset(&BufferA);
-    //DMA0STB = __builtin_dmaoffset(&BufferB);
-    IFS0bits.DMA0IF = 0; //Clear the DMA interrupt flag bit
-    IEC0bits.DMA0IE = 1; //Set the DMA interrupt enable bit
-    DMA0CONbits.CHEN=1; // Enable DMA
-    */
+    IFS0bits.DMA0IF = 0;
+    IEC0bits.DMA0IE = 1;
+    DMAPWC = 0;
+    DMA0CON.SIZE=1;                             // Byte size
+    DMA0CON.DIR=1;                              // Write to flash
+    DMA0CON.MODE=3;                             // One shot, ping pong
+    DMA0STAL = (unsigned int)&TxBufferA;
+    DMA0STAH = (unsigned int)&TxBufferB;
+    DMA0PAD = (volatile unsigned int) &SPI3BUF;
+    DMA0CNT = FLASH_DMAXFERS-1;
+    DMA0REQ = 0x005B;
+    //Set up DMA Channel 1 to Receive in Continuous Ping-Pong Mode:
+
+    IFS0bits.DMA1IF = 0;
+    IEC0bits.DMA1IE = 1;
+    DMA0CON.SIZE=1;                             // Byte size
+    DMA0CON.DIR=0;                              // Read from flash
+    DMA0CON.MODE=3;                             // One shot, ping pong
+    DMA1STAL = (unsigned int)&RxBufferA;
+    DMA1STAH = (unsigned int)&RxBufferB;
+    DMA1PAD = (volatile unsigned int) &SPI3BUF;
+    DMA1CNT = FLASH_DMAXFERS-1;
+    DMA1REQ = 0x005B;
     
-    DMA0CONbits.SIZE = 0; /* Word transfers*/
-    DMA0CONbits.DIR = 1; /* From RAM to DCI*/
-    DMA0CONbits.AMODE = 0; /* Register Indirect with post-increment mode*/
-    DMA0CONbits.MODE = 2; /* Continuous ping pong mode enabled*/
-    DMA0CONbits.HALF = 0; /* Interrupt when all the data has been moved*/
-    DMA0CONbits.NULLW = 0;
-    DMA0REQbits.FORCE = 0; /* Automatic transfer*/
-    DMA0REQbits.IRQSEL = 0x3C;/* Codec transfer done*/
-    address =__builtin_edsoffset(txBufferA) & 0x7FFF;
-    address +=__builtin_edspage(txBufferA) << 15;
-    DMA0STAL = address & 0xFFFF;
-    DMA0STAH = address >>16;
-    address =__builtin_edsoffset(txBufferB) & 0x7FFF;
-    address +=__builtin_edspage(txBufferB) << 15;
-    DMA0STBL = address & 0xFFFF;
-    DMA0STBH = address >>16;
-    DMA0PAD = (int)&TXBUF0;
-    DMA0CNT = STREAMBUF-1;
-    /* DMA 2 - DCI to DPSRAM*/
-    DMA2CONbits.SIZE = 0; /* Word transfers*/
-    DMA2CONbits.DIR = 0; /* From DCI to DPSRAM */
-    DMA2CONbits.HALF = 0; /* Interrupt when all the data has been moved*/
-    DMA2CONbits.NULLW = 0; /* No NULL writes - Normal Operation*/
-    DMA2CONbits.AMODE = 0; /* Register Indirect with post-increment mode*/
-    DMA2CONbits.MODE = 2; /* Continuous mode ping pong mode enabled*/
-    DMA2REQbits.FORCE = 0; /* Automatic transfer*/
-    DMA2REQbits.IRQSEL = 0x3C;/* Codec transfer done*/
-    address =__builtin_edsoffset(rxBufferA) & 0x7FFF;
-    address +=__builtin_edspage(rxBufferA) << 15;
-    DMA2STAL = address & 0xFFFF;
-    DMA2STAH = address >>16;
-    address =__builtin_edsoffset(rxBufferB) & 0x7FFF;
-    address +=__builtin_edspage(rxBufferB) << 15;
-    DMA2STBL = address & 0xFFFF;
-    DMA2STBH = address >>16;
-    DMA2PAD = (int)&RXBUF0;
-    DMA2CNT = STREAMBUF-1;
-    _DMA2IP = 5;
-    _DMA2IE = 1;
-    DMA0CONbits.CHEN = 1; /* Enable the channel*/
-    DMA2CONbits.CHEN = 1;
+    DMA1CONbits.CHEN = 1;
+    DMA0CONbits.CHEN = 1;
 }
 
 void initSPI3_MEM(void){
@@ -315,7 +287,7 @@ void initSPI3_MEM(void){
     IEC5bits.SPI3IE = 0;        // Disable the interrupt
     SPI3CON1bits.MSTEN=1;       //master mode
     SPI3CON1bits.DISSCK = 0;    //Internal serial clock is enabled
-    SPI3CON1bits.MODE16=0;      //8 bit
+    SPI3CON1bits.MODE16=0;      //8 bitBufferB
     SPI3CON1bits.DISSDO=0;      //enable SDO 
     SPI3CON1bits.SSEN=1;        //use SS
     SPI3CON2bits.FRMEN=0;       //no enable framed mode

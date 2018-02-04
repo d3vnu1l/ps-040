@@ -13,7 +13,9 @@
 #define Fscan   300                       //target buttons & pots sampling rate
 #define Fout    44100                      //target output sampling rate (~45k last measured)
 #define Fdisp   15                        //15hz display update rate
+
 #define SINRES  1024
+#define FLASH_DMAXFERS 16
 
 /* BUFFERS */
 
@@ -22,10 +24,10 @@
 #define LOOP_BUFFERS    40                    //about 1/4th of a second               //FX settings
 
 #define LCDBUF          256                     //lcd command buffer size
-    #define LCDBUFMASK  0x00FF               //lcd buffer access mask
+#define LCDBUFMASK  0x00FF               //lcd buffer access mask
 
 
-//misc
+/* MISC */
 #define TRUE    0xFF
 #define FALSE   0x00
 #define BUTTONS 35
@@ -33,9 +35,11 @@
 #define NUMFX   5
 #define NUMFXUNITS 2
 
+/* Pin Map */
 #define SLED _LATF0                                                            
 #define LCD_RS _LATE15
 #define SS3 _LATF1
+
 #define ENCODERCNTH POS1CNTH
 #define ENCODERCNTL POS1CNTL
 

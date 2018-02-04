@@ -24,11 +24,11 @@ fractional outputA[STREAMBUF], outputB[STREAMBUF];
 fractional streamA[STREAMBUF], streamB[STREAMBUF];
 unsigned int write_ptr=0, rw=0, frameReady=0;
 
-/* DMA BUFFERS */
-fractional txBufferA[STREAMBUF]__attribute__((space(eds)));
-fractional txBufferB[STREAMBUF] __attribute__((space(eds)));
-fractional rxBufferA[STREAMBUF] __attribute__((space(eds)));
-fractional rxBufferB[STREAMBUF] __attribute__((space(eds)));
+unsigned int TxBufferA[16] __attribute__((space(xmemory)));
+unsigned int TxBufferB[16] __attribute__((space(xmemory)));
+unsigned int RxBufferA[16] __attribute__((space(xmemory)));
+unsigned int RxBufferB[16] __attribute__((space(xmemory)));
+
 
 
 /* Debug Variables */
@@ -57,10 +57,10 @@ void initBuffer(void){
     for(i=0; i<STREAMBUF; i++){
         streamA[i]=0;
         streamB[i]=0;
-        txBufferA[i]=0;
-        txBufferB[i]=0;
-        rxBufferA[i]=0;
-        rxBufferB[i]=0;
+        TxBufferA[i]=0;
+        TxBufferB[i]=0;
+        RxBufferA[i]=0;
+        RxBufferB[i]=0;
     }
     
     for(i=0; i<BUTTONS; i++)
@@ -75,7 +75,7 @@ int main(void) {
     initADC1();                     //configure & enable internal ADC
     initPMP();
     //||||||||----
-    //initDMA0();
+    //initDMA();
     initDCI_DAC();                  //configure & enable DAC
     initT1();                       //configure & start T1 
     initT2();                       //configure & start T2 
