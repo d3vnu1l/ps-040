@@ -13,12 +13,16 @@
 #define Fscan   300                       //target buttons & pots sampling rate
 #define Fout    44100                      //target output sampling rate (~45k last measured)
 #define Fdisp   15                        //15hz display update rate
+#define SINRES  1024
 
 /* BUFFERS */
-#define LOOP_BUF_SIZE 10000             //about 1/4th of a second               //FX settings
-#define STREAMBUF   256                   //input adc stack size, must be divisible by 2
-#define LCDBUF      256                     //lcd command buffer size
-#define LCDBUFMASK  0x00FF               //lcd buffer access mask
+
+#define STREAMBUF       256                   //input adc stack size, must be divisible by 2
+#define LOOP_BUF_SIZE   17408             
+#define LOOP_BUFFERS    40                    //about 1/4th of a second               //FX settings
+
+#define LCDBUF          256                     //lcd command buffer size
+    #define LCDBUFMASK  0x00FF               //lcd buffer access mask
 
 
 //misc
@@ -36,6 +40,7 @@
 #define ENCODERCNTL POS1CNTL
 
 #define POT_PERCENT Q15(0.3937)      // For pot 0-100 display
+#define POT_LOOP Q15(1.0*LOOP_BUF_SIZE/32767.0)
 
 /* Potentiometer mapping 
     0   1  |  6   7
@@ -77,7 +82,7 @@ enum fxStruct{
     lpf,
     trm,
     lop,
-    bit
+    btc
 };
 
 #endif	/* COMMON_H */

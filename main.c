@@ -7,6 +7,7 @@
 #include "utilities.h"
 #include "audio.h"
 #include "plcd.h"
+#include "sounds.h"
 
 #pragma config ICS = PGD1       //pgeDC 1 is used
 #pragma config JTAGEN = OFF     //disable jtag
@@ -70,6 +71,7 @@ int main(void) {
     initPorts();                    //configure io device & adc 
     //initUART1();                    //configure & enable UART
     initBuffer();
+    genSine(STREAMBUF);
     initADC1();                     //configure & enable internal ADC
     initPMP();
     //||||||||----
@@ -87,7 +89,6 @@ int main(void) {
     
     while(1){    
         if(frameReady) {
-            process_time=(STREAMBUF-1);             //DEBUG
             if(rw){
                 ping = streamA;
                 pong = outputB;
@@ -97,10 +98,8 @@ int main(void) {
             }
             
             processAudio(ping, pong); 
-            process_time=(STREAMBUF-1)-write_ptr;    //DEBUG
+            process_time=write_ptr;    //DEBUG
             frameReady=0;
-            
-            
         }
         if(_T2IF){
             scanButtons();                   //read button matrix

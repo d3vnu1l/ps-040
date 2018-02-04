@@ -5,6 +5,7 @@
 #include "common.h"
 #include "audio.h"
 #include "utilities.h"
+#include "routines.h"
 //CONTROL VARIABLES//
 extern fractional outputA[STREAMBUF], outputB[STREAMBUF];
 extern fractional streamA[STREAMBUF], streamB[STREAMBUF];
@@ -53,7 +54,7 @@ void __attribute__ ((interrupt, auto_psv)) _DCIInterrupt(void){
     _DCIIF=0;
 }
 
-void __attribute__((__interrupt__,no_auto_psv)) _DMA2Interrupt(void){
+void __attribute__((__interrupt__,auto_psv)) _DMA2Interrupt(void){
     _DMA2IF = 0; /* Received one frame of data*/    
     
     if(rxBufferIndicator == 0)

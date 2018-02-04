@@ -17,6 +17,10 @@ fractional scalePotsCustom(unsigned int, fractional);
 void changeFX(void);
 void display(void);
 void processRxData(int *, int *);
+void ClipCopy_psv(int, fractional *, __psv__ fractional *);
+void ClipCopy_eds(int, fractional *, __eds__ fractional *);
+void ClipCopy_toeds(int, __eds__ fractional *, fractional *);
+
 void Delay_us(unsigned int);
 
 #endif	/* UTILITIES_H */

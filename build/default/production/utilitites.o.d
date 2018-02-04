@@ -5,5 +5,4 @@ sounds.h  \
  audio.h  \
 flash.h  \
 screens.h  \
-utilities.h  \
-devInits.h 
+utilities.h 

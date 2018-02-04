@@ -3,4 +3,5 @@ screens.c  \
 screens.h  \
 common.h  \
 plcd.h  \
- flash.h 
+ flash.h  \
+sounds.h 

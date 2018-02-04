@@ -13,6 +13,8 @@
 #include "dsp.h"
 #include "flash.h"
 
+#include "sounds.h"
+
 extern unsigned char TEST_SIN;
 extern fractional pots[POTS];
 extern fractional pots_scaled[POTS];
@@ -21,12 +23,14 @@ extern enum screenStruc state, laststate;
 extern char flash_readback[512];
 extern unsigned int process_time;
 
+extern struct clip sine;
+
 extern enum fxStruct fxUnits[NUMFXUNITS];
 
 int fxLast=0;
 int fxNow=0;
 
-void (*fxModPointers[NUMFX])(unsigned int, fractional, fractional, fractional) = {screenNoFXmod, screenLPFmod, screenTRMmod, screenLOPmod, screenBITmod};
+void (*fxModPointers[NUMFX])(unsigned int, fractional, fractional, fractional) = {screenNoFXmod, screenLPFmod, screenTRMmod, screenLOPmod, screenBTCmod};
 
 void screenDebugAudio(){
 
@@ -142,9 +146,20 @@ void screenDebugInput(void){
         lcdSetCursorQ(0,0);
         lcdWriteStringQ("Input Debug");
         lcdSetCursorQ(0,1);
-        lcdWriteStringQ("ADC variance: ");
+        lcdWriteStringQ("Size:");
+        lcdSetCursorQ(0,2);
+        lcdWriteStringQ("Playing:");
+        lcdSetCursorQ(0,3);
+        lcdWriteStringQ("Blocks:");
     } else {
         //update here
+        lcdSetCursorQ(5,1);
+        lcdWriteWordUnsignedQ(sine.size);
+        lcdSetCursorQ(8,2);
+        lcdWriteWordUnsignedQ(sine.playing);
+        lcdSetCursorQ(7,3);
+        lcdWriteDecimalQ(sine.block_index, 3);
+        
         lcdDrawPads(16);
     }
 }
@@ -241,7 +256,7 @@ void screenLOPmod(unsigned int col, fractional param1, fractional param2, fracti
     }
 }
 
-void screenBITmod(unsigned int col, fractional param1, fractional param2, fractional param3){
+void screenBTCmod(unsigned int col, fractional param1, fractional param2, fractional param3){
     if(fxNow!=fxLast){
         // Setup here
         lcdSetCursorQ(col+5,0);

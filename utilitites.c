@@ -1,6 +1,5 @@
 #include <xc.h>
 #include <p33EP512GM310.h>
-#include <libpic30.h>
 #include <dsp.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,7 +10,6 @@
 #include "flash.h"
 #include "screens.h"
 #include "utilities.h"
-#include "devInits.h"
 
 fractional FXSCALE = Q15(NUMFX*0.000030518509476);
 
@@ -21,7 +19,6 @@ extern fractional pots[POTS];
 extern fractional pots_scaled[POTS];
 extern fractional pots_custom[POTS];
 extern unsigned char UART_ON; 
-extern enum screenStruc state;
 
 //STATUS VARIABLES//
 extern unsigned char hard_clipped;
@@ -29,10 +26,8 @@ extern unsigned char UART_EN;
 extern unsigned char TEST_SIN;
 
 extern enum fxStruct fxUnits[NUMFXUNITS];
-
-
-//FX FLAGS & VARS
-extern unsigned char kick_playing, snare_playing;   
+extern enum screenStruc state;
+extern struct clip_psv sine, kick, snare;
 
 void scanButtons(void){
     
@@ -84,16 +79,16 @@ void scanButtons(void){
     }
     
     // SAMPLE TRIGGERS 
-    if(pad[0]==0&&kick_playing==FALSE){                                         //kick
-        kick_playing=TRUE;
+    if(pad[0]==0){                                         //kick
+        kick.playing=TRUE;
     }
     /*
     if(pad[2]==0&&hat_playing==FALSE){                                          //hat
         hat_playing=TRUE;
     }
     */
-    if(pad[1]==0&&snare_playing==FALSE){                                        //snare
-        snare_playing=TRUE;
+    if(pad[1]==0&&snare.playing==FALSE){                                        //snare
+        snare.playing=TRUE;
     }
 }
 
@@ -222,6 +217,30 @@ void processRxData(fractional *sourceBuffer, fractional *targetBuffer){
     {
         targetBuffer[index] = sourceBuffer[index];
     }
+}
+
+void ClipCopy_psv(int numElems, fractional * dstV, __psv__ fractional * srcV){
+    int i;
+    
+    for(i=0; i<numElems; i++){
+        *dstV++=*srcV++;
+    }
+}
+
+void ClipCopy_eds(int numElems, fractional * dstV, __eds__ fractional * srcV){
+    int i;
+    
+    for(i=0; i<numElems; i++){
+        *dstV++=*srcV++;
+    } 
+}
+
+void ClipCopy_toeds(int numElems, __eds__ fractional * dstV, fractional * srcV){
+    int i;
+    
+    for(i=0; i<numElems; i++){
+        *dstV++=*srcV++;
+    } 
 }
 
 //A blocking delay function. Not very accurate but good enough.

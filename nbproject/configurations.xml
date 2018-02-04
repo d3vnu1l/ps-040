@@ -86,7 +86,7 @@
         <property key="enable-ansi-std" value="false"/>
         <property key="enable-ansi-warnings" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
-        <property key="enable-large-arrays" value="false"/>
+        <property key="enable-large-arrays" value="true"/>
         <property key="enable-omit-frame-pointer" value="false"/>
         <property key="enable-procedural-abstraction" value="false"/>
         <property key="enable-short-double" value="false"/>
@@ -150,7 +150,7 @@
         <property key="enable-default-isr" value="true"/>
         <property key="enable-handles" value="true"/>
         <property key="enable-pack-data" value="true"/>
-        <property key="extra-lib-directories" value="plibs;plibs/dsPIC33E"/>
+        <property key="extra-lib-directories" value="pLibs;pLibs\dsPIC33E"/>
         <property key="fill-flash-options-addr" value=""/>
         <property key="fill-flash-options-const" value=""/>
         <property key="fill-flash-options-how" value="0"/>
@@ -162,7 +162,7 @@
         <property key="general-write-protect" value="no_write_protect"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="heap-size" value=""/>
-        <property key="input-libraries" value="p33EP512GM310-elf;dsp"/>
+        <property key="input-libraries" value="p33EP512GM310-coff;dsp"/>
         <property key="linker-stack" value="true"/>
         <property key="linker-symbols" value=""/>
         <property key="map-file" value="${DISTDIR}/${PROJECTNAME}.${IMAGE_TYPE}.map"/>

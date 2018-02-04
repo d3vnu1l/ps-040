@@ -8,7 +8,7 @@ void runBufferLooper(fractional *);
 void runLPF(fractional *, fractional *, fractional, fractional, fractional);
 void runTRM(fractional *, fractional *, fractional, fractional, fractional);
 void runLOP(fractional *, fractional *, fractional, fractional, fractional);
-void runBIT(fractional *, fractional *, fractional, fractional, fractional);
+void runBTC(fractional *, fractional *, fractional, fractional, fractional);
 void processAudio(fractional *, fractional *);
 
 #endif	/* XC_HEADER_TEMPLATE_H */

@@ -1,39 +1,41 @@
 #include "xc.h"
 #include "audio.h"
 #include "common.h"
+#include "sounds.h"
 #include <dsp.h>
-
+#include "utilities.h"
 
 
 extern char pad[BUTTONS];                                                             //CONTROL VARIABLES//
 extern fractional pots[POTS];
 extern fractional pots_scaled[POTS];
 
+extern fractional sintab[SINRES];
+
 volatile unsigned int loop_ptr = 0;                                             //FX FLAGS & VARS//
 extern unsigned char hard_clipped;
-volatile fractional loop[LOOP_BUF_SIZE]={0};
-fractional lpf_alpha=Q15(0.5), lpf_inv_alpha=Q15(0.5);
 
-extern fractional sintab[1024];     //misc//
+static fractional loopbuf[LOOP_BUF_SIZE] __attribute__ ((eds)) = {0};
+struct clip_eds history = {.size = LOOP_BUF_SIZE, .blocks=LOOP_BUF_SIZE/STREAMBUF, .playing=FALSE, .flash=FALSE, .block_index=0, .start_ptr=loopbuf, .end_ptr=&loopbuf[LOOP_BUF_SIZE-1], .read_ptr=loopbuf};
+
+fractional lpf_alpha=Q15(0.5), lpf_inv_alpha=Q15(0.5);
+static fractional psvbuf[STREAMBUF]={0};
+static fractional flashbufA[STREAMBUF]={0};
+static fractional flashbufB[STREAMBUF]={0};
+
+
 extern unsigned char TEST_SIN;
 
-extern unsigned char kick_playing;                                              //SAMPLES//
-extern unsigned int kick_max, kick_ptr;
-extern fractional kick[5552];
-//extern unsigned char kick_mode;
-/*
-extern unsigned char hat_playing;
-extern unsigned int hat_max, hat_ptr;
-extern fractional hat[5552];
- */
-extern unsigned char snare_playing;
-extern unsigned int snare_max, snare_ptr;
-extern fractional snare[5552];
 extern enum fxStruct fxUnits[NUMFXUNITS];
+extern struct clip_psv sine, kick, snare;
 
-void (*fxFuncPointers[NUMFX])(fractional *, fractional *, fractional, fractional, fractional) = {NULL, runLPF, runTRM, runLOP, runBIT};
+
+void (*fxFuncPointers[NUMFX])(fractional *, fractional *, fractional, fractional, fractional) = {NULL, runLPF, runTRM, runLOP, runBTC};
 
 void runBufferLooper(fractional *source){
+    flashbufA[0]=*source;
+    flashbufB[0]=*source;
+    
     static fractional delayed_sample;
     volatile fractional sample;
     
@@ -43,10 +45,10 @@ void runBufferLooper(fractional *source){
     for(; counter<STREAMBUF; counter++){
         sample=*readPTR++; //!rw
         if(loop_ptr<LOOP_BUF_SIZE)
-            loop[loop_ptr++]=sample;
+            loopbuf[loop_ptr++]=sample;
         else {
             loop_ptr=0;
-            loop[loop_ptr++]=sample;
+            loopbuf[loop_ptr++]=sample;
         }
     }
 }
@@ -126,7 +128,7 @@ void runTRM(fractional *source, fractional *destination, fractional param1, frac
     }
 }
 
-void runBIT(fractional *source, fractional *destination, fractional param1, fractional param2, fractional param3){
+void runBTC(fractional *source, fractional *destination, fractional param1, fractional param2, fractional param3){
     volatile fractional sample;
     
     int *readPTR=source;
@@ -149,63 +151,62 @@ void runBIT(fractional *source, fractional *destination, fractional param1, frac
 
 void runLOP(fractional *source, fractional *destination, fractional param1, fractional param2, fractional param3){
     volatile register int result asm("A");
-    volatile fractional sample;
     
-    result =__builtin_mpy(param1,Q15(0.3052), NULL, NULL, 0, NULL, NULL, 0);
+    result =__builtin_mpy(param1, POT_LOOP, NULL, NULL, 0, NULL, NULL, 0);
     int loop_lim = __builtin_sac(result, 0);
     
-    int *readPTR=source;
-    int *rewritePTR=destination;
-    int counter=0;
+    __eds__ fractional *ptrr = history.start_ptr;
+    ptrr+=loop_lim;
     
     //Run looper Buffer
+    if(history.read_ptr>=(ptrr)) {
+        history.read_ptr=history.start_ptr;
+    }
     if(param3<0x3FFF){
-        runBufferLooper(source); 
+        ClipCopy_toeds(STREAMBUF, history.read_ptr, destination);
     }
+    
     else {
-        for(; counter<STREAMBUF; counter++){
-            sample=*readPTR++; //!rw    
-
-            if(param3>=0x3FFF){
-                if(loop_lim>=LOOP_BUF_SIZE)
-                    loop_lim=LOOP_BUF_SIZE;
-                if(loop_ptr<loop_lim){
-                    sample = (loop[loop_ptr++]);
-                }
-                else {
-                    loop_ptr=0;
-                    sample = (loop[loop_ptr++]);
-                }
-            }
-            *rewritePTR++=sample; //rw
-        }               
+        ClipCopy_eds(STREAMBUF, destination, history.read_ptr);
     }
+    history.read_ptr+=STREAMBUF;
 }
 
 void processAudio(fractional *source, fractional *destination){
     volatile register int result1 asm("A");
     static int i=0;
     volatile fractional sample;
-    int counter=0;
-    
-    int *readPTR=source;
-    int *rewritePTR=destination;
     
     //Run each FX unit
     if(fxUnits[0]==0); else fxFuncPointers[fxUnits[0]](source, source, pots[FX_1], pots[FX_2], pots[FX_3]);
     if(fxUnits[1]==0); else fxFuncPointers[fxUnits[1]](source, source, pots[FX_4], pots[FX_5], pots[FX_6]);
    
-    if(kick_playing==TRUE&&kick_ptr<kick_max){
-        result1 =__builtin_mpy(sample,Q15(0.85), NULL, NULL, 0, NULL, NULL, 0);
-        result1 = __builtin_add(result1,kick[kick_ptr++],0);
-        sample=__builtin_sac(result1, 0);
+    if(kick.playing==TRUE){
+        ClipCopy_psv(STREAMBUF, psvbuf, kick.read_ptr);
+           
+        //ClipCopy_psv(STREAMBUF, source, sine.read_ptr);
+        kick.block_index++;
+        if(kick.block_index==kick.blocks) {
+            kick.read_ptr=kick.start_ptr;
+            kick.block_index=0;
+            kick.playing=FALSE;
+        }
+        else kick.read_ptr+=STREAMBUF;
+                
+        //VectorScale(STREAMBUF, psvbuf, psvbuf, Q15(0.9));
+        VectorAdd(STREAMBUF, source, source, psvbuf);
+                
+        //result1 =__builtin_mpy(sample,Q15(0.85), NULL, NULL, 0, NULL, NULL, 0);
+        //result1 = __builtin_add(result1,kick[kick_ptr++],0);
+        //sample=__builtin_sac(result1, 0);
     }
+    /*
     else if (pad[0]==1&&kick_playing==TRUE&&kick_ptr==kick_max){
         kick_playing=FALSE;
         kick_ptr=0;
     }
 
-    if(snare_playing==TRUE){
+    if(snare.playing==TRUE){
         result1 =__builtin_mpy(sample,Q15(0.85), NULL, NULL, 0, NULL, NULL, 0);
 
         result1 = __builtin_add(result1,snare[snare_ptr++],0);
@@ -213,21 +214,19 @@ void processAudio(fractional *source, fractional *destination){
 
         snare_playing=FALSE;
     }
-
+    */
 
     if (TEST_SIN==TRUE){
-        i++;
-        if(i==1024)
-            i=0;
-        sample=sintab[i];
+        ClipCopy_psv(STREAMBUF, source, sine.read_ptr);
+        sine.block_index++;
+        if(sine.block_index==sine.blocks) {
+            sine.read_ptr=sine.start_ptr;
+            sine.block_index=0;
+        }
+        else sine.read_ptr+=STREAMBUF;
     }
-    
-    for(; counter<STREAMBUF; counter++){
-        sample=*readPTR++; //!rw
-
-        //return sample;
-        *rewritePTR++=sample; //rw
-    }
+        
+    VectorCopy(STREAMBUF, destination, source);     //copy from ping to pong buffer
     
     //VOLUME CONTROL
     //if(pots[POT_VOLUME]<=0x000F); 
