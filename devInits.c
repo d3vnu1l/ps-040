@@ -14,7 +14,7 @@
 
 extern unsigned char UART_ON;
 extern unsigned int TxBufferA[STREAMBUF], TxBufferB[STREAMBUF], 
-            RxBufferA[STREAMBUF], RxBufferB[STREAMBUF];  //doesnt work as fractional
+            RxBufferA[STREAMBUF], RxBufferB[STREAMBUF];  
 
 extern char flash_readback[512];
 
@@ -256,29 +256,25 @@ void initDMA(void){
     IFS0bits.DMA0IF = 0;
     IEC0bits.DMA0IE = 1;
     DMAPWC = 0;
-    DMA0CON.SIZE=1;                             // Byte size
-    DMA0CON.DIR=1;                              // Write to flash
-    DMA0CON.MODE=3;                             // One shot, ping pong
+    DMA0CONbits.SIZE=1;                             // Byte size
+    DMA0CONbits.DIR=1;                              // Write to flash
+    DMA0CONbits.MODE=3;                             // One shot, ping pong
     DMA0STAL = (unsigned int)&TxBufferA;
     DMA0STAH = (unsigned int)&TxBufferB;
     DMA0PAD = (volatile unsigned int) &SPI3BUF;
     DMA0CNT = FLASH_DMAXFERS-1;
     DMA0REQ = 0x005B;
-    //Set up DMA Channel 1 to Receive in Continuous Ping-Pong Mode:
 
     IFS0bits.DMA1IF = 0;
     IEC0bits.DMA1IE = 1;
-    DMA0CON.SIZE=1;                             // Byte size
-    DMA0CON.DIR=0;                              // Read from flash
-    DMA0CON.MODE=3;                             // One shot, ping pong
+    DMA0CONbits.SIZE=1;                             // Byte size
+    DMA0CONbits.DIR=0;                              // Read from flash
+    DMA0CONbits.MODE=3;                             // One shot, ping pong
     DMA1STAL = (unsigned int)&RxBufferA;
     DMA1STAH = (unsigned int)&RxBufferB;
     DMA1PAD = (volatile unsigned int) &SPI3BUF;
     DMA1CNT = FLASH_DMAXFERS-1;
     DMA1REQ = 0x005B;
-    
-    DMA1CONbits.CHEN = 1;
-    DMA0CONbits.CHEN = 1;
 }
 
 void initSPI3_MEM(void){
@@ -289,7 +285,7 @@ void initSPI3_MEM(void){
     SPI3CON1bits.DISSCK = 0;    //Internal serial clock is enabled
     SPI3CON1bits.MODE16=0;      //8 bitBufferB
     SPI3CON1bits.DISSDO=0;      //enable SDO 
-    SPI3CON1bits.SSEN=1;        //use SS
+    SPI3CON1bits.SSEN=0;        //use SS
     SPI3CON2bits.FRMEN=0;       //no enable framed mode
     SPI3CON2bits.SPIBEN=0;      //enhanced buffer mode
     SPI2STATbits.SISEL=5;       //interrupt when done sending
@@ -318,7 +314,7 @@ void initSPI3_MEM(void){
     while(flashStatusCheck()&1);
     */
     
-    flashRead(flash_readback, 256);     // READBACK
+    
     
 }
 

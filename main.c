@@ -8,6 +8,7 @@
 #include "audio.h"
 #include "plcd.h"
 #include "sounds.h"
+#include "flash.h"
 
 #pragma config ICS = PGD1       //pgeDC 1 is used
 #pragma config JTAGEN = OFF     //disable jtag
@@ -75,11 +76,12 @@ int main(void) {
     initADC1();                     //configure & enable internal ADC
     initPMP();
     //||||||||----
-    //initDMA();
     initDCI_DAC();                  //configure & enable DAC
     initT1();                       //configure & start T1 
     initT2();                       //configure & start T2 
     initSPI3_MEM();                  //start segment display
+    initDMA();
+    flashRead(flash_readback, 256);     // READBACK
     //initCAP_BPM();                  //configure bpm capture
     initT3();                       //configure & start T3 for lcd
     initQEI_ENC();

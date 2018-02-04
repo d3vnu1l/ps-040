@@ -5,4 +5,5 @@ devInits.h  \
 utilities.h  \
  audio.h  \
 plcd.h  \
-sounds.h 
+sounds.h  \
+flash.h 

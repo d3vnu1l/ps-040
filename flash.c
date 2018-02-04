@@ -77,6 +77,15 @@ void flashRead(char *array, int bytes){
     while(!_SPI3IF); _SPI3IF=0;
     receive=SPI3BUF;
     
+    
+    /* Kick off read here */
+    
+    DMA1CONbits.CHEN = 1;
+    DMA0CONbits.CHEN = 1;
+    DMA0REQbits.FORCE = 1; // Manual mode: Kick-start the 1st transfer
+    DMA1REQbits.FORCE = 1; // Manual mode: Kick-start the 1st transfer
+    
+    /*
     for(i=0; i<bytes;i++){    //read 512 bytes
         //receive byte
         SPI3BUF=0x00;
@@ -84,6 +93,8 @@ void flashRead(char *array, int bytes){
         Delay_us(1);
         array[i]=SPI3BUF;
     }
+    
+    */ 
     SS3=1;
 }
 
