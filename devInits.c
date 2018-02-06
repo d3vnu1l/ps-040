@@ -19,13 +19,32 @@ extern unsigned char TxBufferA[FLASH_DMAXFERS]__attribute__((space(xmemory))), T
 extern char flash_readback[512];
 
 void initPorts(void){
-    //CLOCK CONFIG
+    /* Clock Setup */
     CLKDIVbits.PLLPOST=0;
     CLKDIVbits.PLLPRE=0;
     PLLFBDbits.PLLDIV = 0x49;       //d_73 for ~140Mhz
     while(OSCCONbits.LOCK!=1) {};   //wait for PLL to lock
     
-    /*PERIPHERAL ENABLE (0) - DISABLE (1)*/
+    /* Remappable Pins*/
+	__builtin_write_OSCCONL(OSCCON & ~(1<<6));      // Unlock Registers
+        //RPINR18bits.U1RXR = 0x37; //U1 rx on RP55
+        //RPOR6bits.RP54R=0x1;          //U1 tx on RP54 (in use)
+        RPOR2bits.RP38R = 0x1;          // Pin 70, RP38
+        RPINR24bits.CSDIR=0x3D;         //DCI IN on RPI61           
+        RPOR3bits.RP40R=0x0C;           //DCI clock
+        RPOR2bits.RP39R=0x0D;           //DCI frame sync
+        RPOR3bits.RP41R=0x0B;           //DCI output
+        RPINR7bits.IC1R=0x5F;           //Capture input on pin 95 re15
+        RPINR29bits.SCK3R=0x39;         //SCK3 input on pin 84
+        RPOR7bits.RP57R=0x20;           //SCK3 output on pin 84
+        RPOR8bits.RP70R=0x1F;           //SDO3 on pin 83
+        RPOR9bits.RP97R=0x21;           //SS3 on pin 88
+        RPINR29bits.SDI3R=0x4C;         //SDI on pin 79, RPI76
+        RPINR14bits.QEA1R=0x10;         //QEA on pin 22, RPI16
+        RPINR14bits.QEB1R=0x1B;         //QEB on pin 21, RPI27
+	__builtin_write_OSCCONL(OSCCON | (1<<6));       // Lock Registers
+    
+    /* PERIPHERAL ENABLE (0) - DISABLE (1) */
     PMD1=PMD2=PMD3=PMD4=PMD6=PMD7=0xFFFF;
     PMD1bits.AD1MD=0;
     PMD1bits.SPI1MD=0;
@@ -279,14 +298,19 @@ void initDMA(void){
     DMA0STAL = (unsigned int)(&TxBufferA);
     //DMA0STAH = (unsigned int)(&TxBufferB);
     DMA0PAD = (volatile unsigned int) &SPI3BUF;
-    DMA0CNT = (unsigned int)(FLASH_DMAXFERS-1);
-    DMA0REQbits.IRQSEL = 0x5B;
-    
-    IFS0bits.DMA0IF = 0;
-    IEC0bits.DMA0IE = 1;
-    IPC1bits.DMA0IP = 6;
-    DMA0CONbits.CHEN = 0;
-     
+    DMA0CNT = FLASH_DMAXFERS-1;
+    DMA0REQ = 0x005B;
+
+    IFS0bits.DMA1IF = 0;
+    IEC0bits.DMA1IE = 1;
+    DMA1CONbits.SIZE=1;                             // Byte size
+    DMA1CONbits.DIR=0;                              // Read from flash
+    DMA1CONbits.MODE=3;                             // One shot, ping pong
+    DMA1STAL = (unsigned int)&RxBufferA;
+    DMA1STAH = (unsigned int)&RxBufferB;
+    DMA1PAD = (volatile unsigned int) &SPI3BUF;
+    DMA1CNT = FLASH_DMAXFERS-1;
+    DMA1REQ = 0x005B;
 }
 
 void initSPI3_MEM(void){

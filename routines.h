@@ -19,6 +19,7 @@ void __attribute__ ((interrupt, auto_psv)) _IC1Interrupt(void);
 void __attribute__((interrupt, no_auto_psv)) _ADC1Interrupt(void);
 */
 
+void __attribute__ ((interrupt, auto_psv)) _SPI3Interrupt(void);
 void __attribute__ ((interrupt, auto_psv)) _DCIInterrupt(void);
 void __attribute__((__interrupt,auto_psv)) _DMA0Interrupt(void);
 void __attribute__((__interrupt,auto_psv)) _DMA1Interrupt(void);
