@@ -11,13 +11,8 @@
 #include "screens.h"
 #include "utilities.h"
 
-fractional FXSCALE = Q15(NUMFX*0.000030518509476);
-
 //CONTROL VARIABLES//
-extern unsigned char pad[BUTTONS];
-extern fractional pots[POTS];
-extern fractional pots_scaled[POTS];
-extern fractional pots_custom[POTS];
+extern struct ctrlsrfc ctrl;
 extern unsigned char UART_ON; 
 
 //STATUS VARIABLES//
@@ -38,56 +33,56 @@ void scanButtons(void){
     portrdD = PORTD;
     portrdF = PORTF;
     
-    pad[34]=(portrdF>>7)&1;     // Special function button
+    ctrl.pad[34]=(portrdF>>7)&1;     // Special function button
     
-    if(pad[34]){
-        pad[6]=(portrdF>>6)&1;
-        pad[5]=(portrdF>>5)&1;
-        pad[4]=(portrdF>>4)&1;
-        pad[0]=(portrdG)&1;
-        pad[1]=(portrdG>>1)&1;
-        pad[2]=(portrdG>>2)&1;
-        pad[3]=(portrdG>>3)&1;
-        pad[16]=(portrdG>>10)&1;    // Encoder button
-        pad[11]=(portrdG>>11)&1;
-        pad[12]=(portrdG>>12)&1;
-        pad[13]=(portrdG>>13)&1;
-        pad[14]=(portrdG>>14)&1;
-        pad[15]=(portrdG>>15)&1;
-        pad[7]=(portrdD>>1)&1;
-        pad[8]=(portrdD>>2)&1;
-        pad[9]=(portrdD>>3)&1;
-        pad[10]=(portrdD>>4)&1;
+    if(ctrl.pad[34]){
+        ctrl.pad[6]=(portrdF>>6)&1;
+        ctrl.pad[5]=(portrdF>>5)&1;
+        ctrl.pad[4]=(portrdF>>4)&1;
+        ctrl.pad[0]=(portrdG)&1;
+        ctrl.pad[1]=(portrdG>>1)&1;
+        ctrl.pad[2]=(portrdG>>2)&1;
+        ctrl.pad[3]=(portrdG>>3)&1;
+        ctrl.pad[16]=(portrdG>>10)&1;    // Encoder button
+        ctrl.pad[11]=(portrdG>>11)&1;
+        ctrl.pad[12]=(portrdG>>12)&1;
+        ctrl.pad[13]=(portrdG>>13)&1;
+        ctrl.pad[14]=(portrdG>>14)&1;
+        ctrl.pad[15]=(portrdG>>15)&1;
+        ctrl.pad[7]=(portrdD>>1)&1;
+        ctrl.pad[8]=(portrdD>>2)&1;
+        ctrl.pad[9]=(portrdD>>3)&1;
+        ctrl.pad[10]=(portrdD>>4)&1;
     } else {
-        pad[23]=(portrdF>>6)&1;
-        pad[22]=(portrdF>>5)&1;
-        pad[21]=(portrdF>>4)&1;
-        pad[17]=(portrdG)&1;
-        pad[18]=(portrdG>>1)&1;
-        pad[19]=(portrdG>>2)&1;
-        pad[20]=(portrdG>>3)&1;
-        pad[33]=(portrdG>>10)&1;    // Encoder button
-        pad[28]=(portrdG>>11)&1;
-        pad[29]=(portrdG>>12)&1;
-        pad[30]=(portrdG>>13)&1;
-        pad[31]=(portrdG>>14)&1;
-        pad[32]=(portrdG>>15)&1;
-        pad[24]=(portrdD>>1)&1;
-        pad[25]=(portrdD>>2)&1;
-        pad[26]=(portrdD>>3)&1;
-        pad[27]=(portrdD>>4)&1;
+        ctrl.pad[23]=(portrdF>>6)&1;
+        ctrl.pad[22]=(portrdF>>5)&1;
+        ctrl.pad[21]=(portrdF>>4)&1;
+        ctrl.pad[17]=(portrdG)&1;
+        ctrl.pad[18]=(portrdG>>1)&1;
+        ctrl.pad[19]=(portrdG>>2)&1;
+        ctrl.pad[20]=(portrdG>>3)&1;
+        ctrl.pad[33]=(portrdG>>10)&1;    // Encoder button
+        ctrl.pad[28]=(portrdG>>11)&1;
+        ctrl.pad[29]=(portrdG>>12)&1;
+        ctrl.pad[30]=(portrdG>>13)&1;
+        ctrl.pad[31]=(portrdG>>14)&1;
+        ctrl.pad[32]=(portrdG>>15)&1;
+        ctrl.pad[24]=(portrdD>>1)&1;
+        ctrl.pad[25]=(portrdD>>2)&1;
+        ctrl.pad[26]=(portrdD>>3)&1;
+        ctrl.pad[27]=(portrdD>>4)&1;
     }
     
     // SAMPLE TRIGGERS 
-    if(pad[0]==0){                                         //kick
+    if(ctrl.pad[0]==0){                                         //kick
         kick.playing=TRUE;
     }
     /*
-    if(pad[2]==0&&hat_playing==FALSE){                                          //hat
+    if(controls.pad[2]==0&&hat_playing==FALSE){                                          //hat
         hat_playing=TRUE;
     }
     */
-    if(pad[1]==0&&snare.playing==FALSE){                                        //snare
+    if(ctrl.pad[1]==0&&snare.playing==FALSE){                                        //snare
         snare.playing=TRUE;
     }
 }
@@ -102,7 +97,7 @@ void readPots(void){
     const unsigned int shift = 0xFE00;
     int i;
     _AD1IF = 0; // Clear conversion done status bit
-    if(pad[34])i=0;
+    if(ctrl.pad[34])i=0;
     else i=POTS/2;
     pots_buf[0]=(ADC1BUF5>>1)|0x7;
     pots_buf[1]=(ADC1BUF2>>1)|0x7;
@@ -138,40 +133,40 @@ void readPots(void){
     pots_smoothed[5]=__builtin_sac(result, 0);
     
     if((pots_smoothed[0]&shift)!=pots_last[0]) 
-        pots[i]=pots_buf[0];
+        ctrl.pots[i]=pots_buf[0];
     if((pots_smoothed[1]&shift)!=pots_last[1]) 
-        pots[i+1]=pots_buf[1];
+        ctrl.pots[i+1]=pots_buf[1];
     if((pots_smoothed[2]&shift)!=pots_last[2]) 
-        pots[i+2]=pots_buf[2];
+        ctrl.pots[i+2]=pots_buf[2];
     if((pots_smoothed[3]&shift)!=pots_last[3]) 
-        pots[i+3]=pots_buf[3];
+        ctrl.pots[i+3]=pots_buf[3];
     if((pots_smoothed[4]&shift)!=pots_last[4]) 
-        pots[i+4]=pots_buf[4];
+        ctrl.pots[i+4]=pots_buf[4];
     if((pots_smoothed[5]&shift)!=pots_last[5]) 
-        pots[i+5]=pots_buf[5];     
+        ctrl.pots[i+5]=pots_buf[5];     
 }
 
 void scalePots(void){
     /* Potentiometer scaling for fx or lcd display */
     volatile register int scaled asm("A");
     
-    scaled=__builtin_mpy(pots[0],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
-    pots_scaled[0]=__builtin_sac(scaled, 7);
-    scaled=__builtin_mpy(pots[1],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
-    pots_scaled[1]=__builtin_sac(scaled, 7);
-    scaled=__builtin_mpy(pots[2],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
-    pots_scaled[2]=__builtin_sac(scaled, 7);
-    scaled=__builtin_mpy(pots[3],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
-    pots_scaled[3]=__builtin_sac(scaled, 7);
-    scaled=__builtin_mpy(pots[4],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
-    pots_scaled[4]=__builtin_sac(scaled, 7);
-    scaled=__builtin_mpy(pots[5],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
-    pots_scaled[5]=__builtin_sac(scaled, 7);
+    scaled=__builtin_mpy(ctrl.pots[0],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
+    ctrl.pots_scaled[0]=__builtin_sac(scaled, 7);
+    scaled=__builtin_mpy(ctrl.pots[1],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
+    ctrl.pots_scaled[1]=__builtin_sac(scaled, 7);
+    scaled=__builtin_mpy(ctrl.pots[2],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
+    ctrl.pots_scaled[2]=__builtin_sac(scaled, 7);
+    scaled=__builtin_mpy(ctrl.pots[3],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
+    ctrl.pots_scaled[3]=__builtin_sac(scaled, 7);
+    scaled=__builtin_mpy(ctrl.pots[4],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
+    ctrl.pots_scaled[4]=__builtin_sac(scaled, 7);
+    scaled=__builtin_mpy(ctrl.pots[5],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
+    ctrl.pots_scaled[5]=__builtin_sac(scaled, 7);
     
-    scaled=__builtin_mpy(pots[POT_FX_SELECT1],FXSCALE, NULL, NULL, 0, NULL, NULL, 0);
-    pots_scaled[POT_FX_SELECT1]=__builtin_sac(scaled, 0);
-    scaled=__builtin_mpy(pots[POT_FX_SELECT2],FXSCALE, NULL, NULL, 0, NULL, NULL, 0);
-    pots_scaled[POT_FX_SELECT2]=__builtin_sac(scaled, 0);
+    scaled=__builtin_mpy(ctrl.pots[POT_FX_SELECT1],FXSCALE, NULL, NULL, 0, NULL, NULL, 0);
+    ctrl.pots_scaled[POT_FX_SELECT1]=__builtin_sac(scaled, 0);
+    scaled=__builtin_mpy(ctrl.pots[POT_FX_SELECT2],FXSCALE, NULL, NULL, 0, NULL, NULL, 0);
+    ctrl.pots_scaled[POT_FX_SELECT2]=__builtin_sac(scaled, 0);
 }
 
 fractional scalePotsCustom(unsigned int steps, fractional scaleme){
@@ -183,8 +178,8 @@ fractional scalePotsCustom(unsigned int steps, fractional scaleme){
 }
 
 void changeFX(void){
-    fxUnits[0]=pots_scaled[POT_FX_SELECT1];
-    fxUnits[1]=pots_scaled[POT_FX_SELECT2];
+    fxUnits[0]=ctrl.pots_scaled[POT_FX_SELECT1];
+    fxUnits[1]=ctrl.pots_scaled[POT_FX_SELECT2];
 }
 
 void display(void){
@@ -197,12 +192,12 @@ void display(void){
     screenUpdate();
    
    if(UART_ON==TRUE){
-        //printf("b1 %d, b2 %d, b3 %d, b4 %d\r\n", pad[0], pad[1], pad[2], pad[3]);
-        //printf("b4 %d, b5 %d, b6 %d, b7 %d\r\n", pad[4], pad[5], pad[6], pad[7]);
-        //printf("P1 %x  P1 %d bpm %d\r\n", pots[0], pots[0], bpm);   //check pots
-        printf("P1 %d  P2 %d P3 %d\r\n", pots[0], pots[1], pots[2]);   //check pots
+        //printf("b1 %d, b2 %d, b3 %d, b4 %d\r\n", controls.pad[0], controls.pad[1], controls.pad[2], controls.pad[3]);
+        //printf("b4 %d, b5 %d, b6 %d, b7 %d\r\n", controls.pad[4], controls.pad[5], controls.pad[6], controls.pad[7]);
+        //printf("P1 %x  P1 %d bpm %d\r\n", controls.pots[0], controls.pots[0], bpm);   //check pots
+        printf("P1 %d  P2 %d P3 %d\r\n", ctrl.pots[0], ctrl.pots[1], ctrl.pots[2]);   //check pots
         //printf("%d\r\n", sample);  //check input ADC
-        //printf("%d, pot1 %x, pot2 %x, avg %x\r\n", sample, pots[1], pots[2], average);  //check input ADC
+        //printf("%d, pot1 %x, pot2 %x, avg %x\r\n", sample, controls.pots[1], controls.pots[2], average);  //check input ADC
     }
    
    SLED=~SLED;

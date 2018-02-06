@@ -16,19 +16,15 @@
 #include "sounds.h"
 
 extern unsigned char TEST_SIN;
-extern fractional pots[POTS];
-extern fractional pots_scaled[POTS];
-extern unsigned char pad[BUTTONS];
 extern enum screenStruc state, laststate;
-extern char flash_readback[512];
 extern unsigned int process_time;
 
 extern unsigned char TxBufferA[FLASH_DMAXFERS]__attribute__((space(xmemory))), TxBufferB[FLASH_DMAXFERS]__attribute__((space(xmemory))), 
             RxBufferA[STREAMBUF]__attribute__((space(xmemory))), RxBufferB[FLASH_DMAXFERS]__attribute__((space(xmemory))); 
 
 extern struct clip sine;
-
 extern enum fxStruct fxUnits[NUMFXUNITS];
+extern struct ctrlsrfc ctrl;
 
 int fxLast=0;
 int fxNow=0;
@@ -81,31 +77,31 @@ void screenDebugPots(void){
         lcdWriteStringQ("|");
     } else {
         // Update here
-        if(!pad[34])bank=POTS/2;
+        if(!ctrl.pad[34])bank=POTS/2;
         lcdSetCursorQ(0,1);
-        lcdWriteDecimalQ(pots_scaled[bank], 3);
+        lcdWriteDecimalQ(ctrl.pots_scaled[bank], 3);
         lcdWriteQ(',');
-        lcdWriteWordUnsignedQ(pots[bank++]);
+        lcdWriteWordUnsignedQ(ctrl.pots[bank++]);
         lcdSetCursorQ(11,1);
-        lcdWriteDecimalQ(pots_scaled[bank], 3);
+        lcdWriteDecimalQ(ctrl.pots_scaled[bank], 3);
         lcdWriteQ(',');
-        lcdWriteWordUnsignedQ(pots[bank++]);
+        lcdWriteWordUnsignedQ(ctrl.pots[bank++]);
         lcdSetCursorQ(0,2);
-        lcdWriteDecimalQ(pots_scaled[bank], 3);
+        lcdWriteDecimalQ(ctrl.pots_scaled[bank], 3);
         lcdWriteQ(',');
-        lcdWriteWordUnsignedQ(pots[bank++]);
+        lcdWriteWordUnsignedQ(ctrl.pots[bank++]);
         lcdSetCursorQ(11,2);
-        lcdWriteDecimalQ(pots_scaled[bank], 3);
+        lcdWriteDecimalQ(ctrl.pots_scaled[bank], 3);
         lcdWriteQ(',');
-        lcdWriteWordUnsignedQ(pots[bank++]);
+        lcdWriteWordUnsignedQ(ctrl.pots[bank++]);
         lcdSetCursorQ(0,3);
-        lcdWriteDecimalQ(pots_scaled[bank], 3);
+        lcdWriteDecimalQ(ctrl.pots_scaled[bank], 3);
         lcdWriteQ(',');
-        lcdWriteWordUnsignedQ(pots[bank++]);
+        lcdWriteWordUnsignedQ(ctrl.pots[bank++]);
         lcdSetCursorQ(11,3);
-        lcdWriteDecimalQ(pots_scaled[bank], 3);
+        lcdWriteDecimalQ(ctrl.pots_scaled[bank], 3);
         lcdWriteQ(',');
-        lcdWriteWordUnsignedQ(pots[bank++]);
+        lcdWriteWordUnsignedQ(ctrl.pots[bank++]);
     }
 }
 
@@ -294,8 +290,8 @@ void screenFX(void){
         
     } else {
         //update here 
-        fxModPointers[fxUnits[0]](0,  pots_scaled[FX_1], pots_scaled[FX_2], pots_scaled[FX_3]);
-        fxModPointers[fxUnits[1]](10, pots_scaled[FX_4], pots_scaled[FX_5], pots_scaled[FX_6]);
+        fxModPointers[fxUnits[0]](0,  ctrl.pots_scaled[FX_1], ctrl.pots_scaled[FX_2], ctrl.pots_scaled[FX_3]);
+        fxModPointers[fxUnits[1]](10, ctrl.pots_scaled[FX_4], ctrl.pots_scaled[FX_5], ctrl.pots_scaled[FX_6]);
     }
          
 }

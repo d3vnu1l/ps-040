@@ -1,7 +1,6 @@
 #include <xc.h>
 #include <p33EP512GM310.h>
 #include <dsp.h>
-#include <libpic30.h>
 #include "common.h"
 #include "devInits.h"
 #include "utilities.h"
@@ -30,8 +29,6 @@ unsigned char TxBufferB[FLASH_DMAXFERS] __attribute__((space(xmemory)));
 unsigned char RxBufferA[FLASH_DMAXFERS] __attribute__((space(xmemory)));
 unsigned char RxBufferB[FLASH_DMAXFERS] __attribute__((space(xmemory)));
 
-
-
 /* Debug Variables */
 unsigned int process_time=0;
 
@@ -40,7 +37,6 @@ volatile unsigned char recording=TRUE;
 unsigned char UART_ON = FALSE;
 unsigned char TEST_SIN = FALSE;
 
-char flash_readback[512]={0};
 
 /* Screen state variables */
 enum screenStruc state = scrnFX;
@@ -48,46 +44,45 @@ enum screenStruc laststate = invalid;
 enum fxStruct fxUnits[NUMFXUNITS]={0,0};
 
 /* Buttons & Potentiometers */
-unsigned char pad[BUTTONS];                                                            
-fractional pots[POTS]={0};
-fractional pots_scaled[POTS]={0};
-fractional pots_custom[POTS]={0};
+struct ctrlsrfc ctrl = {0};
 
-void initBuffer(void){
+
+void initBuffers(void){
     int i;
+    
     for(i=0; i<STREAMBUF; i++){
         streamA[i]=0;
         streamB[i]=0;
     }
     
     for(i=0; i<BUTTONS; i++)
-        pad[i]=1;
+        ctrl.pad[i]=1;
     
-    TxBufferA[0]=0x03;
     for(i=1; i<FLASH_DMAXFERS; i++){
         TxBufferA[i]=0;
         TxBufferB[i]=0;
         RxBufferA[i]=0;
         RxBufferB[i]=0;
     }
+    
+    
 }
 
 int main(void) {
-    initPorts();                    //configure io device & adc 
-    //initUART1();                    //configure & enable UART
-    initBuffer();
-    genSine(STREAMBUF);
-    initADC1();                     //configure & enable internal ADC
-    initPMP();
-    //||||||||----
-    initDCI_DAC();                  //configure & enable DAC
-    initT1();                       //configure & start T1 
-    initT2();                       //configure & start T2 
+    initPorts();                    // Configure io device & adc 
+    initBuffers();
+    if(UART_ON) initUART1();        // Configure & enable UART
     initDMA();
-    initSPI3_MEM();  //start flash 
-    //initCAP_BPM();                  //configure bpm capture
-    initT3();                       //configure & start T3 for lcd
+    initSPI3_MEM();                 // Start flash 
+    initDCI_DAC();                  // Configure & enable DAC
+    //genSine(STREAMBUF);
+    initADC1();                     // Configure & enable internal ADC
+    initPMP();
     initQEI_ENC();
+    
+    initT1();                       // Configure & start T1 
+    initT2();                       // Configure & start T2 
+    initT3();                       // Configure & start T3 for lcd
     //initT5();
     fractional temp;
     fractional *ping, *pong;
@@ -122,4 +117,3 @@ int main(void) {
     }
     return 0;
 }
-// example test 

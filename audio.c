@@ -5,14 +5,10 @@
 #include <dsp.h>
 #include "utilities.h"
 
-
-extern char pad[BUTTONS];                                                             //CONTROL VARIABLES//
-extern fractional pots[POTS];
-extern fractional pots_scaled[POTS];
-
+extern struct ctrlsrfc ctrl;
 extern fractional sintab[SINRES];
 
-volatile unsigned int loop_ptr = 0;                                             //FX FLAGS & VARS//
+volatile unsigned int loop_ptr = 0;         //FX FLAGS & VARS//
 extern unsigned char hard_clipped;
 
 static fractional loopbuf[LOOP_BUF_SIZE] __attribute__ ((eds)) = {0};
@@ -20,6 +16,7 @@ struct clip_eds history = {.size = LOOP_BUF_SIZE, .blocks=LOOP_BUF_SIZE/STREAMBU
 
 fractional lpf_alpha=Q15(0.5), lpf_inv_alpha=Q15(0.5);
 static fractional psvbuf[STREAMBUF]={0};
+
 static fractional flashbufA[STREAMBUF]={0};
 static fractional flashbufB[STREAMBUF]={0};
 
@@ -178,8 +175,8 @@ void processAudio(fractional *source, fractional *destination){
     volatile fractional sample;
     
     //Run each FX unit
-    if(fxUnits[0]==0); else fxFuncPointers[fxUnits[0]](source, source, pots[FX_1], pots[FX_2], pots[FX_3]);
-    if(fxUnits[1]==0); else fxFuncPointers[fxUnits[1]](source, source, pots[FX_4], pots[FX_5], pots[FX_6]);
+    if(fxUnits[0]==0); else fxFuncPointers[fxUnits[0]](source, source, ctrl.pots[FX_1], ctrl.pots[FX_2], ctrl.pots[FX_3]);
+    if(fxUnits[1]==0); else fxFuncPointers[fxUnits[1]](source, source, ctrl.pots[FX_4], ctrl.pots[FX_5], ctrl.pots[FX_6]);
    
     if(kick.playing==TRUE){
         ClipCopy_psv(STREAMBUF, psvbuf, kick.read_ptr);
@@ -230,8 +227,8 @@ void processAudio(fractional *source, fractional *destination){
     
     //VOLUME CONTROL
     //if(pots[POT_VOLUME]<=0x000F); 
-    if(pots[POT_VOLUME]>=0x7FF7);
+    if(ctrl.pots[POT_VOLUME]>=0x7FF7);
     else{
-        VectorScale(STREAMBUF, destination, destination, pots[POT_VOLUME]);
+        VectorScale(STREAMBUF, destination, destination, ctrl.pots[POT_VOLUME]);
     }
 }

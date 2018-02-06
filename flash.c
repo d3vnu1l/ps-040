@@ -11,8 +11,13 @@
 #include "common.h"
 #include "utilities.h"
 
-char flashBuf[STREAMBUF*2];
+//char flashBuf[STREAMBUF*2];
 char receive;
+
+extern unsigned char TxBufferA[FLASH_DMAXFERS]__attribute__((space(xmemory))),
+                     TxBufferB[FLASH_DMAXFERS]__attribute__((space(xmemory))), 
+                     RxBufferA[FLASH_DMAXFERS]__attribute__((space(xmemory))),
+                     RxBufferB[FLASH_DMAXFERS]__attribute__((space(xmemory))); 
 
 void flashWriteReg(char command) {
     SS3a=0;
@@ -79,7 +84,7 @@ void flashRead(char *array, int bytes){
     receive=SPI3BUF;
     */
     
-    
+    TxBufferA[0]=0x03;
     DMA1CONbits.CHEN = 1;
     DMA0CONbits.CHEN = 1;
     /* Kick off read here */

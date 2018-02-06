@@ -12,7 +12,8 @@
 #include "utilities.h"
 #include "screens.h"
 
-extern unsigned char pad[BUTTONS];
+extern struct ctrlsrfc ctrl;
+
 int lcdBuf[LCDBUF+1]={0};
 int *lcdWritePtr=lcdBuf;
 int *lcdReadPtr=lcdBuf;
@@ -150,28 +151,28 @@ void lcdWriteDecimalQ(char word, int digits){
 //4x4 pad debug
 void lcdDrawPads(unsigned char col){
     unsigned char block=0xFF;
-    if(!pad[34]||!pad[16]) block='*';
+    if(!ctrl.pad[34]||!ctrl.pad[16]) block='*';
     
     lcdSetCursorQ(col, 0);
-    if(!pad[12]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
-    if(!pad[13]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
-    if(!pad[14]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
-    if(!pad[15]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!ctrl.pad[12]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!ctrl.pad[13]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!ctrl.pad[14]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!ctrl.pad[15]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
     lcdSetCursorQ(col, 1);
-    if(!pad[8]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
-    if(!pad[9]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
-    if(!pad[10]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
-    if(!pad[11]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!ctrl.pad[8]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!ctrl.pad[9]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!ctrl.pad[10]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!ctrl.pad[11]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
     lcdSetCursorQ(col, 2);
-    if(!pad[4]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
-    if(!pad[5]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
-    if(!pad[6]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
-    if(!pad[7]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!ctrl.pad[4]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!ctrl.pad[5]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!ctrl.pad[6]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!ctrl.pad[7]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
     lcdSetCursorQ(col, 3);
-    if(!pad[0]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
-    if(!pad[1]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
-    if(!pad[2]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
-    if(!pad[3]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!ctrl.pad[0]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!ctrl.pad[1]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!ctrl.pad[2]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+    if(!ctrl.pad[3]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
 }
 
 void lcdPoll(void){  

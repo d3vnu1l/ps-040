@@ -3,7 +3,6 @@
  */
 #include <xc.h>
 #include <p33EP512GM310.h>
-#include <libpic30.h>
 #include "common.h"
 #include "devInits.h"
 #include "utilities.h"
@@ -12,11 +11,10 @@
 #include "flash.h"
 #include "dsp.h"
 
-extern unsigned char UART_ON;
-extern unsigned char TxBufferA[FLASH_DMAXFERS]__attribute__((space(xmemory))), TxBufferB[FLASH_DMAXFERS]__attribute__((space(xmemory))), 
-            RxBufferA[STREAMBUF]__attribute__((space(xmemory))), RxBufferB[FLASH_DMAXFERS]__attribute__((space(xmemory)));  
-
-extern char flash_readback[512];
+extern unsigned char TxBufferA[FLASH_DMAXFERS]__attribute__((space(xmemory))),
+                     TxBufferB[FLASH_DMAXFERS]__attribute__((space(xmemory))), 
+                     RxBufferA[FLASH_DMAXFERS]__attribute__((space(xmemory))),
+                     RxBufferB[FLASH_DMAXFERS]__attribute__((space(xmemory)));  
 
 void initPorts(void){
     /* Clock Setup */
@@ -70,12 +68,12 @@ void initPorts(void){
     TRISD=0x011E; CNPUD=0x001E;
     TRISE=0x7300;
     TRISF=0x00F0; CNPUF=0x00F1;
-    TRISG=CNPUG=0xFFFF;   //PORTG all inputs,//weak pull ups on all of G
+    TRISG=CNPUG=0xFFFF;   //PORTG all inputs, weak pull ups on all of G
     
     /* DIGITAL OUTPUT LATCH */
     LATA=LATB=LATC=LATD=LATE=LATF=LATG=0x0000;
     LATA=0x0040;
-    //_LATC9=1;
+    SS3a=SS3b=FLASHCLK=1;            // Keep SPI CS & CLK asserted
     
     /* ANALOG PINS (1 = analog) */
     ANSELA=ANSELB=ANSELC=ANSELD=ANSELE=ANSELF=ANSELG=0x0000;
@@ -117,28 +115,25 @@ void initUART1(void){
     //IEC0bits.U1TXIE = 1;        //enable tx interrupt
     //IEC0bits.U1RXIE = 1;        //enable rx interrupt
     U1MODEbits.UARTEN = 1;      //start uart
-    UART_ON = TRUE;
-    
 }
 
 void initADC1(void){ 
 
     /* Assign MUXA inputs */
-    AD1CON1 = 0x04E4; // Enable 12-bit mode, auto-sample and auto-conversion
-    AD1CON2 = 0x0408; // Sample alternately using channel scanning
-    AD1CON2bits.SMPI=(POTS/2)-1; // Sample 6 channels
-    AD1CON3 = 0x0F0F; // Sample for 15*TAD before converting
-    AD1CON1bits.FORM=2;         //signed fractional format 
+    AD1CON1 = 0x04E4;               // Enable 12-bit mode, auto-sample and auto-conversion
+    AD1CON2 = 0x0408;               // Sample alternately using channel scanning
+    AD1CON2bits.SMPI=(POTS/2)-1;    // Sample 6 channels
+    AD1CON3 = 0x0F0F;               // Sample for n*TAD before converting
+    AD1CON1bits.FORM=2;             // Signed fractional format 
     AD1CON3bits.ADCS=0x07;
     AD1CON3bits.SAMC=0x1F;
-    //select  AN6,7,8
-    AD1CSSLbits.CSS6=1; //AN6
-    AD1CSSLbits.CSS7=1; //AN7
-    AD1CSSLbits.CSS8=1; //AN8
-    AD1CSSLbits.CSS10=1;//AN10
-    AD1CSSHbits.CSS20=1;//AN20
-    AD1CSSHbits.CSS21=1;//AN21
-    //AD1CSSLbits.CSS9=1; //AN9
+    AD1CSSLbits.CSS6=1;             //AN6 in channel scan
+    AD1CSSLbits.CSS7=1;             //AN7 in channel scan
+    AD1CSSLbits.CSS8=1;             //AN8 in channel scan
+    AD1CSSLbits.CSS10=1;            //AN10 in channel scan
+    AD1CSSHbits.CSS20=1;            //AN20 in channel scan
+    AD1CSSHbits.CSS21=1;            //AN21 in channel scan
+    
     /* Enable ADC module and provide ADC stabilization delay */
     AD1CON1bits.ADON = 1;
     Delay_us(30);
@@ -150,11 +145,11 @@ void initPMP(void){
      *  RS = 44 = PMAO (H = display data, L = display instruction)
      *  E = 81 = PMWR (pulse width 450ns MIN, data triggers from H to L) 
      */
-    PMMODEbits.MODE=3;  //master mode 1 
+    PMMODEbits.MODE=3;              // Master mode 1 
     PMCONbits.PTWREN = 1;
     PMCONbits.PTRDEN = 1;
-    PMCONbits.WRSP=1;   //write strobe active high
-    PMCONbits.RDSP=1;   //read strobe active high
+    PMCONbits.WRSP=1;               // Write strobe active high
+    PMCONbits.RDSP=1;               // Read strobe active high
 
     PMMODEbits.WAITB = 0;
     PMMODEbits.WAITM = 0xC;
@@ -165,15 +160,11 @@ void initPMP(void){
     /* INIT DEVICE */
     Delay_us(40000);
     lcdInit();
-    
-    /* SETUP SCREEN */
-    //lcdSetupPots();
 }
 
 
 //Description: Initializes timer for LED's UART and display
 //Prereq: initUART1()
-//Dependencies: _T1Interrupt(void)
 //Frequency: 15Hz
 void initT1(void){          //16 bit timer
     TMR1 = 0x0000;          //clear timer 4
@@ -188,7 +179,6 @@ void initT1(void){          //16 bit timer
 
 //Description:  Initializes timer handles polling button input
 //Prereq: initADC1() 
-//Dependencies: _T2Interrupt(void)
 //Frequency: 512Hz
 void initT2(void){          //16/32 bit timer
     TMR2 = 0x0000;          //clear timer 4
@@ -202,8 +192,7 @@ void initT2(void){          //16/32 bit timer
 }
 
 //Description: Initialize timer handling LCD sending
-//Dependencies: _T3Interrupt(void)
-//Frequency: 44.1kHz
+//Frequency: variable depending on lcd latency values in datasheet
 void initT3(void){          //16/32 bit timer
     TMR3 = 0x0000;          //clear timer 3
     T3CONbits.TCKPS = 1;    //prescale 8:1
@@ -216,10 +205,6 @@ void initT3(void){          //16/32 bit timer
     
 }
 
-/*=============================================================================  
-Timer 5 is setup to time-out every 125 microseconds (8Khz Rate). As a result, the module 
-will stop sampling and trigger a conversion on every Timer3 time-out, i.e., Ts=125us. 
-=============================================================================*/
 void initT5() 
 {
         TMR5 = 0x0000;
@@ -235,39 +220,34 @@ void initT5()
 
 //Description: Initializes & starts 16 bit DCI I2S DAC
 //Prereq: initSPI_ADC(void)
-//Dependencies: readDAC(void)
 void initDCI_DAC(void){
-    DCICON3bits.BCG=(Fcy/(64*Fout)-1);  //calculate baud rate (WILL TRUNCATE)
-    DCICON1bits.COFSM=1;                //i2s mode
-    DCICON1bits.CSCKE=1;                //sample on rising edge
-    DCICON2bits.WS=0xF;                 //16 bit data word
-    DCICON2bits.COFSG=0;    //data frame has 1 word (per frame)
-    DCICON1bits.DJST=0;     //align data
-    DCICON2bits.BLEN=3;     //4 words buffer btwn interrupts
+    DCICON3bits.BCG=(Fcy/(64*Fout)-1);  // Calculate baud rate (WILL TRUNCATE)
+    DCICON1bits.COFSM=1;                // I2S mode
+    DCICON1bits.CSCKE=1;                // Sample on rising edge
+    DCICON2bits.WS=0xF;                 // 16 bit data word
+    DCICON2bits.COFSG=0;                // Data frame has 1 word (per frame)
+    DCICON1bits.DJST=0;                 // Align data
+    DCICON2bits.BLEN=3;                 // 4 words buffer btwn interrupts
     
-    TSCONbits.TSE0 = 1;     // Transmit on Time Slot 0     
-    TSCONbits.TSE1 = 1;     // Transmit on Time Slot 1   
-    TSCONbits.TSE2 = 1;     // Transmit on Time Slot 2     
-    TSCONbits.TSE3 = 1;     // Transmit on Time Slot 3   
-    RSCONbits.RSE0 = 1;     // rcv on Time Slot 0     
-    RSCONbits.RSE1 = 1;     // rcv on Time Slot 1 
-    RSCONbits.RSE2 = 1;     // rcv on Time Slot 2     
-    RSCONbits.RSE3 = 1;     // rcv on Time Slot 3 
+    TSCONbits.TSE0 = 1;                 // Transmit on Time Slot 0     
+    TSCONbits.TSE1 = 1;                 // Transmit on Time Slot 1   
+    TSCONbits.TSE2 = 1;                 // Transmit on Time Slot 2     
+    TSCONbits.TSE3 = 1;                 // Transmit on Time Slot 3   
+    RSCONbits.RSE0 = 1;                 // Rcv on Time Slot 0     
+    RSCONbits.RSE1 = 1;                 // Rcv on Time Slot 1 
+    RSCONbits.RSE2 = 1;                 // Rcv on Time Slot 2     
+    RSCONbits.RSE3 = 1;                 // Rcv on Time Slot 3 
     
-
-    
-    IPC15bits.DCIIP = 5;    // Interrput priority
+    IPC15bits.DCIIP = 5;                // Interrput priority
     IFS3bits.DCIIF=0;
-    IEC3bits.DCIIE=1;       //=0 to let dma handle interrupt
+    IEC3bits.DCIIE=1;                   // =0 if letting dma handle interrupt
     
-    // Pre-load send registers.
-    TXBUF0=0;
+    TXBUF0=0;                           // Pre-load send registers.
     TXBUF1=0;   
     TXBUF2=0;
     TXBUF3=0;
-    DCICON1bits.DCIEN=1;    //ENABLE
-    // Stabilization delay
-    Delay_us(20);
+    DCICON1bits.DCIEN=1;                // ENABLE
+    Delay_us(20);                       // Stabilization delay
 }
 
 void initDMA(void){
@@ -276,7 +256,7 @@ void initDMA(void){
     DMA1CONbits.SIZE=1;                             // Byte size
     DMA1CONbits.DIR=0;                              // Read from flash
     DMA1CONbits.MODE=1;                             // One shot, ping pong
-    //DMA1CONbits.NULLW=1;                            // NULL WRITE (debug))
+    //DMA1CONbits.NULLW=1;                          // NULL WRITE (debug))
     DMA1STAL = (unsigned int)(&RxBufferA);
     //DMA1STAH = (unsigned int)(&RxBufferB);
     DMA1PAD = (volatile unsigned int) &SPI3BUF;
@@ -314,31 +294,29 @@ void initDMA(void){
 }
 
 void initSPI3_MEM(void){
-    SS3a=1;                     // Assert chip select (active low)
-    SS3b=1;
-    _LATC9=1;
+    SS3a=SS3b=FLASHCLK=1;
     
     IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
     IEC5bits.SPI3IE = 0;        // Disable the interrupt
-    SPI3CON1bits.MSTEN=1;       //master mode
-    SPI3CON1bits.DISSCK = 0;    //Internal serial clock is enabled
-    SPI3CON1bits.MODE16=0;      //8 bitBufferB
-    SPI3CON1bits.DISSDO=0;      //enable SDO 
-    SPI3CON2bits.FRMEN=0;       //no enable framed mode
-    SPI3CON2bits.SPIBEN=0;      //enhanced buffer mode
+    SPI3CON1bits.MSTEN=1;       // Master mode
+    SPI3CON1bits.DISSCK = 0;    // Internal serial clock is enabled
+    SPI3CON1bits.MODE16=0;      // 8 bitBufferB
+    SPI3CON1bits.DISSDO=0;      // Enable SDO 
+    SPI3CON2bits.FRMEN=0;       // No enable framed mode
+    SPI3CON2bits.SPIBEN=0;      // Enhanced buffer mode
     
-    SPI3CON1bits.SMP=1;         //data sampled at end of output time
-    SPI3CON1bits.CKP=1;         //idle clock is low
-    SPI3CON1bits.CKE=0;         //data changes from H to L
+    SPI3CON1bits.SMP=1;         // Data sampled at end of output time
+    SPI3CON1bits.CKP=1;         // Idle clock is low
+    SPI3CON1bits.CKE=0;         // Data changes from H to L
     
-    SPI3CON1bits.PPRE=3;        //1:1 primary prescale (3)
-    SPI3CON1bits.SPRE=6;        //2:1 secondary (6)
+    SPI3CON1bits.PPRE=3;        // 1:1 primary prescale (3)
+    SPI3CON1bits.SPRE=6;        // 2:1 secondary (6)
     
-    SPI3STATbits.SPIROV = 0;        // Clear SPI1 receive overflow flag if set
-    SPI3STATbits.SPIEN = 1;         //start SPI module
-    //IEC5bits.SPI3IE = 0;            // Enable the Interrupt
+    SPI3STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
+    SPI3STATbits.SPIEN = 1;     // Start SPI module
+    //IEC5bits.SPI3IE = 0;      // Enable the Interrupt
 
-    Delay_us(5);                       // Stabilization Delay
+    Delay_us(5);                // Stabilization Delay
     
     flashWriteReg(FLASH_WREN);
     /*
@@ -349,15 +327,12 @@ void initSPI3_MEM(void){
     while(flashStatusCheck()&1);
     */
     Delay_us(5);                       // Stabilization Delay
-    flashRead(flash_readback, 256);     // READBACK
+    flashRead(NULL, 256);     // READBACK
     SPI3STATbits.SPIROV = 0;        // Clear SPI1 receive overflow flag if set
-    //flashRead(flash_readback, 256);     // READBACK
-    //flashRead(flash_readback, 256);     // READBACK
-    //flashRead(flash_readback, 256);     // READBACK
-    
-    
+    //flashRead(flash_readback, 256);     // READBACK   
 }
 
+/* Quadradure Encoder */
 void initQEI_ENC(void){
     QEI1CONbits.INTDIV=6;       // 1:64 prescaler
     QEI1IOCbits.FLTREN=1;       // Enable input filter

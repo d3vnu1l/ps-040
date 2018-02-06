@@ -40,12 +40,14 @@
 #define LCD_RS _LATE15
 #define SS3a _LATF1
 #define SS3b _LATD15
+#define FLASHCLK _LATC9
 
 #define ENCODERCNTH POS1CNTH
 #define ENCODERCNTL POS1CNTL
 
 #define POT_PERCENT Q15(0.3937)      // For pot 0-100 display
 #define POT_LOOP Q15(1.0*LOOP_BUF_SIZE/32767.0)
+#define FXSCALE Q15(NUMFX*0.000030518509476)
 
 /* Potentiometer mapping 
     0   1  |  6   7
@@ -88,6 +90,13 @@ enum fxStruct{
     trm,
     lop,
     btc
+};
+
+struct ctrlsrfc {
+    unsigned char pad[BUTTONS];
+    fractional pots[POTS];
+    fractional pots_scaled[POTS];
+    fractional pots_custom[POTS];
 };
 
 #endif	/* COMMON_H */
