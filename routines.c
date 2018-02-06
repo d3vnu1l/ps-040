@@ -76,6 +76,9 @@ void __attribute__((__interrupt__, auto_psv)) _DMA1Interrupt(void){
  
     //BufferCount ^= 1;
     IFS0bits.DMA1IF = 0; // Clear the DMA1 Interrupt flag
+    //BufferCount ^= 1;
+    SLED=1;
+    //SS3a=1;
 }
 
 /*

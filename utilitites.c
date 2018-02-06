@@ -200,7 +200,7 @@ void display(void){
         //printf("%d, pot1 %x, pot2 %x, avg %x\r\n", sample, controls.pots[1], controls.pots[2], average);  //check input ADC
     }
    
-   SLED=~SLED;
+   //SLED=~SLED;
 }
 
 void processRxData(fractional *sourceBuffer, fractional *targetBuffer){

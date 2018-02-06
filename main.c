@@ -74,6 +74,7 @@ int main(void) {
     if(UART_ON) initUART1();        // Configure & enable UART
     initDMA();
     initSPI3_MEM();                 // Start flash 
+    flashRead(NULL, 256);     // READBACK
     initDCI_DAC();                  // Configure & enable DAC
     //genSine(STREAMBUF);
     initADC1();                     // Configure & enable internal ADC

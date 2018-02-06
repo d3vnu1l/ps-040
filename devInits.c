@@ -318,7 +318,7 @@ void initSPI3_MEM(void){
 
     Delay_us(5);                // Stabilization Delay
     
-    flashWriteReg(FLASH_WREN);
+    //flashWriteReg(FLASH_WREN);
     /*
     flashBulkErase();
     while(flashStatusCheck()&1);
@@ -327,8 +327,7 @@ void initSPI3_MEM(void){
     while(flashStatusCheck()&1);
     */
     Delay_us(5);                       // Stabilization Delay
-    flashRead(NULL, 256);     // READBACK
-    SPI3STATbits.SPIROV = 0;        // Clear SPI1 receive overflow flag if set
+    
     //flashRead(flash_readback, 256);     // READBACK   
 }
 

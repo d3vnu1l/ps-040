@@ -90,6 +90,7 @@ void flashRead(char *array, int bytes){
     /* Kick off read here */
     
     DMA0REQbits.FORCE = 1; // Manual mode: Kick-start the 1st transfer
+    //while(DMA0REQbits.FORCE == 1);
     //SPI3BUF=0x00;
     /*
     for(i=0; i<bytes;i++){    //read 512 bytes
@@ -102,9 +103,11 @@ void flashRead(char *array, int bytes){
     
     */ 
     Delay_us(200);
-    SS3a=1;
     DMA1CONbits.CHEN = 0;
     DMA0CONbits.CHEN = 0;
+    IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
+    SS3a=1;
+
 }
 
 void flashBulkErase(void) {

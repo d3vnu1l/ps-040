@@ -112,24 +112,42 @@ void screenDebugFlash(void){
         lcdClearQ();
         lcdSetCursorQ(0,0);
         lcdWriteByteQ(RxBufferA[0]);
-         lcdSetCursorQ(6,0);
+         lcdSetCursorQ(3,0);
         lcdWriteByteQ(RxBufferA[1]);
-         lcdSetCursorQ(12,0);
+         lcdSetCursorQ(6,0);
         lcdWriteByteQ(RxBufferA[2]);
-         lcdSetCursorQ(0,1);
+         lcdSetCursorQ(9,0);
         lcdWriteByteQ(RxBufferA[3]);
-        lcdSetCursorQ(6,1);
+        lcdSetCursorQ(11,0);
         lcdWriteByteQ(RxBufferA[4]);
-         lcdSetCursorQ(12,1);
+        lcdSetCursorQ(0,1);
         lcdWriteByteQ(RxBufferA[5]);
-        lcdSetCursorQ(0,2);
+         lcdSetCursorQ(3,1);
         lcdWriteByteQ(RxBufferA[6]);
-        lcdSetCursorQ(6,2);
+         lcdSetCursorQ(7,1);
         lcdWriteByteQ(RxBufferA[7]);
-         lcdSetCursorQ(12,2);
+         lcdSetCursorQ(11,1);
         lcdWriteByteQ(RxBufferA[8]);
-        lcdSetCursorQ(0,3);
+        lcdSetCursorQ(15,1);
         lcdWriteByteQ(RxBufferA[9]);
+        lcdSetCursorQ(0,2);
+        lcdWriteByteQ(RxBufferA[10]);
+         lcdSetCursorQ(3,2);
+        lcdWriteByteQ(RxBufferA[11]);
+         lcdSetCursorQ(7,2);
+        lcdWriteByteQ(RxBufferA[12]);
+         lcdSetCursorQ(11,2);
+        lcdWriteByteQ(RxBufferA[13]);
+        lcdSetCursorQ(15,2);
+        lcdWriteByteQ(RxBufferA[14]);
+        lcdSetCursorQ(0,3);
+        lcdWriteByteQ(RxBufferA[15]);
+         lcdSetCursorQ(3,3);
+        lcdWriteByteQ(RxBufferA[16]);
+         lcdSetCursorQ(6,3);
+        lcdWriteByteQ(RxBufferA[17]);
+
+
     } else {
         //update here
         lcdSetCursorQ(9,3);
