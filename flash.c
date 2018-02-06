@@ -15,29 +15,29 @@ char flashBuf[STREAMBUF*2];
 char receive;
 
 void flashWriteReg(char command) {
-    SS3=0;
+    SS3a=0;
     SPI3BUF=command;               //WEL=1 for write enable
     while(!_SPI3IF); _SPI3IF=0;
     receive=SPI3BUF;
-    SS3=1;
+    SS3a=1;
 }
 
 char flashStatusCheck(void){
-    SS3=0;
+    SS3a=0;
     SPI3BUF=FLASH_RDSR1;               //WEL=1 for write enable
     while(!_SPI3IF); _SPI3IF=0;
     receive=SPI3BUF;
     SPI3BUF=0x00;               //WEL=1 for write enable
     while(!_SPI3IF); _SPI3IF=0;
     receive=SPI3BUF;
-    SS3=1;
+    SS3a=1;
     
     return receive;
 }
 
 void flashWritePage(int addressH, int addressL){
     int i;
-    SS3=0;
+    SS3a=0;
     SPI3BUF=FLASH_PP;
     while(!_SPI3IF); _SPI3IF=0;
     receive=SPI3BUF;
@@ -57,13 +57,14 @@ void flashWritePage(int addressH, int addressL){
         while(!_SPI3IF); _SPI3IF=0;
         receive=SPI3BUF;
     }
-    SS3=1;
+    SS3a=1;
 }
 
 void flashRead(char *array, int bytes){
     int i;
     
-    SS3=0;
+    SS3a=0;
+    /*
     SPI3BUF=FLASH_READ;
     while(!_SPI3IF); _SPI3IF=0;
     receive=SPI3BUF;
@@ -76,15 +77,15 @@ void flashRead(char *array, int bytes){
     SPI3BUF=0x00;
     while(!_SPI3IF); _SPI3IF=0;
     receive=SPI3BUF;
+    */
     
-    initDMA();
+    
+    DMA1CONbits.CHEN = 1;
+    DMA0CONbits.CHEN = 1;
     /* Kick off read here */
     
-    Delay_us(1);
     DMA0REQbits.FORCE = 1; // Manual mode: Kick-start the 1st transfer
-    //DMA1REQbits.FORCE = 1; // Manual mode: Kick-start the 1st transfer
     //SPI3BUF=0x00;
-    //SPI3STATbits.SPIROV = 0;        // Clear SPI1 receive overflow flag if set
     /*
     for(i=0; i<bytes;i++){    //read 512 bytes
         //receive byte
@@ -95,8 +96,10 @@ void flashRead(char *array, int bytes){
     }
     
     */ 
-    Delay_us(10);
-    SS3=1;
+    Delay_us(200);
+    SS3a=1;
+    DMA1CONbits.CHEN = 0;
+    DMA0CONbits.CHEN = 0;
 }
 
 void flashBulkErase(void) {

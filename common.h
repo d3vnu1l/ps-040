@@ -15,7 +15,7 @@
 #define Fdisp   15                        //15hz display update rate
 
 #define SINRES  1024
-#define FLASH_DMAXFERS 6
+#define FLASH_DMAXFERS 150
 
 /* BUFFERS */
 
@@ -38,7 +38,8 @@
 /* Pin Map */
 #define SLED _LATF0                                                            
 #define LCD_RS _LATE15
-#define SS3 _LATF1
+#define SS3a _LATF1
+#define SS3b _LATD15
 
 #define ENCODERCNTH POS1CNTH
 #define ENCODERCNTL POS1CNTL

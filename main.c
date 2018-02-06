@@ -63,7 +63,8 @@ void initBuffer(void){
     for(i=0; i<BUTTONS; i++)
         pad[i]=1;
     
-    for(i=0; i<FLASH_DMAXFERS; i++){
+    TxBufferA[0]=0x03;
+    for(i=1; i<FLASH_DMAXFERS; i++){
         TxBufferA[i]=0;
         TxBufferB[i]=0;
         RxBufferA[i]=0;
@@ -82,7 +83,8 @@ int main(void) {
     initDCI_DAC();                  //configure & enable DAC
     initT1();                       //configure & start T1 
     initT2();                       //configure & start T2 
-    initSPI3_MEM();                  //start segment display
+    initDMA();
+    initSPI3_MEM();  //start flash 
     //initCAP_BPM();                  //configure bpm capture
     initT3();                       //configure & start T3 for lcd
     initQEI_ENC();

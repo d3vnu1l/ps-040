@@ -90,6 +90,25 @@ void lcdWriteWordQ(int word){
    lcdWriteQMac(inchar[0]);
 }
 
+void lcdWriteByteQ(char word){
+    int i;
+    char inchar[2];
+     
+   inchar[0] = word&0x0F; 
+   if (inchar[0] > 9) 
+       inchar[0]+=55;
+   else inchar[0]+=48;
+   
+   for(i=1; i<2; i++){ 
+      inchar[i] = ((word>>(i*4))&0x0000F); 
+      if (inchar[i] > 9) 
+          inchar[i]+=55;
+      else inchar[i]+=48;
+   } 
+   lcdWriteQMac(inchar[1]);
+   lcdWriteQMac(inchar[0]);
+}
+
 void lcdWriteWordUnsignedQ(unsigned int word){
     int i;
     char inchar[4];

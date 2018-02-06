@@ -63,6 +63,7 @@ void __attribute__((__interrupt__, auto_psv)) _DMA0Interrupt(void) {
         //TxData(TxBufferB); // Transmit SPI data in DMA RAM Secondary buffer
     //}
     //BufferCount ^= 1;
+    SLED=1;
     IFS0bits.DMA0IF = 0; // Clear the DMA0 Interrupt flag
 }
 
@@ -93,7 +94,8 @@ void __attribute__ ((interrupt, auto_psv)) _U1TXInterrupt(void){
     YLED=~YLED;
     IFS0bits.U1TXIF = 0;            //clear flag, restart
 } 
-  */
+  
+
 void __attribute__ ((interrupt, auto_psv)) _SPI3Interrupt(void){
     //SEG_SEL=1;
     //int trash=SPI3BUF;
@@ -101,3 +103,4 @@ void __attribute__ ((interrupt, auto_psv)) _SPI3Interrupt(void){
     IFS5bits.SPI3IF=0;
     
 }
+*/

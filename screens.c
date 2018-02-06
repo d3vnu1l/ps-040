@@ -23,8 +23,8 @@ extern enum screenStruc state, laststate;
 extern char flash_readback[512];
 extern unsigned int process_time;
 
-extern unsigned char TxBufferA[STREAMBUF], TxBufferB[STREAMBUF], 
-            RxBufferA[STREAMBUF], RxBufferB[STREAMBUF];  
+extern unsigned char TxBufferA[FLASH_DMAXFERS]__attribute__((space(xmemory))), TxBufferB[FLASH_DMAXFERS]__attribute__((space(xmemory))), 
+            RxBufferA[STREAMBUF]__attribute__((space(xmemory))), RxBufferB[FLASH_DMAXFERS]__attribute__((space(xmemory))); 
 
 extern struct clip sine;
 
@@ -115,30 +115,30 @@ void screenDebugFlash(void){
         //setup here
         lcdClearQ();
         lcdSetCursorQ(0,0);
-        lcdWriteWordQ(RxBufferA[0]);
+        lcdWriteByteQ(RxBufferA[0]);
          lcdSetCursorQ(6,0);
-        lcdWriteWordQ(RxBufferB[0]);
+        lcdWriteByteQ(RxBufferA[1]);
          lcdSetCursorQ(12,0);
-        lcdWriteWordQ(RxBufferA[1]);
+        lcdWriteByteQ(RxBufferA[2]);
          lcdSetCursorQ(0,1);
-        lcdWriteWordQ(RxBufferB[1]);
+        lcdWriteByteQ(RxBufferA[3]);
         lcdSetCursorQ(6,1);
-        lcdWriteWordQ(RxBufferA[2]);
+        lcdWriteByteQ(RxBufferA[4]);
          lcdSetCursorQ(12,1);
-        lcdWriteWordQ(RxBufferB[2]);
+        lcdWriteByteQ(RxBufferA[5]);
         lcdSetCursorQ(0,2);
-        lcdWriteWordQ(RxBufferA[3]);
+        lcdWriteByteQ(RxBufferA[6]);
         lcdSetCursorQ(6,2);
-        lcdWriteWordQ(RxBufferB[3]);
+        lcdWriteByteQ(RxBufferA[7]);
          lcdSetCursorQ(12,2);
-        lcdWriteWordQ(RxBufferA[4]);
+        lcdWriteByteQ(RxBufferA[8]);
         lcdSetCursorQ(0,3);
-        lcdWriteWordQ(RxBufferB[4]);
+        lcdWriteByteQ(RxBufferA[9]);
     } else {
         //update here
         lcdSetCursorQ(9,3);
         lcdWriteStringQ("Stat:");
-        //lcdWriteWordQ(flashStatusCheck());
+        lcdWriteWordQ(flashStatusCheck());
     }
 }
 

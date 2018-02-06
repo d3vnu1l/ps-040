@@ -24,24 +24,7 @@ void initPorts(void){
     CLKDIVbits.PLLPRE=0;
     PLLFBDbits.PLLDIV = 0x49;       //d_73 for ~140Mhz
     while(OSCCONbits.LOCK!=1) {};   //wait for PLL to lock
-    //RP pin config
-	__builtin_write_OSCCONL(OSCCON & ~(1<<6));      // Unlock Registers
-    //RPINR18bits.U1RXR = 0x37; //U1 rx on RP55
-    //RPOR6bits.RP54R=0x1;          //U1 tx on RP54
-    RPOR2bits.RP38R = 0x1;
-    RPINR24bits.CSDIR=0x3D;     //DCI IN on RPI61           
-    RPOR3bits.RP40R=0x0C;       //DCI clock
-    RPOR2bits.RP39R=0x0D;       //DCI frame sync
-    RPOR3bits.RP41R=0x0B;       //DCI output
-    RPINR7bits.IC1R=0x5F;       //Capture input on pin 95 re15
-    RPINR29bits.SCK3R=0x39;     //SCK3 input on pin 84
-    RPOR7bits.RP57R=0x20;       //SCK3 output on pin 84
-    RPOR8bits.RP70R=0x1F;       //SDO3 on pin 83
-    RPOR9bits.RP97R=0x21;       //SS3 on pin 88
-    RPINR29bits.SDI3R=0x4C;     //SDI on pin 79, RPI76
-    RPINR14bits.QEA1R=0x10;     //QEA on pin 22, RPI16
-    RPINR14bits.QEB1R=0x1B;     //QEB on pin 21, RPI27
-	__builtin_write_OSCCONL(OSCCON | (1<<6));       // Lock Registers
+    
     /*PERIPHERAL ENABLE (0) - DISABLE (1)*/
     PMD1=PMD2=PMD3=PMD4=PMD6=PMD7=0xFFFF;
     PMD1bits.AD1MD=0;
@@ -73,6 +56,7 @@ void initPorts(void){
     /* DIGITAL OUTPUT LATCH */
     LATA=LATB=LATC=LATD=LATE=LATF=LATG=0x0000;
     LATA=0x0040;
+    //_LATC9=1;
     
     /* ANALOG PINS (1 = analog) */
     ANSELA=ANSELB=ANSELC=ANSELD=ANSELE=ANSELF=ANSELG=0x0000;
@@ -83,8 +67,24 @@ void initPorts(void){
     ANSELEbits.ANSE8=1;     //AN21
     ANSELEbits.ANSE9=1;     //AN20
     
-    
-    
+    //RP pin config
+	__builtin_write_OSCCONL(OSCCON & ~(1<<6));      // Unlock Registers
+    //RPINR18bits.U1RXR = 0x37; //U1 rx on RP55
+    //RPOR6bits.RP54R=0x1;          //U1 tx on RP54
+    RPOR2bits.RP38R = 0x1;
+    RPINR24bits.CSDIR=0x3D;     //DCI IN on RPI61           
+    RPOR3bits.RP40R=0x0C;       //DCI clock
+    RPOR2bits.RP39R=0x0D;       //DCI frame sync
+    RPOR3bits.RP41R=0x0B;       //DCI output
+    RPINR7bits.IC1R=0x5F;       //Capture input on pin 95 re15
+    RPOR7bits.RP57R=0x20;       //SCK3 output on pin 84
+    RPINR29bits.SCK3R=0x39;     //SCK3 input on pin 84
+    RPOR8bits.RP70R=0x1F;       //SDO3 on pin 83
+    RPOR9bits.RP97R=0x21;       //SS3 on pin 88
+    RPINR29bits.SDI3R=0x4C;     //SDI on pin 79, RPI76
+    RPINR14bits.QEA1R=0x10;     //QEA on pin 22, RPI16
+    RPINR14bits.QEB1R=0x1B;     //QEB on pin 21, RPI27
+	__builtin_write_OSCCONL(OSCCON | (1<<6));       // Lock Registers    
 }
 
 void initUART1(void){
@@ -237,7 +237,7 @@ void initDCI_DAC(void){
     
 
     
-    IPC15bits.DCIIP = 6;    // Interrput priority
+    IPC15bits.DCIIP = 5;    // Interrput priority
     IFS3bits.DCIIF=0;
     IEC3bits.DCIIE=1;       //=0 to let dma handle interrupt
     
@@ -256,16 +256,18 @@ void initDMA(void){
     IFS0bits.DMA1IF = 0;
     DMA1CONbits.SIZE=1;                             // Byte size
     DMA1CONbits.DIR=0;                              // Read from flash
-    DMA1CONbits.MODE=3;                             // One shot, ping pong
+    DMA1CONbits.MODE=1;                             // One shot, ping pong
     //DMA1CONbits.NULLW=1;                            // NULL WRITE (debug))
     DMA1STAL = (unsigned int)(&RxBufferA);
-    DMA1STAH = (unsigned int)(&RxBufferB);
+    //DMA1STAH = (unsigned int)(&RxBufferB);
     DMA1PAD = (volatile unsigned int) &SPI3BUF;
-    DMA1CNT = (unsigned int)(FLASH_DMAXFERS-2);
-    //DMA1CNT = 4;
+    DMA1CNT = (unsigned int)(FLASH_DMAXFERS-1);
     DMA1REQbits.IRQSEL = 0x5B;
+    
+    IFS0bits.DMA1IF = 0;
     IEC0bits.DMA1IE = 1;
-    DMA1CONbits.CHEN = 1;
+    IPC3bits.DMA1IP = 6;
+    DMA1CONbits.CHEN = 0;
     
     
     /* TX */
@@ -273,49 +275,48 @@ void initDMA(void){
     DMAPWC = 0;
     DMA0CONbits.SIZE=1;                             // Byte size
     DMA0CONbits.DIR=1;                              // Write to flash
-    DMA0CONbits.MODE=3;                             // One shot, ping pong
+    DMA0CONbits.MODE=1;                             // One shot, ping pong
     DMA0STAL = (unsigned int)(&TxBufferA);
-    DMA0STAH = (unsigned int)(&TxBufferB);
+    //DMA0STAH = (unsigned int)(&TxBufferB);
     DMA0PAD = (volatile unsigned int) &SPI3BUF;
-    DMA0CNT = (unsigned int)(FLASH_DMAXFERS-2);
-    //DMA0CNT = 4;
+    DMA0CNT = (unsigned int)(FLASH_DMAXFERS-1);
     DMA0REQbits.IRQSEL = 0x5B;
+    
+    IFS0bits.DMA0IF = 0;
     IEC0bits.DMA0IE = 1;
-    DMA0CONbits.CHEN = 1;
+    IPC1bits.DMA0IP = 6;
+    DMA0CONbits.CHEN = 0;
      
 }
 
 void initSPI3_MEM(void){
-    SS3=1;                     // Assert chip select (active low)
+    SS3a=1;                     // Assert chip select (active low)
+    SS3b=1;
+    _LATC9=1;
+    
     IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
     IEC5bits.SPI3IE = 0;        // Disable the interrupt
     SPI3CON1bits.MSTEN=1;       //master mode
     SPI3CON1bits.DISSCK = 0;    //Internal serial clock is enabled
     SPI3CON1bits.MODE16=0;      //8 bitBufferB
     SPI3CON1bits.DISSDO=0;      //enable SDO 
-    //SPI3CON1bits.SSEN=1;        //use SS
     SPI3CON2bits.FRMEN=0;       //no enable framed mode
     SPI3CON2bits.SPIBEN=0;      //enhanced buffer mode
-    //SPI2STATbits.SISEL=5;       //interrupt when done sending
-    
-    SPI3STATbits.SPISIDL = 0; // Continue module operation in Idle mode
-    SPI3STATbits.SPIBEC = 0; // Buffer Length = 1 Word
     
     SPI3CON1bits.SMP=1;         //data sampled at end of output time
-    SPI3CON1bits.CKP=0;         //idle clock is low
-    SPI3CON1bits.CKE=1;         //data changes from H to L
+    SPI3CON1bits.CKP=1;         //idle clock is low
+    SPI3CON1bits.CKE=0;         //data changes from H to L
     
-    SPI3CON1bits.PPRE=3;        //1:1 primary prescale
-    SPI3CON1bits.SPRE=5;        //2:1 secondary (6)
+    SPI3CON1bits.PPRE=3;        //1:1 primary prescale (3)
+    SPI3CON1bits.SPRE=6;        //2:1 secondary (6)
     
     SPI3STATbits.SPIROV = 0;        // Clear SPI1 receive overflow flag if set
-    //IPC22bits.SPI3IP = 3;         // Interrupt priority
     SPI3STATbits.SPIEN = 1;         //start SPI module
-    IEC5bits.SPI3IE = 0;            // Enable the Interrupt
-    // Force First Word After Enabling SPI
+    //IEC5bits.SPI3IE = 0;            // Enable the Interrupt
+
     Delay_us(5);                       // Stabilization Delay
     
-    //flashWriteReg(FLASH_WREN);
+    flashWriteReg(FLASH_WREN);
     /*
     flashBulkErase();
     while(flashStatusCheck()&1);
@@ -323,7 +324,12 @@ void initSPI3_MEM(void){
     flashWritePage
     while(flashStatusCheck()&1);
     */
+    Delay_us(5);                       // Stabilization Delay
     flashRead(flash_readback, 256);     // READBACK
+    SPI3STATbits.SPIROV = 0;        // Clear SPI1 receive overflow flag if set
+    //flashRead(flash_readback, 256);     // READBACK
+    //flashRead(flash_readback, 256);     // READBACK
+    //flashRead(flash_readback, 256);     // READBACK
     
     
 }
