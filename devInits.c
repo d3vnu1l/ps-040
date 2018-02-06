@@ -13,8 +13,8 @@
 #include "dsp.h"
 
 extern unsigned char UART_ON;
-extern unsigned int TxBufferA[STREAMBUF], TxBufferB[STREAMBUF], 
-            RxBufferA[STREAMBUF], RxBufferB[STREAMBUF];  
+extern unsigned char TxBufferA[FLASH_DMAXFERS]__attribute__((space(xmemory))), TxBufferB[FLASH_DMAXFERS]__attribute__((space(xmemory))), 
+            RxBufferA[STREAMBUF]__attribute__((space(xmemory))), RxBufferB[FLASH_DMAXFERS]__attribute__((space(xmemory)));  
 
 extern char flash_readback[512];
 
@@ -252,29 +252,37 @@ void initDCI_DAC(void){
 }
 
 void initDMA(void){
+    /* RX */
+    IFS0bits.DMA1IF = 0;
+    DMA1CONbits.SIZE=1;                             // Byte size
+    DMA1CONbits.DIR=0;                              // Read from flash
+    DMA1CONbits.MODE=3;                             // One shot, ping pong
+    //DMA1CONbits.NULLW=1;                            // NULL WRITE (debug))
+    DMA1STAL = (unsigned int)(&RxBufferA);
+    DMA1STAH = (unsigned int)(&RxBufferB);
+    DMA1PAD = (volatile unsigned int) &SPI3BUF;
+    DMA1CNT = (unsigned int)(FLASH_DMAXFERS-2);
+    //DMA1CNT = 4;
+    DMA1REQbits.IRQSEL = 0x5B;
+    IEC0bits.DMA1IE = 1;
+    DMA1CONbits.CHEN = 1;
     
+    
+    /* TX */
     IFS0bits.DMA0IF = 0;
-    IEC0bits.DMA0IE = 1;
     DMAPWC = 0;
     DMA0CONbits.SIZE=1;                             // Byte size
     DMA0CONbits.DIR=1;                              // Write to flash
     DMA0CONbits.MODE=3;                             // One shot, ping pong
-    DMA0STAL = (unsigned int)&TxBufferA;
-    DMA0STAH = (unsigned int)&TxBufferB;
+    DMA0STAL = (unsigned int)(&TxBufferA);
+    DMA0STAH = (unsigned int)(&TxBufferB);
     DMA0PAD = (volatile unsigned int) &SPI3BUF;
-    DMA0CNT = FLASH_DMAXFERS-1;
-    DMA0REQ = 0x005B;
-
-    IFS0bits.DMA1IF = 0;
-    IEC0bits.DMA1IE = 1;
-    DMA0CONbits.SIZE=1;                             // Byte size
-    DMA0CONbits.DIR=0;                              // Read from flash
-    DMA0CONbits.MODE=3;                             // One shot, ping pong
-    DMA1STAL = (unsigned int)&RxBufferA;
-    DMA1STAH = (unsigned int)&RxBufferB;
-    DMA1PAD = (volatile unsigned int) &SPI3BUF;
-    DMA1CNT = FLASH_DMAXFERS-1;
-    DMA1REQ = 0x005B;
+    DMA0CNT = (unsigned int)(FLASH_DMAXFERS-2);
+    //DMA0CNT = 4;
+    DMA0REQbits.IRQSEL = 0x5B;
+    IEC0bits.DMA0IE = 1;
+    DMA0CONbits.CHEN = 1;
+     
 }
 
 void initSPI3_MEM(void){
@@ -285,27 +293,29 @@ void initSPI3_MEM(void){
     SPI3CON1bits.DISSCK = 0;    //Internal serial clock is enabled
     SPI3CON1bits.MODE16=0;      //8 bitBufferB
     SPI3CON1bits.DISSDO=0;      //enable SDO 
-    SPI3CON1bits.SSEN=0;        //use SS
+    //SPI3CON1bits.SSEN=1;        //use SS
     SPI3CON2bits.FRMEN=0;       //no enable framed mode
     SPI3CON2bits.SPIBEN=0;      //enhanced buffer mode
-    SPI2STATbits.SISEL=5;       //interrupt when done sending
+    //SPI2STATbits.SISEL=5;       //interrupt when done sending
+    
+    SPI3STATbits.SPISIDL = 0; // Continue module operation in Idle mode
+    SPI3STATbits.SPIBEC = 0; // Buffer Length = 1 Word
     
     SPI3CON1bits.SMP=1;         //data sampled at end of output time
     SPI3CON1bits.CKP=0;         //idle clock is low
     SPI3CON1bits.CKE=1;         //data changes from H to L
     
     SPI3CON1bits.PPRE=3;        //1:1 primary prescale
-    SPI3CON1bits.SPRE=6;        //2:1 secondary
+    SPI3CON1bits.SPRE=5;        //2:1 secondary (6)
     
     SPI3STATbits.SPIROV = 0;        // Clear SPI1 receive overflow flag if set
     //IPC22bits.SPI3IP = 3;         // Interrupt priority
-    //IFS5bits.SPI3IF = 0;          // Clear the Interrupt flag
-    //IEC5bits.SPI3IE = 0;          // Enable the interrupt
     SPI3STATbits.SPIEN = 1;         //start SPI module
-   
-    Delay_us(20);                       // Stabilization Delay
+    IEC5bits.SPI3IE = 0;            // Enable the Interrupt
+    // Force First Word After Enabling SPI
+    Delay_us(5);                       // Stabilization Delay
     
-    flashWriteReg(FLASH_WREN);
+    //flashWriteReg(FLASH_WREN);
     /*
     flashBulkErase();
     while(flashStatusCheck()&1);
@@ -313,7 +323,7 @@ void initSPI3_MEM(void){
     flashWritePage
     while(flashStatusCheck()&1);
     */
-    
+    flashRead(flash_readback, 256);     // READBACK
     
     
 }

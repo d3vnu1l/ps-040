@@ -15,7 +15,7 @@
 #define Fdisp   15                        //15hz display update rate
 
 #define SINRES  1024
-#define FLASH_DMAXFERS 16
+#define FLASH_DMAXFERS 6
 
 /* BUFFERS */
 

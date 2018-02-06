@@ -55,30 +55,25 @@ void __attribute__ ((interrupt, auto_psv)) _DCIInterrupt(void){
     _DCIIF=0;
 }
 
-void __attribute__((__interrupt__)) _SPI3Interrupt(void)
-{
-    IFS5bits.SPI3IF = 0;
-}
-
-void __attribute__((__interrupt__)) _DMA0Interrupt(void) {
-    static unsigned int BufferCount = 0; // Keep record of the buffer that contains TX data
-    if(BufferCount == 0);
-    {
+void __attribute__((__interrupt__, auto_psv)) _DMA0Interrupt(void) {
+    //static unsigned int BufferCount = 0; // Keep record of the buffer that contains TX data
+    //if(BufferCount == 0);
+    //{
         //TxData(TxBufferA); // Transmit SPI data in DMA RAM Primary buffer
         //TxData(TxBufferB); // Transmit SPI data in DMA RAM Secondary buffer
-    }
-    BufferCount ^= 1;
+    //}
+    //BufferCount ^= 1;
     IFS0bits.DMA0IF = 0; // Clear the DMA0 Interrupt flag
 }
 
-void __attribute__((__interrupt__)) _DMA1Interrupt(void){
-    static unsigned int BufferCount = 0; // Keep record of the buffer that contains RX data
-    if(BufferCount == 0) ;
+void __attribute__((__interrupt__, auto_psv)) _DMA1Interrupt(void){
+    //static unsigned int BufferCount = 0; // Keep record of the buffer that contains RX data
+    //if(BufferCount == 0) ;
         //ProcessRxData(TxBufferA); // Process received SPI data in DMA RAM Primary buffer
-    else;
+    //else;
         //ProcessRxData(TxBufferB); // Process received SPI data in DMA RAM Secondary buffer
  
-    BufferCount ^= 1;
+    //BufferCount ^= 1;
     IFS0bits.DMA1IF = 0; // Clear the DMA1 Interrupt flag
 }
 
@@ -98,12 +93,11 @@ void __attribute__ ((interrupt, auto_psv)) _U1TXInterrupt(void){
     YLED=~YLED;
     IFS0bits.U1TXIF = 0;            //clear flag, restart
 } 
-  
+  */
 void __attribute__ ((interrupt, auto_psv)) _SPI3Interrupt(void){
     //SEG_SEL=1;
-    int trash=SPI3BUF;
+    //int trash=SPI3BUF;
     SPI3STATbits.SPIROV = 0;                                //Clear SPI1 receive overflow flag if set
     IFS5bits.SPI3IF=0;
     
 }
- */

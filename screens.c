@@ -23,7 +23,7 @@ extern enum screenStruc state, laststate;
 extern char flash_readback[512];
 extern unsigned int process_time;
 
-extern unsigned int TxBufferA[STREAMBUF], TxBufferB[STREAMBUF], 
+extern unsigned char TxBufferA[STREAMBUF], TxBufferB[STREAMBUF], 
             RxBufferA[STREAMBUF], RxBufferB[STREAMBUF];  
 
 extern struct clip sine;

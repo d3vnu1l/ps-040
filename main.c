@@ -25,10 +25,10 @@ fractional outputA[STREAMBUF], outputB[STREAMBUF];
 fractional streamA[STREAMBUF], streamB[STREAMBUF];
 unsigned int write_ptr=0, rw=0, frameReady=0;
 
-unsigned int TxBufferA[16] __attribute__((space(xmemory)));
-unsigned int TxBufferB[16] __attribute__((space(xmemory)));
-unsigned int RxBufferA[16] __attribute__((space(xmemory)));
-unsigned int RxBufferB[16] __attribute__((space(xmemory)));
+unsigned char TxBufferA[FLASH_DMAXFERS] __attribute__((space(xmemory)));
+unsigned char TxBufferB[FLASH_DMAXFERS] __attribute__((space(xmemory)));
+unsigned char RxBufferA[FLASH_DMAXFERS] __attribute__((space(xmemory)));
+unsigned char RxBufferB[FLASH_DMAXFERS] __attribute__((space(xmemory)));
 
 
 
@@ -58,14 +58,17 @@ void initBuffer(void){
     for(i=0; i<STREAMBUF; i++){
         streamA[i]=0;
         streamB[i]=0;
+    }
+    
+    for(i=0; i<BUTTONS; i++)
+        pad[i]=1;
+    
+    for(i=0; i<FLASH_DMAXFERS; i++){
         TxBufferA[i]=0;
         TxBufferB[i]=0;
         RxBufferA[i]=0;
         RxBufferB[i]=0;
     }
-    
-    for(i=0; i<BUTTONS; i++)
-        pad[i]=1;
 }
 
 int main(void) {
@@ -80,8 +83,6 @@ int main(void) {
     initT1();                       //configure & start T1 
     initT2();                       //configure & start T2 
     initSPI3_MEM();                  //start segment display
-    initDMA();
-    flashRead(flash_readback, 256);     // READBACK
     //initCAP_BPM();                  //configure bpm capture
     initT3();                       //configure & start T3 for lcd
     initQEI_ENC();
