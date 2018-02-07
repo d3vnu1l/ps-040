@@ -1,8 +1,6 @@
 #include <xc.h>
 #include <p33EP512GM310.h>
 #include <dsp.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <math.h>
 #include "common.h"
 #include "sounds.h"
@@ -167,6 +165,9 @@ void scalePots(void){
     ctrl.pots_scaled[POT_FX_SELECT1]=__builtin_sac(scaled, 0);
     scaled=__builtin_mpy(ctrl.pots[POT_FX_SELECT2],FXSCALE, NULL, NULL, 0, NULL, NULL, 0);
     ctrl.pots_scaled[POT_FX_SELECT2]=__builtin_sac(scaled, 0);
+    
+    scaled=__builtin_mpy(ctrl.pots[POT_VOLUME],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
+    ctrl.pots_scaled[POT_VOLUME]=__builtin_sac(scaled, 0);
 }
 
 fractional scalePotsCustom(unsigned int steps, fractional scaleme){
@@ -182,22 +183,21 @@ void changeFX(void){
     fxUnits[1]=ctrl.pots_scaled[POT_FX_SELECT2];
 }
 
+void checkFunctions(){
+    //if
+}
+
 void display(void){
     scalePots();
     changeFX();
     // Update ui state logic here
     state = (ENCODERCNTL/4)+1;
-    
+    if(!ctrl.pad[BTN_ENC]) state = scrnSHIFT;
     // Update screen here
+    checkFunctions();
     screenUpdate();
    
    if(UART_ON==TRUE){
-        //printf("b1 %d, b2 %d, b3 %d, b4 %d\r\n", controls.pad[0], controls.pad[1], controls.pad[2], controls.pad[3]);
-        //printf("b4 %d, b5 %d, b6 %d, b7 %d\r\n", controls.pad[4], controls.pad[5], controls.pad[6], controls.pad[7]);
-        //printf("P1 %x  P1 %d bpm %d\r\n", controls.pots[0], controls.pots[0], bpm);   //check pots
-        //printf("P1 %d  P2 %d P3 %d\r\n", ctrl.pots[0], ctrl.pots[1], ctrl.pots[2]);   //check pots
-        //printf("%d\r\n", sample);  //check input ADC
-        //printf("%d, pot1 %x, pot2 %x, avg %x\r\n", sample, controls.pots[1], controls.pots[2], average);  //check input ADC
         U1TXREG = 0x61;
     }
    

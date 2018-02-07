@@ -20,6 +20,7 @@ void screenLOPmod(unsigned int, fractional, fractional, fractional);
 void screenBTCmod(unsigned int, fractional, fractional, fractional);
 
 void screenFX(void);
+void screenSHIFT(void);
 void screenStart(char);
 
 void screenUpdate(void);

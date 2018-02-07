@@ -77,6 +77,7 @@ int main(void) {
     initDMA();
     initSPI3_MEM();                 // Start flash 
     flashRead(NULL, 256);     // READBACK
+    //flashRead(NULL, 256);     // READBACK
     initDCI_DAC();                  // Configure & enable DAC
     //genSine(STREAMBUF);
     initADC1();                     // Configure & enable internal ADC
@@ -103,6 +104,7 @@ int main(void) {
             
             processAudio(ping, pong); 
             process_time=write_ptr;    //DEBUG
+            //dma?
             frameReady=0;
         }
         if(_T2IF){

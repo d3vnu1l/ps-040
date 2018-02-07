@@ -309,13 +309,6 @@ void initSPI3_MEM(void){
     //IEC5bits.SPI3IE = 0;      // Enable the Interrupt
 
     flashWriteReg(FLASH_WREN);
-    /*
-    flashBulkErase();
-    while(flashStatusCheck()&1);
-
-    flashWritePage
-    while(flashStatusCheck()&1);
-    */
 }
 
 /* Quadradure Encoder */

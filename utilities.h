@@ -15,6 +15,7 @@ void readPots(void);
 void scalePots(void);
 fractional scalePotsCustom(unsigned int, fractional);
 void changeFX(void);
+void checkFunctions(void);
 void display(void);
 void processRxData(int *, int *);
 void ClipCopy_psv(int, fractional *, __psv__ fractional *);

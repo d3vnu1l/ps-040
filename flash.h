@@ -4,6 +4,7 @@
 #define	FLASH_H
 
 #include <xc.h> // include processor files - each processor file is guarded.  
+#include <dsp.h>
 
 #define FLASH_WREN  0x06    // Write enable
 #define FLASH_WRDI  0x04    // Write disable
@@ -20,7 +21,7 @@
 
 void flashWriteReg(char);
 char flashStatusCheck(void);
-void flashWritePage(int, int);
+void flashWritePage(int, int, fractional*);
 void flashRead(char *, int);
 void flashBulkErase(void);
 

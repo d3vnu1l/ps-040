@@ -15,17 +15,13 @@
 #define Fdisp   15                        //15hz display update rate
 
 #define SINRES  1024
-#define FLASH_DMAXFERS 99
+#define FLASH_DMAXFERS 256+4
 
 /* BUFFERS */
 
 #define STREAMBUF       256                   //input adc stack size, must be divisible by 2
 #define LOOP_BUF_SIZE   17408             
-#define LOOP_BUFFERS    40                    //about 1/4th of a second               //FX settings
-
 #define LCDBUF          256                     //lcd command buffer size
-#define LCDBUFMASK  0x00FF               //lcd buffer access mask
-
 
 /* MISC */
 #define TRUE    0xFF
@@ -66,16 +62,18 @@
 
 
 /* Button Mapping
-    12  13  14  15  |   28  29  30  31      Encoder:
-    8   9   10  11  |   24  25  26  27              32  |   33
-    4   5   6   7   |   20  21  22  23      Function:
- `` 0   1   2   3   |   16  17  18  19              34
+    12  13  14  15  |   29  30  31  32      Encoder:
+    8   9   10  11  |   25  26  27  28              16  |   33
+    4   5   6   7   |   21  22  23  24      Function:
+ `` 0   1   2   3   |   17  18  19  20              34
  */
 #define BTN_SPECIAL         34
+#define BTN_ENC             16
 
 enum screenStruc{
     invalid,
     scrnFX,
+    scrnSHIFT,
     debugscrnPOTS,
     debugscrnFLASH,
     debugscrnBUFFERS,

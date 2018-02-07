@@ -123,41 +123,53 @@ void screenDebugFlash(void){
         lcdWriteByteQ(RxBufferA[2]);
          lcdSetCursorQ(9,0);
         lcdWriteByteQ(RxBufferA[3]);
-        lcdSetCursorQ(11,0);
+        lcdSetCursorQ(12,0);
         lcdWriteByteQ(RxBufferA[4]);
-        lcdSetCursorQ(0,1);
+        lcdSetCursorQ(15,0);
         lcdWriteByteQ(RxBufferA[5]);
-         lcdSetCursorQ(3,1);
+        lcdSetCursorQ(18,0);
         lcdWriteByteQ(RxBufferA[6]);
-         lcdSetCursorQ(7,1);
+        lcdSetCursorQ(0,1);
         lcdWriteByteQ(RxBufferA[7]);
-         lcdSetCursorQ(11,1);
+         lcdSetCursorQ(3,1);
         lcdWriteByteQ(RxBufferA[8]);
-        lcdSetCursorQ(15,1);
+         lcdSetCursorQ(6,1);
         lcdWriteByteQ(RxBufferA[9]);
-        lcdSetCursorQ(0,2);
+         lcdSetCursorQ(9,1);
         lcdWriteByteQ(RxBufferA[10]);
-         lcdSetCursorQ(3,2);
+        lcdSetCursorQ(12,1);
         lcdWriteByteQ(RxBufferA[11]);
-         lcdSetCursorQ(7,2);
+        lcdSetCursorQ(15,1);
         lcdWriteByteQ(RxBufferA[12]);
-         lcdSetCursorQ(11,2);
+        lcdSetCursorQ(18,1);
         lcdWriteByteQ(RxBufferA[13]);
-        lcdSetCursorQ(15,2);
+        lcdSetCursorQ(0,2);
         lcdWriteByteQ(RxBufferA[14]);
-        lcdSetCursorQ(0,3);
+         lcdSetCursorQ(3,2);
         lcdWriteByteQ(RxBufferA[15]);
-         lcdSetCursorQ(3,3);
+         lcdSetCursorQ(6,2);
         lcdWriteByteQ(RxBufferA[16]);
-         lcdSetCursorQ(6,3);
+         lcdSetCursorQ(9,2);
         lcdWriteByteQ(RxBufferA[17]);
+        lcdSetCursorQ(12,2);
+        lcdWriteByteQ(RxBufferA[18]);
+        lcdSetCursorQ(15,2);
+        lcdWriteByteQ(RxBufferA[19]);
+        lcdSetCursorQ(18,2);
+        lcdWriteByteQ(RxBufferA[20]);
+        lcdSetCursorQ(0,3);
+        lcdWriteByteQ(RxBufferA[21]);
+         lcdSetCursorQ(3,3);
+        lcdWriteByteQ(RxBufferA[22]);
+         lcdSetCursorQ(6,3);
+        lcdWriteByteQ(RxBufferA[23]);
 
 
     } else {
         //update here
         lcdSetCursorQ(9,3);
         lcdWriteStringQ("Stat:");
-        //lcdWriteWordQ(flashStatusCheck());
+        lcdWriteWordQ(flashStatusCheck());
     }
 }
 
@@ -187,7 +199,7 @@ void screenDebugInput(void){
 }
 
 void screenNoFXmod(unsigned int col, fractional param1, fractional param2, fractional param3){
-        if(fxNow!=fxLast){
+        if(fxNow!=fxLast || state!=laststate){
         // Setup here
             
         lcdSetCursorQ(col+5,0);
@@ -207,7 +219,7 @@ void screenNoFXmod(unsigned int col, fractional param1, fractional param2, fract
 }
 
 void screenLPFmod(unsigned int col, fractional param1, fractional param2, fractional param3){
-    if(fxNow!=fxLast){
+    if(fxNow!=fxLast || state!=laststate){
         // Setup here
         lcdSetCursorQ(col+5,0);
         lcdWriteStringQ("LPF");
@@ -231,7 +243,7 @@ void screenLPFmod(unsigned int col, fractional param1, fractional param2, fracti
 }
 
 void screenTRMmod(unsigned int col, fractional param1, fractional param2, fractional param3){
-    if(fxNow!=fxLast){
+    if(fxNow!=fxLast || state!=laststate){
         // Setup here
         lcdSetCursorQ(col+5,0);
         lcdWriteStringQ("TRM");
@@ -255,7 +267,7 @@ void screenTRMmod(unsigned int col, fractional param1, fractional param2, fracti
 }
 
 void screenLOPmod(unsigned int col, fractional param1, fractional param2, fractional param3){
-    if(fxNow!=fxLast){
+    if(fxNow!=fxLast || state!=laststate){
         // Setup here
         lcdSetCursorQ(col+5,0);
         lcdWriteStringQ("LOP");
@@ -279,7 +291,7 @@ void screenLOPmod(unsigned int col, fractional param1, fractional param2, fracti
 }
 
 void screenBTCmod(unsigned int col, fractional param1, fractional param2, fractional param3){
-    if(fxNow!=fxLast){
+    if(fxNow!=fxLast || state!=laststate){
         // Setup here
         lcdSetCursorQ(col+5,0);
         lcdWriteStringQ("BIT");
@@ -310,6 +322,8 @@ void screenFX(void){
         lcdWriteStringQ("Fx1:");
         lcdSetCursorQ(10,0);
         lcdWriteStringQ("Fx2:");
+        fxModPointers[fxUnits[0]](0,  ctrl.pots_scaled[FX_1], ctrl.pots_scaled[FX_2], ctrl.pots_scaled[FX_3]);
+        fxModPointers[fxUnits[1]](10, ctrl.pots_scaled[FX_4], ctrl.pots_scaled[FX_5], ctrl.pots_scaled[FX_6]);
         
     } else {
         //update here 
@@ -319,12 +333,29 @@ void screenFX(void){
          
 }
 
+void screenSHIFT(void){
+    if(state!=laststate){
+        //setup here
+        lcdClearQ();
+        lcdSetCursorQ(0,0);
+        lcdWriteStringQ("SHIFT");
+        lcdSetCursorQ(0,1);
+        lcdWriteStringQ("Volume: ");
+    } else {
+        //update here 
+        lcdSetCursorQ(8,1);
+        lcdWriteDecimalQ(ctrl.pots_scaled[POT_VOLUME], 3);
+    }
+}
+
 void screenUpdate(void){
     fxNow=fxUnits[0]+fxUnits[1];
     
     switch(state){
         case start: break;
         case scrnFX:            screenFX(); 
+        break;
+        case scrnSHIFT:         screenSHIFT();
         break;
         case debugscrnPOTS:     screenDebugPots();
         break;
