@@ -26,8 +26,9 @@ void initPorts(void){
     /* Remappable Pins*/
 	__builtin_write_OSCCONL(OSCCON & ~(1<<6));      // Unlock Registers
         //RPINR18bits.U1RXR = 0x37; //U1 rx on RP55
-        //RPOR6bits.RP54R=0x1;          //U1 tx on RP54 (in use)
-        RPOR2bits.RP38R = 0x1;          // Pin 70, RP38
+        //RPOR6bits.RP54R=0x1;          // U1 tx on RP54 (in use)
+        RPINR18bits.U1RXR = 0x48;       // U1 rx on RP72
+        RPOR1bits.RP37R = 0x01;         // Pin 70, RP37 U1 tx
         RPINR24bits.CSDIR=0x3D;         //DCI IN on RPI61           
         RPOR3bits.RP40R=0x0C;           //DCI clock
         RPOR2bits.RP39R=0x0D;           //DCI frame sync
@@ -108,13 +109,15 @@ void initUART1(void){
     IFS0bits.U1TXIF = 0;        //clear flag
     IFS0bits.U1RXIF = 0;        //clear flag
     U1STA=0x1510;               //enable tx & rx
+    
     U1BRG=BRGVAL;               //baud rate
-    U1MODEbits.PDSEL=1;         //8 bit data, even parity
-    IPC2bits.U1RXIP = 7;        //interrupt priority 3 (low)
-    IPC3bits.U1TXIP = 7;        //interrupt priority 3 (low)
-    //IEC0bits.U1TXIE = 1;        //enable tx interrupt
-    //IEC0bits.U1RXIE = 1;        //enable rx interrupt
+    //U1MODEbits.PDSEL=0;         //8 bit data, even parity
+    IPC2bits.U1RXIP = 4;        //interrupt priority 3 (low)
+    IPC3bits.U1TXIP = 4;        //interrupt priority 3 (low)
+    IEC0bits.U1TXIE = 1;        //enable tx interrupt
+    IEC0bits.U1RXIE = 1;        //enable rx interrupt
     U1MODEbits.UARTEN = 1;      //start uart
+    U1STAbits.UTXEN = 1;
 }
 
 void initADC1(void){ 
@@ -280,17 +283,6 @@ void initDMA(void){
     DMA0PAD = (volatile unsigned int) &SPI3BUF;
     DMA0CNT = FLASH_DMAXFERS-1;
     DMA0REQ = 0x005B;
-
-    IFS0bits.DMA1IF = 0;
-    IEC0bits.DMA1IE = 1;
-    DMA1CONbits.SIZE=1;                             // Byte size
-    DMA1CONbits.DIR=0;                              // Read from flash
-    DMA1CONbits.MODE=3;                             // One shot, ping pong
-    DMA1STAL = (unsigned int)&RxBufferA;
-    DMA1STAH = (unsigned int)&RxBufferB;
-    DMA1PAD = (volatile unsigned int) &SPI3BUF;
-    DMA1CNT = FLASH_DMAXFERS-1;
-    DMA1REQ = 0x005B;
 }
 
 void initSPI3_MEM(void){
@@ -316,9 +308,7 @@ void initSPI3_MEM(void){
     SPI3STATbits.SPIEN = 1;     // Start SPI module
     //IEC5bits.SPI3IE = 0;      // Enable the Interrupt
 
-    Delay_us(5);                // Stabilization Delay
-    
-    //flashWriteReg(FLASH_WREN);
+    flashWriteReg(FLASH_WREN);
     /*
     flashBulkErase();
     while(flashStatusCheck()&1);
@@ -326,9 +316,6 @@ void initSPI3_MEM(void){
     flashWritePage
     while(flashStatusCheck()&1);
     */
-    Delay_us(5);                       // Stabilization Delay
-    
-    //flashRead(flash_readback, 256);     // READBACK   
 }
 
 /* Quadradure Encoder */

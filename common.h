@@ -8,14 +8,14 @@
 #define Fcy     Fosc/2
 
 /* Timers and Frequencies */
-#define BAUDRATE 57600                  //target baud rate for *UART*           //peripheral configs
+#define BAUDRATE 9600                  //target baud rate for *UART*           //peripheral configs
 #define BRGVAL  ((Fcy/BAUDRATE)/16)-1    //calculate baud value (MAY TRUNCATE)
 #define Fscan   300                       //target buttons & pots sampling rate
 #define Fout    44100                      //target output sampling rate (~45k last measured)
 #define Fdisp   15                        //15hz display update rate
 
 #define SINRES  1024
-#define FLASH_DMAXFERS 150
+#define FLASH_DMAXFERS 99
 
 /* BUFFERS */
 

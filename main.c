@@ -34,8 +34,9 @@ unsigned int process_time=0;
 
 unsigned char hard_clipped=FALSE;                                              
 volatile unsigned char recording=TRUE;
-unsigned char UART_ON = FALSE;
+unsigned char UART_ON = TRUE;
 unsigned char TEST_SIN = FALSE;
+unsigned char FLASH_DMA = FALSE;
 
 
 /* Screen state variables */
@@ -45,6 +46,8 @@ enum fxStruct fxUnits[NUMFXUNITS]={0,0};
 
 /* Buttons & Potentiometers */
 struct ctrlsrfc ctrl = {0};
+
+unsigned char btread;
 
 
 void initBuffers(void){
@@ -71,7 +74,6 @@ void initBuffers(void){
 int main(void) {
     initPorts();                    // Configure io device & adc 
     initBuffers();
-    if(UART_ON) initUART1();        // Configure & enable UART
     initDMA();
     initSPI3_MEM();                 // Start flash 
     flashRead(NULL, 256);     // READBACK
@@ -80,6 +82,7 @@ int main(void) {
     initADC1();                     // Configure & enable internal ADC
     initPMP();
     initQEI_ENC();
+    if(UART_ON) initUART1();        // Configure & enable UART
     
     initT1();                       // Configure & start T1 
     initT2();                       // Configure & start T2 

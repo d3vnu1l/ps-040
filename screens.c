@@ -19,8 +19,10 @@ extern unsigned char TEST_SIN;
 extern enum screenStruc state, laststate;
 extern unsigned int process_time;
 
-extern unsigned char TxBufferA[FLASH_DMAXFERS]__attribute__((space(xmemory))), TxBufferB[FLASH_DMAXFERS]__attribute__((space(xmemory))), 
-            RxBufferA[STREAMBUF]__attribute__((space(xmemory))), RxBufferB[FLASH_DMAXFERS]__attribute__((space(xmemory))); 
+extern unsigned char TxBufferA[FLASH_DMAXFERS]__attribute__((space(xmemory))),
+                     TxBufferB[FLASH_DMAXFERS]__attribute__((space(xmemory))), 
+                     RxBufferA[FLASH_DMAXFERS]__attribute__((space(xmemory))),
+                     RxBufferB[FLASH_DMAXFERS]__attribute__((space(xmemory)));  
 
 extern struct clip sine;
 extern enum fxStruct fxUnits[NUMFXUNITS];
@@ -30,6 +32,8 @@ int fxLast=0;
 int fxNow=0;
 
 void (*fxModPointers[NUMFX])(unsigned int, fractional, fractional, fractional) = {screenNoFXmod, screenLPFmod, screenTRMmod, screenLOPmod, screenBTCmod};
+
+extern unsigned char btread;
 
 void screenDebugAudio(){
 
@@ -48,12 +52,13 @@ void screenDebugBuffers(){
         lcdSetCursorQ(0,2);
         lcdWriteStringQ("LCD:");
         lcdSetCursorQ(0,3);
-        lcdWriteStringQ("Flash:");
+        lcdWriteStringQ("btRd:");
     } else {
         //update here
         lcdSetCursorQ(8,1);
         lcdWriteDecimalQ(process_time,3);
-        //lcdSetCursorQ(4,2);
+        lcdSetCursorQ(6,3);
+        lcdWriteByteQ(btread);
         //lcdWriteDecimalQ();
         //lcdSetCursorQ(6,3);
         //lcdWriteDecimalQ();
@@ -152,7 +157,7 @@ void screenDebugFlash(void){
         //update here
         lcdSetCursorQ(9,3);
         lcdWriteStringQ("Stat:");
-        lcdWriteWordQ(flashStatusCheck());
+        //lcdWriteWordQ(flashStatusCheck());
     }
 }
 

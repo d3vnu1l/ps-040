@@ -10,14 +10,19 @@
 extern fractional outputA[STREAMBUF], outputB[STREAMBUF];
 extern fractional streamA[STREAMBUF], streamB[STREAMBUF];
 extern unsigned int write_ptr, rw, frameReady;
-extern int txBufferA[STREAMBUF], txBufferB[STREAMBUF],
-            RxBufferA[STREAMBUF], RxBufferB[STREAMBUF];  //doesnt work as fractional
+extern unsigned char TxBufferA[FLASH_DMAXFERS]__attribute__((space(xmemory))),
+                     TxBufferB[FLASH_DMAXFERS]__attribute__((space(xmemory))), 
+                     RxBufferA[FLASH_DMAXFERS]__attribute__((space(xmemory))),
+                     RxBufferB[FLASH_DMAXFERS]__attribute__((space(xmemory)));  
+
+extern unsigned char FLASH_DMA;
 
 //misc.
 volatile fractional sampinA=0, sampinB=0;
 
 volatile int rxBufferIndicator = 0;
-fractional *ping, *pong;
+
+extern unsigned char btread;
 
 //Description: This interrupt triggers at the completion of DCI output
 //Dependancies: initSPI2(); 
@@ -51,7 +56,6 @@ void __attribute__ ((interrupt, auto_psv)) _DCIInterrupt(void){
         streamA[write_ptr]=sampinB; 
         sampoutB=outputB[write_ptr++];  
     } 
-    
     _DCIIF=0;
 }
 
@@ -63,7 +67,7 @@ void __attribute__((__interrupt__, auto_psv)) _DMA0Interrupt(void) {
         //TxData(TxBufferB); // Transmit SPI data in DMA RAM Secondary buffer
     //}
     //BufferCount ^= 1;
-    SLED=1;
+    
     IFS0bits.DMA0IF = 0; // Clear the DMA0 Interrupt flag
 }
 
@@ -77,33 +81,23 @@ void __attribute__((__interrupt__, auto_psv)) _DMA1Interrupt(void){
     //BufferCount ^= 1;
     IFS0bits.DMA1IF = 0; // Clear the DMA1 Interrupt flag
     //BufferCount ^= 1;
-    SLED=1;
-    //SS3a=1;
+    SS3a=SS3b=1;
+    FLASH_DMA=FALSE;
+    DMA1CONbits.CHEN = 0;
+    DMA0CONbits.CHEN = 0;
+    IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
 }
 
-/*
 //Description: This interrupt handles UART reception
 //Dependencies: initUART1();
 void __attribute__ ((interrupt, auto_psv)) _U1RXInterrupt(void){
-    unsigned char trash;
-    trash=U1RXREG;
-    printf("RECIEVED: %d\r\n", trash);
+    //unsigned char trash;
+    btread=U1RXREG;
     IFS0bits.U1RXIF = 0;            //clear flag, restart
 }
 
 //Description: This interrupt handles UART transmission
 //Dependencies: initUART1();
 void __attribute__ ((interrupt, auto_psv)) _U1TXInterrupt(void){
-    YLED=~YLED;
     IFS0bits.U1TXIF = 0;            //clear flag, restart
 } 
-  
-
-void __attribute__ ((interrupt, auto_psv)) _SPI3Interrupt(void){
-    //SEG_SEL=1;
-    //int trash=SPI3BUF;
-    SPI3STATbits.SPIROV = 0;                                //Clear SPI1 receive overflow flag if set
-    IFS5bits.SPI3IF=0;
-    
-}
-*/

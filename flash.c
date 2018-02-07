@@ -19,6 +19,8 @@ extern unsigned char TxBufferA[FLASH_DMAXFERS]__attribute__((space(xmemory))),
                      RxBufferA[FLASH_DMAXFERS]__attribute__((space(xmemory))),
                      RxBufferB[FLASH_DMAXFERS]__attribute__((space(xmemory))); 
 
+extern unsigned char FLASH_DMA;
+
 void flashWriteReg(char command) {
     SS3a=0;
     SPI3BUF=command;               //WEL=1 for write enable
@@ -85,28 +87,14 @@ void flashRead(char *array, int bytes){
     */
     
     TxBufferA[0]=0x03;
+    /* Kick off dma read here */
     DMA1CONbits.CHEN = 1;
     DMA0CONbits.CHEN = 1;
-    /* Kick off read here */
-    
     DMA0REQbits.FORCE = 1; // Manual mode: Kick-start the 1st transfer
-    //while(DMA0REQbits.FORCE == 1);
-    //SPI3BUF=0x00;
-    /*
-    for(i=0; i<bytes;i++){    //read 512 bytes
-        //receive byte
-        SPI3BUF=0x00;
-        while(!_SPI3IF); _SPI3IF=0;
-        Delay_us(1);
-        array[i]=SPI3BUF;
-    }
-    
-    */ 
-    Delay_us(200);
-    DMA1CONbits.CHEN = 0;
-    DMA0CONbits.CHEN = 0;
-    IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
-    SS3a=1;
+    FLASH_DMA=TRUE;
+    //Delay_us(100);
+    //while()
+    while(!_DMA1IF);  //works
 
 }
 

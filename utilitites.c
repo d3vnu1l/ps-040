@@ -195,12 +195,13 @@ void display(void){
         //printf("b1 %d, b2 %d, b3 %d, b4 %d\r\n", controls.pad[0], controls.pad[1], controls.pad[2], controls.pad[3]);
         //printf("b4 %d, b5 %d, b6 %d, b7 %d\r\n", controls.pad[4], controls.pad[5], controls.pad[6], controls.pad[7]);
         //printf("P1 %x  P1 %d bpm %d\r\n", controls.pots[0], controls.pots[0], bpm);   //check pots
-        printf("P1 %d  P2 %d P3 %d\r\n", ctrl.pots[0], ctrl.pots[1], ctrl.pots[2]);   //check pots
+        //printf("P1 %d  P2 %d P3 %d\r\n", ctrl.pots[0], ctrl.pots[1], ctrl.pots[2]);   //check pots
         //printf("%d\r\n", sample);  //check input ADC
         //printf("%d, pot1 %x, pot2 %x, avg %x\r\n", sample, controls.pots[1], controls.pots[2], average);  //check input ADC
+        U1TXREG = 0x61;
     }
    
-   //SLED=~SLED;
+   SLED=~SLED;
 }
 
 void processRxData(fractional *sourceBuffer, fractional *targetBuffer){
