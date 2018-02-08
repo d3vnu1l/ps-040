@@ -169,7 +169,8 @@ void screenDebugFlash(void){
         //update here
         lcdSetCursorQ(9,3);
         lcdWriteStringQ("Stat:");
-        lcdWriteWordQ(flashStatusCheck());
+        lcdWriteWordQ(flashStatusCheck(FLASH_RDSR1));
+        //lcdWriteWordQ(flashStatusCheck(FLASH_BRRD));
     }
 }
 

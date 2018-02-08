@@ -193,6 +193,12 @@ void display(void){
     // Update ui state logic here
     state = (ENCODERCNTL/4)+1;
     if(!ctrl.pad[BTN_ENC]) state = scrnSHIFT;
+    
+    if(!ctrl.pad[33]) flashBulkErase();
+    
+    if(!ctrl.pad[3])flashWritePage(NULL,NULL,NULL);
+    if(!ctrl.pad[2])flashWriteReg(FLASH_WREN);
+    if(!ctrl.pad[4])flashRead(NULL, 256);     // READBACK
     // Update screen here
     checkFunctions();
     screenUpdate();

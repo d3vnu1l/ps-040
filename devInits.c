@@ -11,7 +11,7 @@
 #include "flash.h"
 #include "dsp.h"
 
-extern unsigned char TxBufferA[FLASH_DMAXFERS]__attribute__((space(xmemory))),
+extern unsigned int  TxBufferA[FLASH_DMAXFERS]__attribute__((space(xmemory))),
                      TxBufferB[FLASH_DMAXFERS]__attribute__((space(xmemory))), 
                      RxBufferA[FLASH_DMAXFERS]__attribute__((space(xmemory))),
                      RxBufferB[FLASH_DMAXFERS]__attribute__((space(xmemory)));  
@@ -308,7 +308,15 @@ void initSPI3_MEM(void){
     SPI3STATbits.SPIEN = 1;     // Start SPI module
     //IEC5bits.SPI3IE = 0;      // Enable the Interrupt
 
-    flashWriteReg(FLASH_WREN);
+    //flashWriteReg(FLASH_WREN);
+    //flashWriteBreg(0x80);
+    Delay_us(10000);
+    //flashWritePage(NULL,NULL,NULL);
+    //flashWriteReg(FLASH_WREN);
+    Delay_us(10000);
+    //flashBulkErase();
+    
+    
 }
 
 /* Quadradure Encoder */

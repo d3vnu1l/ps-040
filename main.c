@@ -49,6 +49,7 @@ struct ctrlsrfc ctrl = {0};
 
 unsigned char btread;
 
+extern fractional sintab[SINRES];
 
 void initBuffers(void){
     int i;
@@ -61,11 +62,15 @@ void initBuffers(void){
     for(i=0; i<BUTTONS; i++)
         ctrl.pad[i]=1;
     
-    for(i=1; i<FLASH_DMAXFERS; i++){
+    for(i=0; i<FLASH_DMAXFERS; i++){
         TxBufferA[i]=0;
         TxBufferB[i]=0;
         RxBufferA[i]=0;
         RxBufferB[i]=0;
+    }
+    
+    for(i=0; i<50; i++){
+        TxBufferA[i]=i;
     }
     
     
@@ -76,8 +81,6 @@ int main(void) {
     initBuffers();
     initDMA();
     initSPI3_MEM();                 // Start flash 
-    flashRead(NULL, 256);     // READBACK
-    //flashRead(NULL, 256);     // READBACK
     initDCI_DAC();                  // Configure & enable DAC
     //genSine(STREAMBUF);
     initADC1();                     // Configure & enable internal ADC
@@ -101,10 +104,11 @@ int main(void) {
                 ping = streamB;
                 pong = outputA;
             }
-            
             processAudio(ping, pong); 
             process_time=write_ptr;    //DEBUG
             //dma?
+            //flashRead(NULL, 256);     // READBACK
+            
             frameReady=0;
         }
         if(_T2IF){
