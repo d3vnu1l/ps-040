@@ -15,6 +15,7 @@
 #define FLASH_BRWR  0x17    // Bank register write
 #define FLASH_FRMT  0x60    // Bulk erase, takes ~100 seconds for each die
 #define FLASH_SE    0xD8    // Erase 256kB sector       (0.5 MB/s)
+#define FLASH_4SE   0xDC    // Erase 256kB sector       (0.5 MB/s)
 
 #define FLASH_READ  0x03    // Read                     (0.78 MB/s @<=50MHZ)
 #define FLASH_4READ 0x13    // Read                     (0.78 MB/s @<=50MHZ)
@@ -25,9 +26,11 @@
 void flashWriteReg(char);
 void flashWriteBreg(char);
 char flashStatusCheck(char);
-void flashWritePage(int, int, fractional*);
-void flashRead(char *, int);
+void flashWritePage(fractional*, long);
+void flashStartRead(long);
+void flashProcessRead(void);
 void flashBulkErase(void);
+void flashEraseSector(long);
 
 
 #endif	/* XC_HEADER_TEMPLATE_H */

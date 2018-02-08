@@ -194,11 +194,13 @@ void display(void){
     state = (ENCODERCNTL/4)+1;
     if(!ctrl.pad[BTN_ENC]) state = scrnSHIFT;
     
-    if(!ctrl.pad[33]) flashBulkErase();
-    
-    if(!ctrl.pad[3])flashWritePage(NULL,NULL,NULL);
-    if(!ctrl.pad[2])flashWriteReg(FLASH_WREN);
-    if(!ctrl.pad[4])flashRead(NULL, 256);     // READBACK
+    if(state==debugscrnFLASH){
+        if(!ctrl.pad[33]) flashBulkErase();
+        if(!ctrl.pad[3])flashWritePage(NULL, 0);
+        if(!ctrl.pad[4])flashStartRead((long)(0));     // READBACK
+        if(!ctrl.pad[5])flashEraseSector((long)(0));
+        if(!ctrl.pad[6])flashWriteReg(FLASH_WREN);
+    }
     // Update screen here
     checkFunctions();
     screenUpdate();

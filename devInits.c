@@ -11,10 +11,9 @@
 #include "flash.h"
 #include "dsp.h"
 
-extern unsigned int  TxBufferA[FLASH_DMAXFERS]__attribute__((space(xmemory))),
-                     TxBufferB[FLASH_DMAXFERS]__attribute__((space(xmemory))), 
-                     RxBufferA[FLASH_DMAXFERS]__attribute__((space(xmemory))),
-                     RxBufferB[FLASH_DMAXFERS]__attribute__((space(xmemory)));  
+extern unsigned char    TxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory))), 
+                        RxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory)));
+extern fractional       RxBufferB[STREAMBUF] __attribute__((space(xmemory)));
 
 void initPorts(void){
     /* Clock Setup */
@@ -263,7 +262,7 @@ void initDMA(void){
     DMA1STAL = (unsigned int)(&RxBufferA);
     //DMA1STAH = (unsigned int)(&RxBufferB);
     DMA1PAD = (volatile unsigned int) &SPI3BUF;
-    DMA1CNT = (unsigned int)(FLASH_DMAXFERS-1);
+    DMA1CNT = (unsigned int)(FLASH_DMAXFER_BYTES-1);
     DMA1REQbits.IRQSEL = 0x5B;
     
     IFS0bits.DMA1IF = 0;
@@ -281,8 +280,13 @@ void initDMA(void){
     DMA0STAL = (unsigned int)(&TxBufferA);
     //DMA0STAH = (unsigned int)(&TxBufferB);
     DMA0PAD = (volatile unsigned int) &SPI3BUF;
-    DMA0CNT = FLASH_DMAXFERS-1;
-    DMA0REQ = 0x005B;
+    DMA0CNT = FLASH_DMAXFER_BYTES-1;
+    DMA0REQbits.IRQSEL = 0x5B;
+    
+    IFS0bits.DMA0IF = 0;
+    IEC0bits.DMA0IE = 1;
+    IPC1bits.DMA0IP = 6;
+    DMA0CONbits.CHEN = 0;
 }
 
 void initSPI3_MEM(void){

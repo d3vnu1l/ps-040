@@ -24,10 +24,9 @@ fractional outputA[STREAMBUF], outputB[STREAMBUF];
 fractional streamA[STREAMBUF], streamB[STREAMBUF];
 unsigned int write_ptr=0, rw=0, frameReady=0;
 
-unsigned char TxBufferA[FLASH_DMAXFERS] __attribute__((space(xmemory)));
-unsigned char TxBufferB[FLASH_DMAXFERS] __attribute__((space(xmemory)));
-unsigned char RxBufferA[FLASH_DMAXFERS] __attribute__((space(xmemory)));
-unsigned char RxBufferB[FLASH_DMAXFERS] __attribute__((space(xmemory)));
+unsigned char TxBufferA[FLASH_DMAXFER_BYTES] __attribute__((space(xmemory)));
+unsigned char RxBufferA[FLASH_DMAXFER_BYTES] __attribute__((space(xmemory)));
+fractional    RxBufferB[STREAMBUF] __attribute__((space(xmemory)));
 
 /* Debug Variables */
 unsigned int process_time=0;
@@ -37,6 +36,8 @@ volatile unsigned char recording=TRUE;
 unsigned char UART_ON = TRUE;
 unsigned char TEST_SIN = FALSE;
 unsigned char FLASH_DMA = FALSE;
+unsigned char DMA_JUSTREAD = FALSE;
+unsigned char DMA_READING = FALSE;
 
 
 /* Screen state variables */
@@ -49,7 +50,8 @@ struct ctrlsrfc ctrl = {0};
 
 unsigned char btread;
 
-extern fractional sintab[SINRES];
+long writeAddr=0, readAddr=0;
+
 
 void initBuffers(void){
     int i;
@@ -62,18 +64,10 @@ void initBuffers(void){
     for(i=0; i<BUTTONS; i++)
         ctrl.pad[i]=1;
     
-    for(i=0; i<FLASH_DMAXFERS; i++){
+    for(i=0; i<FLASH_DMAXFER_BYTES; i++){
         TxBufferA[i]=0;
-        TxBufferB[i]=0;
         RxBufferA[i]=0;
-        RxBufferB[i]=0;
     }
-    
-    for(i=0; i<50; i++){
-        TxBufferA[i]=i;
-    }
-    
-    
 }
 
 int main(void) {
@@ -92,7 +86,6 @@ int main(void) {
     initT2();                       // Configure & start T2 
     initT3();                       // Configure & start T3 for lcd
     //initT5();
-    fractional temp;
     fractional *ping, *pong;
     
     while(1){    
@@ -104,9 +97,30 @@ int main(void) {
                 ping = streamB;
                 pong = outputA;
             }
+            if(DMA_JUSTREAD==TRUE){
+                //use read data
+                DMA_JUSTREAD=FALSE;
+                flashProcessRead();
+                VectorAdd(STREAMBUF, ping, ping, RxBufferB);
+            }
+            if(state==scrnFX){
+                if(!ctrl.pad[33]) flashBulkErase();
+                if(!ctrl.pad[3]){
+                    flashWritePage(ping, writeAddr);
+                    writeAddr+=FLASH_PAGE;
+                } else writeAddr=0;
+                if(!ctrl.pad[4]){
+                    flashStartRead(readAddr);     // READBACK
+                    readAddr+=FLASH_PAGE;
+                } else readAddr=0;
+                if(!ctrl.pad[5])flashEraseSector((long)(0));
+                if(!ctrl.pad[6])flashWriteReg(FLASH_WREN);
+            }
+            
             processAudio(ping, pong); 
             process_time=write_ptr;    //DEBUG
             //dma?
+
             //flashRead(NULL, 256);     // READBACK
             
             frameReady=0;

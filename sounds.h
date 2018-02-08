@@ -36,8 +36,7 @@ struct clip_flash{
     const unsigned int size, blocks;
     unsigned char playing, flash;
     unsigned int block_index;
-    long* start_ptr;
-    long* read_ptr;
+    long address;
 };
 
 void genSine(unsigned int);

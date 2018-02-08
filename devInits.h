@@ -19,6 +19,7 @@ void initADC1(void);
 void initSPI2_ADC(void);
 void initSPI3_MEM(void);
 void initDCI_DAC(void);
+void initDMA(void);
 void initPMP(void);
 void initQEI_ENC(void);
 

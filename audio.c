@@ -4,6 +4,13 @@
 #include "sounds.h"
 #include <dsp.h>
 #include "utilities.h"
+#include "flash.h"
+
+extern unsigned char    TxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory))), 
+                        RxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory)));
+extern fractional       RxBufferB[STREAMBUF] __attribute__((space(xmemory)));
+extern unsigned char    DMA_READING, DMA_JUSTREAD;
+
 
 extern struct ctrlsrfc ctrl;
 extern fractional sintab[SINRES];
@@ -173,6 +180,7 @@ void processAudio(fractional *source, fractional *destination){
     volatile register int result1 asm("A");
     static int i=0;
     volatile fractional sample;
+    
     
     //Run each FX unit
     if(fxUnits[0]==0); else fxFuncPointers[fxUnits[0]](source, source, ctrl.pots[FX_1], ctrl.pots[FX_2], ctrl.pots[FX_3]);

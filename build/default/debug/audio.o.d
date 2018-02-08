@@ -1,4 +1,4 @@
-build/default/production/audio.o:  \
+build/default/debug/audio.o:  \
 audio.c  \
 audio.h  \
 common.h  \

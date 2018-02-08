@@ -10,12 +10,11 @@
 extern fractional outputA[STREAMBUF], outputB[STREAMBUF];
 extern fractional streamA[STREAMBUF], streamB[STREAMBUF];
 extern unsigned int write_ptr, rw, frameReady;
-extern unsigned char TxBufferA[FLASH_DMAXFERS]__attribute__((space(xmemory))),
-                     TxBufferB[FLASH_DMAXFERS]__attribute__((space(xmemory))), 
-                     RxBufferA[FLASH_DMAXFERS]__attribute__((space(xmemory))),
-                     RxBufferB[FLASH_DMAXFERS]__attribute__((space(xmemory)));  
 
-extern unsigned char FLASH_DMA;
+extern unsigned char    TxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory))), 
+                        RxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory)));
+
+extern unsigned char FLASH_DMA, DMA_READING, DMA_JUSTREAD;
 
 //misc.
 volatile fractional sampinA=0, sampinB=0;
@@ -59,7 +58,7 @@ void __attribute__ ((interrupt, auto_psv)) _DCIInterrupt(void){
     _DCIIF=0;
 }
 
-void __attribute__((__interrupt__, auto_psv)) _DMA0Interrupt(void) {
+void __attribute__((interrupt, auto_psv)) _DMA0Interrupt(void) {
     //static unsigned int BufferCount = 0; // Keep record of the buffer that contains TX data
     //if(BufferCount == 0);
     //{
@@ -67,11 +66,10 @@ void __attribute__((__interrupt__, auto_psv)) _DMA0Interrupt(void) {
         //TxData(TxBufferB); // Transmit SPI data in DMA RAM Secondary buffer
     //}
     //BufferCount ^= 1;
-    
     IFS0bits.DMA0IF = 0; // Clear the DMA0 Interrupt flag
 }
 
-void __attribute__((__interrupt__, auto_psv)) _DMA1Interrupt(void){
+void __attribute__((interrupt, auto_psv)) _DMA1Interrupt(void){
     //static unsigned int BufferCount = 0; // Keep record of the buffer that contains RX data
     //if(BufferCount == 0) ;
         //ProcessRxData(TxBufferA); // Process received SPI data in DMA RAM Primary buffer
@@ -83,6 +81,12 @@ void __attribute__((__interrupt__, auto_psv)) _DMA1Interrupt(void){
     //BufferCount ^= 1;
     SS3a=SS3b=1;
     FLASH_DMA=FALSE;
+    
+    if(DMA_READING==TRUE){
+        DMA_READING=FALSE;
+        DMA_JUSTREAD=TRUE;
+    }
+    
     DMA1CONbits.CHEN = 0;
     DMA0CONbits.CHEN = 0;
     IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
