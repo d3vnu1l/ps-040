@@ -31,6 +31,7 @@ void flashStartRead(long);
 void flashProcessRead(void);
 void flashBulkErase(void);
 void flashEraseSector(long);
+void flashFXops(fractional*);
 
 
 #endif	/* XC_HEADER_TEMPLATE_H */

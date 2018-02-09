@@ -1,16 +1,11 @@
 /*
  * File:   plcd.c
- * Author: root
- *
- * Created on January 10, 2018, 4:48 PM
  */
-
-
 #include "xc.h"
 #include "plcd.h"
 #include "common.h"
-#include "utilities.h"
 #include "screens.h"
+#include "utilities.h"
 
 extern struct ctrlsrfc ctrl;
 

@@ -1,28 +1,24 @@
 /*
- * File:   flash.c
- * Author: root
- *
- * Created on January 28, 2018, 5:00 PM
+ This file has hardware routines for flash writing and DMA read/writes
  */
-
-
 #include <xc.h>
 #include <dsp.h>
 #include "flash.h"
 #include "common.h"
-#include "utilities.h"
 
-//char flashBuf[STREAMBUF*2];
 char receive;
+unsigned long  writeAddr=0, readAddr=0, eraseAddr=0;
 
 extern unsigned char    TxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory))), 
                         RxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory)));
 extern fractional       RxBufferB[STREAMBUF] __attribute__((space(xmemory)));
 
-extern unsigned char FLASH_DMA, DMA_READING, DMA_JUSTREAD;
+extern struct sflags stat;
+extern struct ctrlsrfc ctrl;
+
 
 void flashWriteReg(char command) {
-    if(FLASH_DMA==FALSE){
+    if(stat.FLASH_DMA==FALSE){
         SS3a=0;
         SPI3BUF=command;               //WEL=1 for write enable
         while(!_SPI3IF); _SPI3IF=0;
@@ -32,7 +28,7 @@ void flashWriteReg(char command) {
 }
 
 void flashWriteBreg(char newreg){
-    if(FLASH_DMA==FALSE){
+    if(stat.FLASH_DMA==FALSE){
         flashWriteReg(FLASH_WREN);
         SS3a=0;
         SPI3BUF=FLASH_BRWR;               //WEL=1 for write enable
@@ -46,7 +42,7 @@ void flashWriteBreg(char newreg){
 }
 
 char flashStatusCheck(char command){
-    if(FLASH_DMA==FALSE){
+    if(stat.FLASH_DMA==FALSE){
         SS3a=0;
         SPI3BUF=command;               //WEL=1 for write enable
         while(!_SPI3IF); _SPI3IF=0;
@@ -61,14 +57,13 @@ char flashStatusCheck(char command){
 }
 
 void flashWritePage(fractional* source, long address){
-    if(FLASH_DMA==FALSE){
+    if(stat.FLASH_DMA==FALSE){
         int i;
-        flashWriteReg(FLASH_WREN);
-        FLASH_DMA=TRUE;
         fractional sample;
         
+        flashWriteReg(FLASH_WREN);
+        stat.FLASH_DMA=TRUE;
         
-
         for(i=0; i<FLASH_DMAXFER_BYTES; i++){
             sample=*source++;
             TxBufferA[i++]=(sample>>8)&0xFF;
@@ -98,16 +93,16 @@ void flashWritePage(fractional* source, long address){
 }
 
 void flashStartRead(long address){
-    if(FLASH_DMA==FALSE){
+    if(stat.FLASH_DMA==FALSE){
         int i;
 
         for(i=0; i<FLASH_DMAXFER_BYTES; i++){
             TxBufferA[i]=0;
         }
 
-        FLASH_DMA=TRUE;
-        DMA_READING=TRUE;
-        DMA_JUSTREAD=FALSE;
+        stat.FLASH_DMA=TRUE;
+        stat.DMA_READING=TRUE;
+        stat.DMA_JUSTREAD=FALSE;
         
         SS3a=0;
         SPI3BUF=FLASH_READ;
@@ -146,10 +141,10 @@ void flashProcessRead(void){
 }
 
 void flashEraseSector(long address){
-    if(FLASH_DMA==FALSE){
+    if(stat.FLASH_DMA==FALSE){
         flashWriteReg(FLASH_WREN);
         SS3a=0;
-            SPI3BUF=FLASH_SE;                 
+        SPI3BUF=FLASH_SE;                 
         while(!_SPI3IF); _SPI3IF=0;
         receive=SPI3BUF;
         SPI3BUF=(address>>16)&0xFF;                  
@@ -168,4 +163,24 @@ void flashEraseSector(long address){
 void flashBulkErase(void) {
     flashWriteReg(FLASH_WREN);
     flashWriteReg(FLASH_FRMT);
+}
+
+void flashFXops(fractional* stream){
+    if(!ctrl.pad[33]) flashBulkErase();
+    if(!ctrl.pad[3]){
+        flashWritePage(stream, writeAddr);
+        writeAddr+=FLASH_PAGE;
+    } else writeAddr=0;
+    if(!ctrl.pad[4]){
+        flashStartRead(readAddr);     // READBACK
+        readAddr+=FLASH_PAGE;
+    } else readAddr=0;
+    if(!ctrl.pad[5]){
+        if(flashStatusCheck(FLASH_RDSR1)==0x03);
+        else{
+            flashEraseSector(eraseAddr);
+            eraseAddr+=FLASH_PAGE;
+        }
+    } else eraseAddr=0;
+    if(!ctrl.pad[6])flashWriteReg(FLASH_WREN);
 }

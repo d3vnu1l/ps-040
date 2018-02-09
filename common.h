@@ -101,5 +101,14 @@ struct ctrlsrfc {
     fractional pots_custom[POTS];
 };
 
+struct sflags {
+    unsigned char UART_ON;
+    unsigned char TEST_SIN;
+    unsigned char FLASH_DMA;
+    unsigned char DMA_JUSTREAD;
+    unsigned char DMA_READING;
+    unsigned char hard_clipped; 
+};
+
 #endif	/* COMMON_H */
 

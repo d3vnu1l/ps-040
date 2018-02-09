@@ -310,17 +310,7 @@ void initSPI3_MEM(void){
     
     SPI3STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
     SPI3STATbits.SPIEN = 1;     // Start SPI module
-    //IEC5bits.SPI3IE = 0;      // Enable the Interrupt
-
-    //flashWriteReg(FLASH_WREN);
-    //flashWriteBreg(0x80);
-    Delay_us(10000);
-    //flashWritePage(NULL,NULL,NULL);
-    //flashWriteReg(FLASH_WREN);
-    Delay_us(10000);
-    //flashBulkErase();
-    
-    
+    //IEC5bits.SPI3IE = 0;      // Enable the Interrupt    
 }
 
 /* Quadradure Encoder */

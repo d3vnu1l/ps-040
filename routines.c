@@ -1,25 +1,17 @@
 #include <xc.h>
 #include <p33EP512GM310.h>
 #include <dsp.h>
-#include <stdio.h>
 #include "common.h"
-#include "audio.h"
-#include "utilities.h"
 #include "routines.h"
-//CONTROL VARIABLES//
-extern fractional outputA[STREAMBUF], outputB[STREAMBUF];
-extern fractional streamA[STREAMBUF], streamB[STREAMBUF];
+
+extern fractional   outputA[STREAMBUF], outputB[STREAMBUF],
+                    streamA[STREAMBUF], streamB[STREAMBUF];
 extern unsigned int write_ptr, rw, frameReady;
 
 extern unsigned char    TxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory))), 
                         RxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory)));
 
-extern unsigned char FLASH_DMA, DMA_READING, DMA_JUSTREAD;
-
-//misc.
-volatile fractional sampinA=0, sampinB=0;
-
-volatile int rxBufferIndicator = 0;
+extern struct sflags stat;
 
 extern unsigned char btread;
 
@@ -27,6 +19,7 @@ extern unsigned char btread;
 //Dependancies: initSPI2(); 
 void __attribute__ ((interrupt, auto_psv)) _DCIInterrupt(void){
     static fractional sampoutA=0, sampoutB=0;
+    fractional sampinA=0, sampinB=0;
     
     int trashA=RXBUF0;
     sampinA=RXBUF1;
@@ -80,11 +73,11 @@ void __attribute__((interrupt, auto_psv)) _DMA1Interrupt(void){
     IFS0bits.DMA1IF = 0; // Clear the DMA1 Interrupt flag
     //BufferCount ^= 1;
     SS3a=SS3b=1;
-    FLASH_DMA=FALSE;
+    stat.FLASH_DMA=FALSE;
     
-    if(DMA_READING==TRUE){
-        DMA_READING=FALSE;
-        DMA_JUSTREAD=TRUE;
+    if(stat.DMA_READING==TRUE){
+        stat.DMA_READING=FALSE;
+        stat.DMA_JUSTREAD=TRUE;
     }
     
     DMA1CONbits.CHEN = 0;

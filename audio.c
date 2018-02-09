@@ -9,39 +9,32 @@
 extern unsigned char    TxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory))), 
                         RxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory)));
 extern fractional       RxBufferB[STREAMBUF] __attribute__((space(xmemory)));
-extern unsigned char    DMA_READING, DMA_JUSTREAD;
 
-
-extern struct ctrlsrfc ctrl;
 extern fractional sintab[SINRES];
-
-volatile unsigned int loop_ptr = 0;         //FX FLAGS & VARS//
-extern unsigned char hard_clipped;
-
 static fractional loopbuf[LOOP_BUF_SIZE] __attribute__ ((eds)) = {0};
-struct clip_eds history = {.size = LOOP_BUF_SIZE, .blocks=LOOP_BUF_SIZE/STREAMBUF, .playing=FALSE, .flash=FALSE, .block_index=0, .start_ptr=loopbuf, .end_ptr=&loopbuf[LOOP_BUF_SIZE-1], .read_ptr=loopbuf};
+
 
 fractional lpf_alpha=Q15(0.5), lpf_inv_alpha=Q15(0.5);
 static fractional psvbuf[STREAMBUF]={0};
 
-static fractional flashbufA[STREAMBUF]={0};
-static fractional flashbufB[STREAMBUF]={0};
-
-
-extern unsigned char TEST_SIN;
-
 extern enum fxStruct fxUnits[NUMFXUNITS];
 extern struct clip_psv sine, kick, snare;
+extern struct sflags stat;
+extern struct ctrlsrfc ctrl;
+struct clip_eds history = { .size = LOOP_BUF_SIZE,
+                            .blocks=LOOP_BUF_SIZE/STREAMBUF, 
+                            .playing=FALSE, .flash=FALSE, 
+                            .block_index=0, 
+                            .start_ptr=loopbuf, 
+                            .end_ptr=&loopbuf[LOOP_BUF_SIZE-1], 
+                            .read_ptr=loopbuf};
 
 
 void (*fxFuncPointers[NUMFX])(fractional *, fractional *, fractional, fractional, fractional) = {NULL, runLPF, runTRM, runLOP, runBTC};
 
 void runBufferLooper(fractional *source){
-    flashbufA[0]=*source;
-    flashbufB[0]=*source;
-    
-    static fractional delayed_sample;
     volatile fractional sample;
+    unsigned int loop_ptr = 0;
     
     int *readPTR=source;
     
@@ -139,7 +132,7 @@ void runBTC(fractional *source, fractional *destination, fractional param1, frac
     int *rewritePTR=destination;
     int counter=0;
     int shift = scalePotsCustom(14, param1);
-    fractional shiftedsample, sign;
+    fractional sign;
     
     for(; counter<STREAMBUF; counter++){
         sample=*readPTR++; //!rw
@@ -178,8 +171,6 @@ void runLOP(fractional *source, fractional *destination, fractional param1, frac
 
 void processAudio(fractional *source, fractional *destination){
     volatile register int result1 asm("A");
-    static int i=0;
-    volatile fractional sample;
     
     
     //Run each FX unit
@@ -221,7 +212,7 @@ void processAudio(fractional *source, fractional *destination){
     }
     */
 
-    if (TEST_SIN==TRUE){
+    if (stat.TEST_SIN==TRUE){
         ClipCopy_psv(STREAMBUF, source, sine.read_ptr);
         sine.block_index++;
         if(sine.block_index==sine.blocks) {

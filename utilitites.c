@@ -1,25 +1,19 @@
+/*
+ General utilities, button and pot scanning
+ */
 #include <xc.h>
 #include <p33EP512GM310.h>
 #include <dsp.h>
-#include <math.h>
 #include "common.h"
 #include "sounds.h"
-#include "audio.h"
 #include "flash.h"
 #include "screens.h"
 #include "utilities.h"
 
-//CONTROL VARIABLES//
-extern struct ctrlsrfc ctrl;
-extern unsigned char UART_ON; 
-
-//STATUS VARIABLES//
-extern unsigned char hard_clipped;
-extern unsigned char UART_EN;
-extern unsigned char TEST_SIN;
-
 extern enum fxStruct fxUnits[NUMFXUNITS];
 extern enum screenStruc state;
+extern struct ctrlsrfc ctrl;
+extern struct sflags stat;
 extern struct clip_psv sine, kick, snare;
 
 void scanButtons(void){
@@ -205,7 +199,7 @@ void display(void){
     checkFunctions();
     screenUpdate();
    
-   if(UART_ON==TRUE){
+   if(stat.UART_ON==TRUE){
         U1TXREG = 0x61;
     }
    

@@ -15,24 +15,22 @@
 
 #include "sounds.h"
 
-extern unsigned char TEST_SIN;
-extern enum screenStruc state, laststate;
 extern unsigned int process_time;
+extern unsigned char btread;
 
 extern unsigned char    TxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory))), 
                         RxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory)));
 extern fractional       RxBufferB[STREAMBUF] __attribute__((space(xmemory)));
 
-extern struct clip sine;
+extern enum screenStruc state, laststate;
 extern enum fxStruct fxUnits[NUMFXUNITS];
+extern struct clip sine;
 extern struct ctrlsrfc ctrl;
+extern struct sflags stat;
 
-int fxLast=0;
-int fxNow=0;
+int fxLast=0, fxNow=0;
 
 void (*fxModPointers[NUMFX])(unsigned int, fractional, fractional, fractional) = {screenNoFXmod, screenLPFmod, screenTRMmod, screenLOPmod, screenBTCmod};
-
-extern unsigned char btread;
 
 void screenDebugAudio(){
 
@@ -142,28 +140,6 @@ void screenDebugFlash(void){
         lcdWriteByteQ(RxBufferA[12]);
         lcdSetCursorQ(18,1);
         lcdWriteByteQ(RxBufferA[13]);
-        lcdSetCursorQ(0,2);
-        lcdWriteByteQ(RxBufferA[14]);
-         lcdSetCursorQ(3,2);
-        lcdWriteByteQ(RxBufferA[15]);
-         lcdSetCursorQ(6,2);
-        lcdWriteByteQ(RxBufferA[16]);
-         lcdSetCursorQ(9,2);
-        lcdWriteByteQ(RxBufferA[17]);
-        lcdSetCursorQ(12,2);
-        lcdWriteByteQ(RxBufferA[18]);
-        lcdSetCursorQ(15,2);
-        lcdWriteByteQ(RxBufferA[19]);
-        lcdSetCursorQ(18,2);
-        lcdWriteByteQ(RxBufferA[20]);
-        lcdSetCursorQ(0,3);
-        lcdWriteByteQ(RxBufferA[21]);
-         lcdSetCursorQ(3,3);
-        lcdWriteByteQ(RxBufferA[22]);
-         lcdSetCursorQ(6,3);
-        lcdWriteByteQ(RxBufferA[23]);
-
-
     } else {
         //update here
         lcdSetCursorQ(0,0);
@@ -194,26 +170,7 @@ void screenDebugFlash(void){
         lcdWriteByteQ(RxBufferA[12]);
         lcdSetCursorQ(18,1);
         lcdWriteByteQ(RxBufferA[13]);
-        lcdSetCursorQ(0,2);
-        lcdWriteByteQ(RxBufferA[14]);
-         lcdSetCursorQ(3,2);
-        lcdWriteByteQ(RxBufferA[15]);
-         lcdSetCursorQ(6,2);
-        lcdWriteByteQ(RxBufferA[16]);
-         lcdSetCursorQ(9,2);
-        lcdWriteByteQ(RxBufferA[17]);
-        lcdSetCursorQ(12,2);
-        lcdWriteByteQ(RxBufferA[18]);
-        lcdSetCursorQ(15,2);
-        lcdWriteByteQ(RxBufferA[19]);
-        lcdSetCursorQ(18,2);
-        lcdWriteByteQ(RxBufferA[20]);
-        lcdSetCursorQ(0,3);
-        lcdWriteByteQ(RxBufferA[21]);
-         lcdSetCursorQ(3,3);
-        lcdWriteByteQ(RxBufferA[22]);
-         lcdSetCursorQ(6,3);
-        lcdWriteByteQ(RxBufferA[23]);
+
         lcdSetCursorQ(9,3);
         lcdWriteStringQ("Stat:");
         lcdWriteWordQ(flashStatusCheck(FLASH_RDSR1));

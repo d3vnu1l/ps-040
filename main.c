@@ -5,9 +5,9 @@
 #include "devInits.h"
 #include "utilities.h"
 #include "audio.h"
-#include "plcd.h"
 #include "sounds.h"
 #include "flash.h"
+#include "plcd.h"
 
 #pragma config ICS = PGD1       //pgeDC 1 is used
 #pragma config JTAGEN = OFF     //disable jtag
@@ -20,24 +20,23 @@
 #pragma config FNOSC = FRCPLL   //clock source
 
 /* Data Buffers & index variables */
-fractional outputA[STREAMBUF], outputB[STREAMBUF];
-fractional streamA[STREAMBUF], streamB[STREAMBUF];
+fractional  outputA[STREAMBUF], outputB[STREAMBUF],
+            streamA[STREAMBUF], streamB[STREAMBUF];
 unsigned int write_ptr=0, rw=0, frameReady=0;
 
-unsigned char TxBufferA[FLASH_DMAXFER_BYTES] __attribute__((space(xmemory)));
-unsigned char RxBufferA[FLASH_DMAXFER_BYTES] __attribute__((space(xmemory)));
-fractional    RxBufferB[STREAMBUF] __attribute__((space(xmemory)));
+unsigned char   TxBufferA[FLASH_DMAXFER_BYTES] __attribute__((space(xmemory))),
+                RxBufferA[FLASH_DMAXFER_BYTES] __attribute__((space(xmemory)));
+fractional      RxBufferB[STREAMBUF] __attribute__((space(xmemory)));
 
 /* Debug Variables */
 unsigned int process_time=0;
 
-unsigned char hard_clipped=FALSE;                                              
-volatile unsigned char recording=TRUE;
-unsigned char UART_ON = TRUE;
-unsigned char TEST_SIN = FALSE;
-unsigned char FLASH_DMA = FALSE;
-unsigned char DMA_JUSTREAD = FALSE;
-unsigned char DMA_READING = FALSE;
+struct sflags stat = {  .UART_ON = TRUE,
+                        .TEST_SIN = FALSE,
+                        .FLASH_DMA = FALSE,
+                        .DMA_JUSTREAD = FALSE,
+                        .DMA_READING = FALSE,
+                        .hard_clipped = FALSE};
 
 
 /* Screen state variables */
@@ -49,9 +48,6 @@ enum fxStruct fxUnits[NUMFXUNITS]={0,0};
 struct ctrlsrfc ctrl = {0};
 
 unsigned char btread;
-
-long writeAddr=0, readAddr=0;
-
 
 void initBuffers(void){
     int i;
@@ -80,7 +76,7 @@ int main(void) {
     initADC1();                     // Configure & enable internal ADC
     initPMP();
     initQEI_ENC();
-    if(UART_ON) initUART1();        // Configure & enable UART
+    if(stat.UART_ON) initUART1();        // Configure & enable UART
     
     initT1();                       // Configure & start T1 
     initT2();                       // Configure & start T2 
@@ -97,32 +93,17 @@ int main(void) {
                 ping = streamB;
                 pong = outputA;
             }
-            if(DMA_JUSTREAD==TRUE){
-                //use read data
-                DMA_JUSTREAD=FALSE;
-                flashProcessRead();
+            if(stat.DMA_JUSTREAD==TRUE){    
+                stat.DMA_JUSTREAD=FALSE;
+                flashProcessRead();                             // Process DMA requested read data
                 VectorAdd(STREAMBUF, ping, ping, RxBufferB);
             }
             if(state==scrnFX){
-                if(!ctrl.pad[33]) flashBulkErase();
-                if(!ctrl.pad[3]){
-                    flashWritePage(ping, writeAddr);
-                    writeAddr+=FLASH_PAGE;
-                } else writeAddr=0;
-                if(!ctrl.pad[4]){
-                    flashStartRead(readAddr);     // READBACK
-                    readAddr+=FLASH_PAGE;
-                } else readAddr=0;
-                if(!ctrl.pad[5])flashEraseSector((long)(0));
-                if(!ctrl.pad[6])flashWriteReg(FLASH_WREN);
+                flashFXops(ping);
             }
             
             processAudio(ping, pong); 
             process_time=write_ptr;    //DEBUG
-            //dma?
-
-            //flashRead(NULL, 256);     // READBACK
-            
             frameReady=0;
         }
         if(_T2IF){

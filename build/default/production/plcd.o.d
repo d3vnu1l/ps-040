@@ -2,5 +2,5 @@ build/default/production/plcd.o:  \
 plcd.c  \
 plcd.h  \
 common.h  \
-utilities.h  \
- screens.h 
+screens.h  \
+ utilities.h 

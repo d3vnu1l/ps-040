@@ -4,6 +4,6 @@ common.h  \
 devInits.h  \
 utilities.h  \
  audio.h  \
-plcd.h  \
 sounds.h  \
-flash.h 
+flash.h  \
+plcd.h 
