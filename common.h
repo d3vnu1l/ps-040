@@ -10,16 +10,16 @@
 /* Timers and Frequencies */
 #define BAUDRATE 9600                  //target baud rate for *UART*           //peripheral configs
 #define BRGVAL  ((Fcy/BAUDRATE)/16)-1    //calculate baud value (MAY TRUNCATE)
-#define Fscan   300                       //target buttons & pots sampling rate
+#define Fscan   200                       //target buttons & pots sampling rate
 #define Fout    44100                      //target output sampling rate (~45k last measured)
-#define Fdisp   16                        //15hz display update rate
+#define Fdisp   10                        //15hz display update rate
 
 #define SINRES  1024
 
 /* Flash Variable */
 #define FLASH_DMAXFER_BYTES 512 // Must be double of streambuf
 #define FLASH_PAGE 512
-#define FLASH_SECTOR 262144
+#define FLASH_SECTOR 256000
 
 /* BUFFERS */
 

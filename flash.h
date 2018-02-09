@@ -26,11 +26,11 @@
 void flashWriteReg(char);
 void flashWriteBreg(char);
 char flashStatusCheck(char);
-void flashWritePage(fractional*, long);
-void flashStartRead(long);
+void flashWritePage(fractional*,unsigned long);
+void flashStartRead(unsigned long);
 void flashProcessRead(void);
 void flashBulkErase(void);
-void flashEraseSector(long);
+void flashEraseSector(unsigned long);
 void flashFXops(fractional*);
 
 

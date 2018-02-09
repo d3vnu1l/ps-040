@@ -59,6 +59,20 @@ void __attribute__((interrupt, auto_psv)) _DMA0Interrupt(void) {
         //TxData(TxBufferB); // Transmit SPI data in DMA RAM Secondary buffer
     //}
     //BufferCount ^= 1;
+    //DMA1CONbits.CHEN = 0;
+    //DMA0CONbits.CHEN = 0;
+    SS3a=SS3b=1;
+    stat.FLASH_DMA=FALSE;
+    
+    if(stat.DMA_READING==TRUE){
+        stat.DMA_READING=FALSE;
+        stat.DMA_JUSTREAD=TRUE;
+    }
+    
+    DMA1CONbits.CHEN = 0;
+    DMA0CONbits.CHEN = 0;
+    
+    IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
     IFS0bits.DMA0IF = 0; // Clear the DMA0 Interrupt flag
 }
 
@@ -70,7 +84,7 @@ void __attribute__((interrupt, auto_psv)) _DMA1Interrupt(void){
         //ProcessRxData(TxBufferB); // Process received SPI data in DMA RAM Secondary buffer
  
     //BufferCount ^= 1;
-    IFS0bits.DMA1IF = 0; // Clear the DMA1 Interrupt flag
+    
     //BufferCount ^= 1;
     SS3a=SS3b=1;
     stat.FLASH_DMA=FALSE;
@@ -82,6 +96,7 @@ void __attribute__((interrupt, auto_psv)) _DMA1Interrupt(void){
     
     DMA1CONbits.CHEN = 0;
     DMA0CONbits.CHEN = 0;
+    IFS0bits.DMA1IF = 0;        // Clear the DMA1 Interrupt flag
     IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
 }
 

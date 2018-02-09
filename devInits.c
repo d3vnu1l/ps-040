@@ -255,6 +255,8 @@ void initDCI_DAC(void){
 void initDMA(void){
     /* RX */
     IFS0bits.DMA1IF = 0;
+    IEC0bits.DMA1IE = 1;
+    IPC3bits.DMA1IP = 6;
     DMA1CONbits.SIZE=1;                             // Byte size
     DMA1CONbits.DIR=0;                              // Read from flash
     DMA1CONbits.MODE=1;                             // One shot, ping pong
@@ -265,14 +267,14 @@ void initDMA(void){
     DMA1CNT = (unsigned int)(FLASH_DMAXFER_BYTES-1);
     DMA1REQbits.IRQSEL = 0x5B;
     
-    IFS0bits.DMA1IF = 0;
-    IEC0bits.DMA1IE = 1;
-    IPC3bits.DMA1IP = 6;
+
     DMA1CONbits.CHEN = 0;
     
     
     /* TX */
     IFS0bits.DMA0IF = 0;
+    IEC0bits.DMA0IE = 1;
+    IPC1bits.DMA0IP = 6;
     DMAPWC = 0;
     DMA0CONbits.SIZE=1;                             // Byte size
     DMA0CONbits.DIR=1;                              // Write to flash
@@ -283,9 +285,7 @@ void initDMA(void){
     DMA0CNT = FLASH_DMAXFER_BYTES-1;
     DMA0REQbits.IRQSEL = 0x5B;
     
-    IFS0bits.DMA0IF = 0;
-    IEC0bits.DMA0IE = 1;
-    IPC1bits.DMA0IP = 6;
+
     DMA0CONbits.CHEN = 0;
 }
 

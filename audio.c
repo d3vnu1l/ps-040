@@ -219,7 +219,7 @@ void processAudio(fractional *source, fractional *destination){
             sine.read_ptr=sine.start_ptr;
             sine.block_index=0;
         }
-        else sine.read_ptr+=STREAMBUF;
+        //else sine.read_ptr+=STREAMBUF;
     }
         
     VectorCopy(STREAMBUF, destination, source);     //copy from ping to pong buffer

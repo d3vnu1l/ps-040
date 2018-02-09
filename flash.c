@@ -56,7 +56,7 @@ char flashStatusCheck(char command){
     return 0;
 }
 
-void flashWritePage(fractional* source, long address){
+void flashWritePage(fractional* source, unsigned long address){
     if(stat.FLASH_DMA==FALSE){
         int i;
         fractional sample;
@@ -84,15 +84,17 @@ void flashWritePage(fractional* source, long address){
         while(!_SPI3IF); _SPI3IF=0;
         receive=SPI3BUF;
 
-
-        DMA1CONbits.CHEN = 1;
+        DMA1CONbits.NULLW=0;                          // NULL WRITE (debug))
         DMA0CONbits.CHEN = 1;
-        DMA0REQbits.FORCE = 1; // Manual mode: Kick-start the 1st transfer           
+        DMA1CONbits.CHEN = 1;
+        DMA0REQbits.FORCE = 1; // Manual mode: Kick-start the 1st transfer  
+        while (DMA0REQbits.FORCE == 1);
+        //DMA1REQbits.FORCE = 1; // Manual mode: Kick-start the 1st transfer  
         //while(!_DMA1IF);  //works  
     }
 }
 
-void flashStartRead(long address){
+void flashStartRead(unsigned long address){
     if(stat.FLASH_DMA==FALSE){
         int i;
 
@@ -124,9 +126,12 @@ void flashStartRead(long address){
         //DMA0CNT = (unsigned int)(FLASH_DMAXFERS-1);
 
         /* Kick off dma read here */
-        DMA1CONbits.CHEN = 1;
+        //DMA1CONbits.NULLW=1;                          // NULL WRITE (debug))
         DMA0CONbits.CHEN = 1;
+        DMA1CONbits.CHEN = 1;
         DMA0REQbits.FORCE = 1; // Manual mode: Kick-start the 1st transfer
+        while (DMA0REQbits.FORCE == 1);
+        //DMA1REQbits.FORCE = 1; // Manual mode: Kick-start the 1st transfer
         //while(!_DMA1IF);  //works
     }
 }
@@ -140,7 +145,7 @@ void flashProcessRead(void){
     }    
 }
 
-void flashEraseSector(long address){
+void flashEraseSector(unsigned long address){
     if(stat.FLASH_DMA==FALSE){
         flashWriteReg(FLASH_WREN);
         SS3a=0;
@@ -167,14 +172,17 @@ void flashBulkErase(void) {
 
 void flashFXops(fractional* stream){
     if(!ctrl.pad[33]) flashBulkErase();
+    
     if(!ctrl.pad[3]){
         flashWritePage(stream, writeAddr);
         writeAddr+=FLASH_PAGE;
     } else writeAddr=0;
+    
     if(!ctrl.pad[4]){
         flashStartRead(readAddr);     // READBACK
         readAddr+=FLASH_PAGE;
     } else readAddr=0;
+    
     if(!ctrl.pad[5]){
         if(flashStatusCheck(FLASH_RDSR1)==0x03);
         else{
@@ -183,4 +191,7 @@ void flashFXops(fractional* stream){
         }
     } else eraseAddr=0;
     if(!ctrl.pad[6])flashWriteReg(FLASH_WREN);
+    
+    if(!ctrl.pad[7]) stat.TEST_SIN=TRUE;
+    else stat.TEST_SIN = FALSE;
 }
