@@ -27,9 +27,9 @@ void initPorts(void){
     TRISA=0x1E01; CNPUA=0x0801; 
     TRISB=0x0000; CNPUB=0x0000; 
     TRISC=0x2087; 
-    TRISD=0x111E; CNPUD=0x101E; 
+    TRISD=0x111E; CNPUD=0x801E; 
     TRISE=0x7300; 
-    TRISF=0x00F0; CNPUF=0x00F1; 
+    TRISF=0x00F0; CNPUF=0x00F2; 
     TRISG=CNPUG=0xFFFF;   //PORTG all inputs, weak pull ups on all of G 
      
     /* DIGITAL OUTPUT LATCH */ 
