@@ -52,13 +52,6 @@ void __attribute__ ((interrupt, auto_psv)) _DCIInterrupt(void){
 }
 
 void __attribute__((interrupt, auto_psv)) _DMA0Interrupt(void) {
-    //static unsigned int BufferCount = 0; // Keep record of the buffer that contains TX data
-    //if(BufferCount == 0);
-    //{
-        //TxData(TxBufferA); // Transmit SPI data in DMA RAM Primary buffer
-        //TxData(TxBufferB); // Transmit SPI data in DMA RAM Secondary buffer
-    //}
-    //BufferCount ^= 1;
     //DMA1CONbits.CHEN = 0;
     //DMA0CONbits.CHEN = 0;
     /*
@@ -92,7 +85,7 @@ void __attribute__((interrupt, auto_psv)) _DMA1Interrupt(void){
     
     //BufferCount ^= 1;
     IFS0bits.DMA1IF = 0;        // Clear the DMA1 Interrupt flag
-    stat.FLASH_DMA=FALSE;
+    SS3a=SS3b=1;
     
     if(stat.DMA_READING==TRUE){
         stat.DMA_READING=FALSE;
@@ -103,7 +96,7 @@ void __attribute__((interrupt, auto_psv)) _DMA1Interrupt(void){
     DMA0CONbits.CHEN = 0;
     SPI3STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
     IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
-    SS3a=SS3b=1;
+    
 }
 
 //Description: This interrupt handles UART reception

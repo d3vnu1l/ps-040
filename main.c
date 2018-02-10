@@ -29,11 +29,10 @@ unsigned char   TxBufferA[FLASH_DMAXFER_BYTES] __attribute__((space(xmemory))),
 fractional      RxBufferB[STREAMBUF] __attribute__((space(xmemory)));
 
 /* Debug Variables */
-unsigned int process_time=0;
+unsigned int process_time=0, flash_time = 0;;
 
 struct sflags stat = {  .UART_ON = FALSE,
                         .TEST_SIN = FALSE,
-                        .FLASH_DMA = FALSE,
                         .DMA_JUSTREAD = FALSE,
                         .DMA_READING = FALSE,
                         .hard_clipped = FALSE};
@@ -93,20 +92,20 @@ int main(void) {
                 ping = streamB;
                 pong = outputA;
             }
-            
+
             if(stat.DMA_JUSTREAD==TRUE){    
-                stat.DMA_JUSTREAD=FALSE;
-                if(stat.FLASH_DMA==FALSE) flashProcessRead();                             // Process DMA requested read data
-                VectorCopy(STREAMBUF, ping, RxBufferB);
-                //VectorAdd(STREAMBUF, ping, ping, RxBufferB);
+                    flashProcessRead();                             // Process DMA requested read data
+                    stat.DMA_JUSTREAD=FALSE;
+                    VectorCopy(STREAMBUF, ping, RxBufferB);
+                    //VectorAdd(STREAMBUF, ping, ping, RxBufferB);
             }
-            if(state==scrnFX){
-                flashFXops(ping);
+            if(state==scrnFX||state==debugscrnBUFFERS){
+                    flashFXops(ping);
             }
-            
-            processAudio(ping, pong); 
-            
+            processAudio(ping, pong);
             process_time=write_ptr;    //DEBUG
+            while(!SS3a);               //wait for flash transmissions to complete
+            flash_time=write_ptr;
             frameReady=0;
         }
         if(_T2IF){

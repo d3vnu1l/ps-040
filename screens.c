@@ -15,7 +15,7 @@
 
 #include "sounds.h"
 
-extern unsigned int process_time;
+extern unsigned int process_time, flash_time;
 extern unsigned char btread;
 
 extern unsigned char    TxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory))), 
@@ -47,13 +47,15 @@ void screenDebugBuffers(){
         lcdSetCursorQ(11,1);
         lcdWriteStringQ("/256");
         lcdSetCursorQ(0,2);
-        lcdWriteStringQ("LCD:");
+        lcdWriteStringQ("Flash:");
         lcdSetCursorQ(0,3);
         lcdWriteStringQ("btRd:");
     } else {
         //update here
         lcdSetCursorQ(8,1);
         lcdWriteDecimalQ(process_time,3);
+        lcdSetCursorQ(6,2);
+        lcdWriteDecimalQ(flash_time,3);
         lcdSetCursorQ(6,3);
         lcdWriteByteQ(btread);
         //lcdWriteDecimalQ();
@@ -173,7 +175,7 @@ void screenDebugFlash(void){
 
         lcdSetCursorQ(9,3);
         lcdWriteStringQ("Stat:");
-        lcdWriteWordQ(flashStatusCheck(FLASH_RDSR1));
+        lcdWriteWordUnsignedQ(flashStatusCheck(FLASH_RDSR1));
         //lcdWriteWordQ(flashStatusCheck(FLASH_BRRD));
     }
 }

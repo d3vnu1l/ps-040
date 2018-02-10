@@ -104,7 +104,6 @@ struct ctrlsrfc {
 struct sflags {
     unsigned char UART_ON;
     unsigned char TEST_SIN;
-    unsigned char FLASH_DMA;
     unsigned char DMA_JUSTREAD;
     unsigned char DMA_READING;
     unsigned char hard_clipped; 

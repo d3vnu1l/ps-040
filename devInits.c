@@ -36,7 +36,8 @@ void initPorts(void){
     LATA=LATB=LATC=LATD=LATE=LATF=LATG=0x0000; 
     LATA=0x0040; 
     SS3a=SS3b=1; 
-    FLASHCLK=1;            // Keep SPI CS & CLK asserted 
+    FLASHCLK=0;            // Keep SPI CS & CLK asserted 
+    
      
     /* ANALOG PINS (1 = analog) */ 
     ANSELA=ANSELB=ANSELC=ANSELD=ANSELE=ANSELF=ANSELG=0x0000; 
@@ -55,8 +56,8 @@ void initPorts(void){
         RPOR3bits.RP40R=0x0C;           //DCI clock
         RPOR2bits.RP39R=0x0D;           //DCI frame sync
         RPOR3bits.RP41R=0x0B;           //DCI output
-        RPOR7bits.RP57R=0x20;           //SCK3 output on pin 84
-        RPINR29bits.SCK3R=0x39;         //SCK3 input on pin 84
+        RPOR6bits.RP54R=0x20;           //SCK3 output on pin 77
+        RPINR29bits.SCK3R=0x36;         //SCK3 input on pin 77
         RPOR8bits.RP70R=0x1F;           //SDO3 on pin 83
         RPINR29bits.SDI3R=0x4C;         //SDI on pin 79, RPI76
         RPINR14bits.QEA1R=0x10;         //QEA on pin 22, RPI16
@@ -265,7 +266,7 @@ void initDMA(void){
 
 void initSPI3_MEM(void){
     SS3a=SS3b=1;
-    FLASHCLK=1;
+    FLASHCLK=0;
     
     IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
     IEC5bits.SPI3IE = 0;        // Disable the interrupt
@@ -277,10 +278,10 @@ void initSPI3_MEM(void){
     SPI3CON2bits.SPIBEN=0;      // Enhanced buffer mode
     
     SPI3CON1bits.SMP=1;         // Data sampled at end of output time
-    SPI3CON1bits.CKP=1;         // Idle clock is high
-    SPI3CON1bits.CKE=0;         // Data changes from H to L
+    SPI3CON1bits.CKP=0;         // Idle clock is high
+    SPI3CON1bits.CKE=1;         // Data changes from H to L
     
-    SPI3CON1bits.PPRE=1;        // 1:1 primary prescale (3) (1))
+    SPI3CON1bits.PPRE=2;        // 1:1 primary prescale (3) (1))
     SPI3CON1bits.SPRE=6;        // 2:1 secondary (6) (6)) )
     
     SPI3STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set

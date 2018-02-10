@@ -18,50 +18,54 @@ extern struct ctrlsrfc ctrl;
 
 
 void flashWriteReg(char command) {
-    if(stat.FLASH_DMA==FALSE){
+    if(SS3a){
         SS3a=0;
         SPI3BUF=command;               //WEL=1 for write enable
-        while(!_SPI3IF); _SPI3IF=0;
-        receive=SPI3BUF;
+        while(!_SPI3IF);
         SS3a=1;
+        _SPI3IF=0;
+        receive=SPI3BUF;
     }
 }
 
 void flashWriteBreg(char newreg){
-    if(stat.FLASH_DMA==FALSE){
+    if(SS3a){
         flashWriteReg(FLASH_WREN);
         SS3a=0;
         SPI3BUF=FLASH_BRWR;               //WEL=1 for write enable
         while(!_SPI3IF); _SPI3IF=0;
         receive=SPI3BUF;
         SPI3BUF=newreg;               //WEL=1 for write enable
-        while(!_SPI3IF); _SPI3IF=0;
-        receive=SPI3BUF;
+        while(!_SPI3IF); 
         SS3a=1;
+        _SPI3IF=0;
+        receive=SPI3BUF;
+        
     }
 }
 
 char flashStatusCheck(char command){
-    if(stat.FLASH_DMA==FALSE){
+    if(SS3a){
         SS3a=0;
         SPI3BUF=command;               //WEL=1 for write enable
         while(!_SPI3IF); _SPI3IF=0;
         receive=SPI3BUF;
         SPI3BUF=0x00;               //WEL=1 for write enable
-        while(!_SPI3IF); _SPI3IF=0;
-        receive=SPI3BUF;
+        while(!_SPI3IF); 
         SS3a=1;
+        _SPI3IF=0;
+        receive=SPI3BUF;
+        
         return receive;
     }else return 0xFF;
 }
 
 void flashWritePage(fractional* source, unsigned long address){
-    if(stat.FLASH_DMA==FALSE){
+    if(SS3a){
         int i;
         fractional sample;
         
         flashWriteReg(FLASH_WREN);
-        stat.FLASH_DMA=TRUE;
         
         for(i=0; i<FLASH_DMAXFER_BYTES; i++){
             sample=*source++;
@@ -82,7 +86,8 @@ void flashWritePage(fractional* source, unsigned long address){
         SPI3BUF=(address&0xFF);               
         while(!_SPI3IF); _SPI3IF=0;
         receive=SPI3BUF;
-
+        
+        //SPI3STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
         //DMA1CONbits.NULLW=0;                          // NULL WRITE (debug))
         DMA0CONbits.CHEN = 1;
         DMA1CONbits.CHEN = 1;
@@ -90,19 +95,17 @@ void flashWritePage(fractional* source, unsigned long address){
         //SPI3BUF = 0x00;
         //while (DMA0REQbits.FORCE == 1);
         //DMA1REQbits.FORCE = 1; // Manual mode: Kick-start the 1st transfer  
-        //while(!_DMA1IF);  //works  
     }
 }
 
 void flashStartRead(unsigned long address){
-    if(stat.FLASH_DMA==FALSE){
+    if(SS3a){
         int i;
 
         for(i=0; i<FLASH_DMAXFER_BYTES; i++){
             TxBufferA[i]=0;
         }
 
-        stat.FLASH_DMA=TRUE;
         stat.DMA_READING=TRUE;
         stat.DMA_JUSTREAD=FALSE;
         
@@ -119,13 +122,13 @@ void flashStartRead(unsigned long address){
         SPI3BUF=(address&0xFF);               
         while(!_SPI3IF); _SPI3IF=0;
         receive=SPI3BUF;
-
         //DMA1STAL = (unsigned int)(&RxBufferA);
         //DMA0STAL = (unsigned int)(&outputA);
         //DMA1CNT = (unsigned int)(FLASH_DMAXFERS-1);
         //DMA0CNT = (unsigned int)(FLASH_DMAXFERS-1);
 
         /* Kick off dma read here */
+        //SPI3STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
         //DMA1CONbits.NULLW=1;                          // NULL WRITE (debug))
         DMA0CONbits.CHEN = 1;
         DMA1CONbits.CHEN = 1;
@@ -133,7 +136,6 @@ void flashStartRead(unsigned long address){
         //SPI3BUF = 0x00;
         //while (DMA0REQbits.FORCE == 1);
         //DMA1REQbits.FORCE = 1; // Manual mode: Kick-start the 1st transfer
-        //while(!_DMA1IF);  //works
     }
 }
 
@@ -147,7 +149,7 @@ void flashProcessRead(void){
 }
 
 void flashEraseSector(unsigned long address){
-    if(stat.FLASH_DMA==FALSE){
+    if(SS3a){
         flashWriteReg(FLASH_WREN);
         SS3a=0;
         SPI3BUF=FLASH_SE;                 
