@@ -299,12 +299,12 @@ void initSPI3_MEM(void){
     SPI3CON2bits.FRMEN=0;       // No enable framed mode
     SPI3CON2bits.SPIBEN=0;      // Enhanced buffer mode
     
-    SPI3CON1bits.SMP=0;         // Data sampled at end of output time
+    SPI3CON1bits.SMP=1;         // Data sampled at end of output time
     SPI3CON1bits.CKP=1;         // Idle clock is high
     SPI3CON1bits.CKE=0;         // Data changes from H to L
     
-    SPI3CON1bits.PPRE=0;        // 1:1 primary prescale (3) (1))
-    SPI3CON1bits.SPRE=7;        // 2:1 secondary (6) (6)) )
+    SPI3CON1bits.PPRE=1;        // 1:1 primary prescale (3) (1))
+    SPI3CON1bits.SPRE=6;        // 2:1 secondary (6) (6)) )
     
     SPI3STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
     SPI3STATbits.SPIEN = 1;     // Start SPI module
