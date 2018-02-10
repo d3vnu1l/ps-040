@@ -36,7 +36,7 @@ void initPorts(void){
         RPINR29bits.SCK3R=0x39;         //SCK3 input on pin 84
         RPOR7bits.RP57R=0x20;           //SCK3 output on pin 84
         RPOR8bits.RP70R=0x1F;           //SDO3 on pin 83
-        RPOR9bits.RP97R=0x21;           //SS3 on pin 88
+        //RPOR9bits.RP97R=0x21;           //SS3 on pin 88
         RPINR29bits.SDI3R=0x4C;         //SDI on pin 79, RPI76
         RPINR14bits.QEA1R=0x10;         //QEA on pin 22, RPI16
         RPINR14bits.QEB1R=0x1B;         //QEB on pin 21, RPI27
@@ -65,7 +65,7 @@ void initPorts(void){
     TRISA=0x1E01; CNPUA=0x0801;
     TRISB=0x0000; CNPUB=0x0000;
     TRISC=0x2087;
-    TRISD=0x011E; CNPUD=0x001E;
+    TRISD=0x111E; CNPUD=0x101E;
     TRISE=0x7300;
     TRISF=0x00F0; CNPUF=0x00F1;
     TRISG=CNPUG=0xFFFF;   //PORTG all inputs, weak pull ups on all of G
@@ -73,7 +73,8 @@ void initPorts(void){
     /* DIGITAL OUTPUT LATCH */
     LATA=LATB=LATC=LATD=LATE=LATF=LATG=0x0000;
     LATA=0x0040;
-    SS3a=SS3b=FLASHCLK=1;            // Keep SPI CS & CLK asserted
+    SS3a=SS3b=1;
+    FLASHCLK=1;            // Keep SPI CS & CLK asserted
     
     /* ANALOG PINS (1 = analog) */
     ANSELA=ANSELB=ANSELC=ANSELD=ANSELE=ANSELF=ANSELG=0x0000;
@@ -266,8 +267,6 @@ void initDMA(void){
     DMA1PAD = (volatile unsigned int) &SPI3BUF;
     DMA1CNT = (unsigned int)(FLASH_DMAXFER_BYTES-1);
     DMA1REQbits.IRQSEL = 0x5B;
-    
-
     DMA1CONbits.CHEN = 0;
     
     
@@ -282,31 +281,30 @@ void initDMA(void){
     DMA0STAL = (unsigned int)(&TxBufferA);
     //DMA0STAH = (unsigned int)(&TxBufferB);
     DMA0PAD = (volatile unsigned int) &SPI3BUF;
-    DMA0CNT = FLASH_DMAXFER_BYTES-1;
+    DMA0CNT = (unsigned int)(FLASH_DMAXFER_BYTES-1);
     DMA0REQbits.IRQSEL = 0x5B;
-    
-
     DMA0CONbits.CHEN = 0;
 }
 
 void initSPI3_MEM(void){
-    SS3a=SS3b=FLASHCLK=1;
+    SS3a=SS3b=1;
+    FLASHCLK=1;
     
     IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
     IEC5bits.SPI3IE = 0;        // Disable the interrupt
     SPI3CON1bits.MSTEN=1;       // Master mode
     SPI3CON1bits.DISSCK = 0;    // Internal serial clock is enabled
-    SPI3CON1bits.MODE16=0;      // 8 bitBufferB
+    SPI3CON1bits.MODE16=0;      // 8 bitBuffer
     SPI3CON1bits.DISSDO=0;      // Enable SDO 
     SPI3CON2bits.FRMEN=0;       // No enable framed mode
     SPI3CON2bits.SPIBEN=0;      // Enhanced buffer mode
     
-    SPI3CON1bits.SMP=1;         // Data sampled at end of output time
-    SPI3CON1bits.CKP=1;         // Idle clock is low
+    SPI3CON1bits.SMP=0;         // Data sampled at end of output time
+    SPI3CON1bits.CKP=1;         // Idle clock is high
     SPI3CON1bits.CKE=0;         // Data changes from H to L
     
-    SPI3CON1bits.PPRE=3;        // 1:1 primary prescale (3)
-    SPI3CON1bits.SPRE=6;        // 2:1 secondary (6)
+    SPI3CON1bits.PPRE=0;        // 1:1 primary prescale (3) (1))
+    SPI3CON1bits.SPRE=7;        // 2:1 secondary (6) (6)) )
     
     SPI3STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
     SPI3STATbits.SPIEN = 1;     // Start SPI module

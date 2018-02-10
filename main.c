@@ -69,8 +69,8 @@ void initBuffers(void){
 int main(void) {
     initPorts();                    // Configure io device & adc 
     initBuffers();
-    //initDMA();
-    //initSPI3_MEM();                 // Start flash 
+    initDMA();
+    initSPI3_MEM();                 // Start flash 
     initDCI_DAC();                  // Configure & enable DAC
     //genSine(STREAMBUF);
     initADC1();                     // Configure & enable internal ADC
@@ -97,18 +97,15 @@ int main(void) {
             if(stat.DMA_JUSTREAD==TRUE){    
                 stat.DMA_JUSTREAD=FALSE;
                 if(stat.FLASH_DMA==FALSE) flashProcessRead();                             // Process DMA requested read data
-                VectorCopy(STREAMBUF, pong, RxBufferB);
+                VectorCopy(STREAMBUF, ping, RxBufferB);
                 //VectorAdd(STREAMBUF, ping, ping, RxBufferB);
+            }
+            if(state==scrnFX){
+                flashFXops(ping);
             }
             
             processAudio(ping, pong); 
             
-
-            
-            if(state==scrnFX){
-                flashFXops(pong);
-            }
-
             process_time=write_ptr;    //DEBUG
             frameReady=0;
         }

@@ -61,6 +61,7 @@ void __attribute__((interrupt, auto_psv)) _DMA0Interrupt(void) {
     //BufferCount ^= 1;
     //DMA1CONbits.CHEN = 0;
     //DMA0CONbits.CHEN = 0;
+    /*
     SS3a=SS3b=1;
     stat.FLASH_DMA=FALSE;
     
@@ -73,6 +74,10 @@ void __attribute__((interrupt, auto_psv)) _DMA0Interrupt(void) {
     DMA0CONbits.CHEN = 0;
     
     IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
+     */ 
+    //SS3a=SS3b=1;
+    //SPI3STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
+    //IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
     IFS0bits.DMA0IF = 0; // Clear the DMA0 Interrupt flag
 }
 
@@ -86,7 +91,7 @@ void __attribute__((interrupt, auto_psv)) _DMA1Interrupt(void){
     //BufferCount ^= 1;
     
     //BufferCount ^= 1;
-    SS3a=SS3b=1;
+    IFS0bits.DMA1IF = 0;        // Clear the DMA1 Interrupt flag
     stat.FLASH_DMA=FALSE;
     
     if(stat.DMA_READING==TRUE){
@@ -96,8 +101,9 @@ void __attribute__((interrupt, auto_psv)) _DMA1Interrupt(void){
     
     DMA1CONbits.CHEN = 0;
     DMA0CONbits.CHEN = 0;
-    IFS0bits.DMA1IF = 0;        // Clear the DMA1 Interrupt flag
+    SPI3STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
     IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
+    SS3a=SS3b=1;
 }
 
 //Description: This interrupt handles UART reception

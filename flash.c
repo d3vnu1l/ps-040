@@ -52,8 +52,7 @@ char flashStatusCheck(char command){
         receive=SPI3BUF;
         SS3a=1;
         return receive;
-    }
-    return 0;
+    }else return 0xFF;
 }
 
 void flashWritePage(fractional* source, unsigned long address){
@@ -84,11 +83,12 @@ void flashWritePage(fractional* source, unsigned long address){
         while(!_SPI3IF); _SPI3IF=0;
         receive=SPI3BUF;
 
-        DMA1CONbits.NULLW=0;                          // NULL WRITE (debug))
+        //DMA1CONbits.NULLW=0;                          // NULL WRITE (debug))
         DMA0CONbits.CHEN = 1;
         DMA1CONbits.CHEN = 1;
-        DMA0REQbits.FORCE = 1; // Manual mode: Kick-start the 1st transfer  
-        while (DMA0REQbits.FORCE == 1);
+        DMA0REQbits.FORCE = 1; // Manual mode: Kick-start the 1st transfer 
+        //SPI3BUF = 0x00;
+        //while (DMA0REQbits.FORCE == 1);
         //DMA1REQbits.FORCE = 1; // Manual mode: Kick-start the 1st transfer  
         //while(!_DMA1IF);  //works  
     }
@@ -130,7 +130,8 @@ void flashStartRead(unsigned long address){
         DMA0CONbits.CHEN = 1;
         DMA1CONbits.CHEN = 1;
         DMA0REQbits.FORCE = 1; // Manual mode: Kick-start the 1st transfer
-        while (DMA0REQbits.FORCE == 1);
+        //SPI3BUF = 0x00;
+        //while (DMA0REQbits.FORCE == 1);
         //DMA1REQbits.FORCE = 1; // Manual mode: Kick-start the 1st transfer
         //while(!_DMA1IF);  //works
     }
