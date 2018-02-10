@@ -22,21 +22,42 @@ void initPorts(void){
     PLLFBDbits.PLLDIV = 0x49;       //d_73 for ~140Mhz
     while(OSCCONbits.LOCK!=1) {};   //wait for PLL to lock
     
+    /* Digital IO DIRECTION (1 = input) */ 
+    TRISA=TRISB=TRISC=TRISD=TRISE=TRISF=TRISG=0x0000; 
+    TRISA=0x1E01; CNPUA=0x0801; 
+    TRISB=0x0000; CNPUB=0x0000; 
+    TRISC=0x2087; 
+    TRISD=0x111E; CNPUD=0x101E; 
+    TRISE=0x7300; 
+    TRISF=0x00F0; CNPUF=0x00F1; 
+    TRISG=CNPUG=0xFFFF;   //PORTG all inputs, weak pull ups on all of G 
+     
+    /* DIGITAL OUTPUT LATCH */ 
+    LATA=LATB=LATC=LATD=LATE=LATF=LATG=0x0000; 
+    LATA=0x0040; 
+    SS3a=SS3b=1; 
+    FLASHCLK=1;            // Keep SPI CS & CLK asserted 
+     
+    /* ANALOG PINS (1 = analog) */ 
+    ANSELA=ANSELB=ANSELC=ANSELD=ANSELE=ANSELF=ANSELG=0x0000; 
+    ANSELCbits.ANSC0=1;     //AN6 
+    ANSELCbits.ANSC1=1;     //AN7 
+    ANSELCbits.ANSC2=1;     //AN8 
+    ANSELAbits.ANSA12=1;    //AN10  
+    ANSELEbits.ANSE8=1;     //AN21 
+    ANSELEbits.ANSE9=1;     //AN20
+    
     /* Remappable Pins*/
 	__builtin_write_OSCCONL(OSCCON & ~(1<<6));      // Unlock Registers
-        //RPINR18bits.U1RXR = 0x37; //U1 rx on RP55
-        //RPOR6bits.RP54R=0x1;          // U1 tx on RP54 (in use)
-        RPINR18bits.U1RXR = 0x48;       // U1 rx on RP72
+        RPINR18bits.U1RXR = 0x48;       // U1 rx on RPI72
         RPOR1bits.RP37R = 0x01;         // Pin 70, RP37 U1 tx
         RPINR24bits.CSDIR=0x3D;         //DCI IN on RPI61           
         RPOR3bits.RP40R=0x0C;           //DCI clock
         RPOR2bits.RP39R=0x0D;           //DCI frame sync
         RPOR3bits.RP41R=0x0B;           //DCI output
-        RPINR7bits.IC1R=0x5F;           //Capture input on pin 95 re15
-        RPINR29bits.SCK3R=0x39;         //SCK3 input on pin 84
         RPOR7bits.RP57R=0x20;           //SCK3 output on pin 84
+        RPINR29bits.SCK3R=0x39;         //SCK3 input on pin 84
         RPOR8bits.RP70R=0x1F;           //SDO3 on pin 83
-        //RPOR9bits.RP97R=0x21;           //SS3 on pin 88
         RPINR29bits.SDI3R=0x4C;         //SDI on pin 79, RPI76
         RPINR14bits.QEA1R=0x10;         //QEA on pin 22, RPI16
         RPINR14bits.QEB1R=0x1B;         //QEB on pin 21, RPI27
@@ -58,51 +79,7 @@ void initPorts(void){
     PMD3bits.PMPMD=0;
     PMD3bits.CMPMD=0;
     PMD6bits.SPI3MD=0;
-    PMD7bits.DMA0MD=0;
-    
-    /* Digital IO DIRECTION (1 = input) */
-    TRISA=TRISB=TRISC=TRISD=TRISE=TRISF=TRISG=0x0000;
-    TRISA=0x1E01; CNPUA=0x0801;
-    TRISB=0x0000; CNPUB=0x0000;
-    TRISC=0x2087;
-    TRISD=0x111E; CNPUD=0x101E;
-    TRISE=0x7300;
-    TRISF=0x00F0; CNPUF=0x00F1;
-    TRISG=CNPUG=0xFFFF;   //PORTG all inputs, weak pull ups on all of G
-    
-    /* DIGITAL OUTPUT LATCH */
-    LATA=LATB=LATC=LATD=LATE=LATF=LATG=0x0000;
-    LATA=0x0040;
-    SS3a=SS3b=1;
-    FLASHCLK=1;            // Keep SPI CS & CLK asserted
-    
-    /* ANALOG PINS (1 = analog) */
-    ANSELA=ANSELB=ANSELC=ANSELD=ANSELE=ANSELF=ANSELG=0x0000;
-    ANSELCbits.ANSC0=1;     //AN6
-    ANSELCbits.ANSC1=1;     //AN7
-    ANSELCbits.ANSC2=1;     //AN8
-    ANSELAbits.ANSA12=1;    //AN10 
-    ANSELEbits.ANSE8=1;     //AN21
-    ANSELEbits.ANSE9=1;     //AN20
-    
-    //RP pin config
-	__builtin_write_OSCCONL(OSCCON & ~(1<<6));      // Unlock Registers
-    //RPINR18bits.U1RXR = 0x37; //U1 rx on RP55
-    //RPOR6bits.RP54R=0x1;          //U1 tx on RP54
-    RPOR2bits.RP38R = 0x1;
-    RPINR24bits.CSDIR=0x3D;     //DCI IN on RPI61           
-    RPOR3bits.RP40R=0x0C;       //DCI clock
-    RPOR2bits.RP39R=0x0D;       //DCI frame sync
-    RPOR3bits.RP41R=0x0B;       //DCI output
-    RPINR7bits.IC1R=0x5F;       //Capture input on pin 95 re15
-    RPOR7bits.RP57R=0x20;       //SCK3 output on pin 84
-    RPINR29bits.SCK3R=0x39;     //SCK3 input on pin 84
-    RPOR8bits.RP70R=0x1F;       //SDO3 on pin 83
-    RPOR9bits.RP97R=0x21;       //SS3 on pin 88
-    RPINR29bits.SDI3R=0x4C;     //SDI on pin 79, RPI76
-    RPINR14bits.QEA1R=0x10;     //QEA on pin 22, RPI16
-    RPINR14bits.QEB1R=0x1B;     //QEB on pin 21, RPI27
-	__builtin_write_OSCCONL(OSCCON | (1<<6));       // Lock Registers    
+    PMD7bits.DMA0MD=0;  
 }
 
 void initUART1(void){
