@@ -7,7 +7,9 @@
 #include "common.h"
 
 char receive;
-unsigned long  writeAddr=0, readAddr=0, eraseAddr=0;
+unsigned long  eraseAddr=0;
+struct clip_flash clipmap[FLASH_NUMCHUNKS];
+
 
 extern unsigned char    TxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory))), 
                         RxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory)));
@@ -16,6 +18,35 @@ extern fractional       RxBufferB[STREAMBUF] __attribute__((space(xmemory)));
 extern struct sflags stat;
 extern struct ctrlsrfc ctrl;
 
+void flashSoftSetup(void){
+    int i=1;
+    unsigned long chunksize = (FLASH_MAX/FLASH_NUMCHUNKS);
+    
+    clipmap[0].start_address=0;
+    clipmap[0].read_index=clipmap[0].start_address;
+    clipmap[0].write_index=clipmap[0].start_address;
+    clipmap[0].erase_index=clipmap[0].start_address;
+    clipmap[0].voices=1;
+    clipmap[0].one_shot=FALSE;
+    clipmap[0].choke=FALSE;
+    clipmap[0].block_index=0;
+    clipmap[0].playing=FALSE;
+    
+    for(; i<FLASH_NUMCHUNKS; i++){
+        clipmap[i].start_address=chunksize*i;
+        clipmap[i].read_index=clipmap[i].start_address;
+        clipmap[i].write_index=clipmap[i].start_address;
+        clipmap[i].erase_index=clipmap[i].start_address;
+        clipmap[i].voices=1;
+        clipmap[i].one_shot=FALSE;
+        clipmap[i].choke=FALSE;
+        clipmap[i].block_index=0;
+        clipmap[i].playing=FALSE;
+        
+        clipmap[i-1].end_address=clipmap[i].start_address;
+    }
+    clipmap[FLASH_NUMCHUNKS-1].end_address=FLASH_MAX;
+}
 
 void flashWriteReg(char command) {
     if(SS3a){
@@ -30,7 +61,7 @@ void flashWriteReg(char command) {
 
 void flashWriteBreg(char newreg){
     if(SS3a){
-        flashWriteReg(FLASH_WREN);
+        //flashWriteReg(FLASH_WREN);
         SS3a=0;
         SPI3BUF=FLASH_BRWR;               //WEL=1 for write enable
         while(!_SPI3IF); _SPI3IF=0;
@@ -77,13 +108,17 @@ void flashWritePage(fractional* source, unsigned long address){
         SPI3BUF=FLASH_PP;
         while(!_SPI3IF); _SPI3IF=0;
         receive=SPI3BUF;
-        SPI3BUF=(address>>16)&0xFF;                  
+        
+        SPI3BUF=(address & 0xff000000UL) >> 24;                 
         while(!_SPI3IF); _SPI3IF=0;
         receive=SPI3BUF;
-        SPI3BUF=(address>>8)&0xFF;                  
+        SPI3BUF=(address & 0x00ff0000UL) >> 16;                 
         while(!_SPI3IF); _SPI3IF=0;
         receive=SPI3BUF;
-        SPI3BUF=(address&0xFF);               
+        SPI3BUF=(address & 0x0000ff00UL) >>  8;                 
+        while(!_SPI3IF); _SPI3IF=0;
+        receive=SPI3BUF;
+        SPI3BUF=(address & 0x000000ffUL);            
         while(!_SPI3IF); _SPI3IF=0;
         receive=SPI3BUF;
         
@@ -113,19 +148,19 @@ void flashStartRead(unsigned long address){
         SPI3BUF=FLASH_READ;
         while(!_SPI3IF); _SPI3IF=0;
         receive=SPI3BUF;
-        SPI3BUF=(address>>16)&0xFF;                  
+        
+        SPI3BUF=(address & 0xff000000UL) >> 24;                 
         while(!_SPI3IF); _SPI3IF=0;
         receive=SPI3BUF;
-        SPI3BUF=(address>>8)&0xFF;                  
+        SPI3BUF=(address & 0x00ff0000UL) >> 16;                 
         while(!_SPI3IF); _SPI3IF=0;
         receive=SPI3BUF;
-        SPI3BUF=(address&0xFF);               
+        SPI3BUF=(address & 0x0000ff00UL) >>  8;                 
         while(!_SPI3IF); _SPI3IF=0;
         receive=SPI3BUF;
-        //DMA1STAL = (unsigned int)(&RxBufferA);
-        //DMA0STAL = (unsigned int)(&outputA);
-        //DMA1CNT = (unsigned int)(FLASH_DMAXFERS-1);
-        //DMA0CNT = (unsigned int)(FLASH_DMAXFERS-1);
+        SPI3BUF=(address & 0x000000ffUL);            
+        while(!_SPI3IF); _SPI3IF=0;
+        receive=SPI3BUF;
 
         /* Kick off dma read here */
         //SPI3STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
@@ -155,13 +190,16 @@ void flashEraseSector(unsigned long address){
         SPI3BUF=FLASH_SE;                 
         while(!_SPI3IF); _SPI3IF=0;
         receive=SPI3BUF;
-        SPI3BUF=(address>>16)&0xFF;                  
+        SPI3BUF=(address & 0xff000000UL) >> 24;                 
         while(!_SPI3IF); _SPI3IF=0;
         receive=SPI3BUF;
-        SPI3BUF=(address>>8)&0xFF;                  
+        SPI3BUF=(address & 0x00ff0000UL) >> 16;                 
         while(!_SPI3IF); _SPI3IF=0;
         receive=SPI3BUF;
-        SPI3BUF=(address&0xFF);               
+        SPI3BUF=(address & 0x0000ff00UL) >>  8;                 
+        while(!_SPI3IF); _SPI3IF=0;
+        receive=SPI3BUF;
+        SPI3BUF=(address & 0x000000ffUL);            
         while(!_SPI3IF); _SPI3IF=0;
         receive=SPI3BUF;
         SS3a=1;
@@ -174,17 +212,55 @@ void flashBulkErase(void) {
 }
 
 void flashFXops(fractional* stream){
+    int i;
+    
     if(!ctrl.pad[33]) flashBulkErase();
     
+    //check write triggers
+    for(i=0; i<FLASH_NUMCHUNKS; i++){
+        if(!ctrl.pad[i+17]){    //use shifted pads to trigger recording
+            flashWritePage(stream, clipmap[i].write_index);
+            if(clipmap[i].write_index!=clipmap[i].end_address){
+                clipmap[i].write_index+=FLASH_PAGE;
+            }
+            else {
+                clipmap[i].write_index=clipmap[i].start_address;
+            }
+        } 
+        else {
+            clipmap[i].write_index=clipmap[i].start_address;
+        }
+    }
+    
+    /*
     if(!ctrl.pad[3]){
         flashWritePage(stream, writeAddr);
         writeAddr+=FLASH_PAGE;
     } else writeAddr=0;
+    */
     
+    //check read triggers
+    for(i=0; i<FLASH_NUMCHUNKS; i++){
+        if(!ctrl.pad[i]){
+            flashStartRead(clipmap[i].read_index);     // READBACK
+            if(clipmap[i].read_index!=clipmap[i].end_address){
+                clipmap[i].read_index+=FLASH_PAGE;
+            }
+            else {
+                clipmap[i].read_index=clipmap[i].start_address;
+            }
+        } 
+        else {
+            clipmap[i].read_index=clipmap[i].start_address;
+        }
+    }
+    
+    /*
     if(!ctrl.pad[4]){
         flashStartRead(readAddr);     // READBACK
         readAddr+=FLASH_PAGE;
     } else readAddr=0;
+    
     
     if(!ctrl.pad[5]){
         if(flashStatusCheck(FLASH_RDSR1)==0x03);
@@ -194,7 +270,7 @@ void flashFXops(fractional* stream){
         }
     } else eraseAddr=0;
     if(!ctrl.pad[6])flashWriteReg(FLASH_WREN);
-    
-    if(!ctrl.pad[7]) stat.TEST_SIN=TRUE;
-    else stat.TEST_SIN = FALSE;
+    */
+    //if(!ctrl.pad[7]) stat.TEST_SIN=TRUE;
+    //else stat.TEST_SIN = FALSE;
 }

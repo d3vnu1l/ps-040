@@ -16,11 +16,6 @@
 
 #define SINRES  1024
 
-/* Flash Variable */
-#define FLASH_DMAXFER_BYTES 512 // Must be double of streambuf
-#define FLASH_PAGE 512
-#define FLASH_SECTOR 256000
-
 /* BUFFERS */
 
 #define STREAMBUF       256                   //input adc stack size, must be divisible by 2
@@ -73,6 +68,13 @@
  */
 #define BTN_SPECIAL         34
 #define BTN_ENC             16
+
+/* Flash Variable */
+#define FLASH_DMAXFER_BYTES 512 // Must be double of streambuf
+#define FLASH_PAGE 512
+/* Memory Map */
+#define FLASH_MAX 0x04000000
+#define FLASH_NUMCHUNKS 16
 
 enum screenStruc{
     invalid,

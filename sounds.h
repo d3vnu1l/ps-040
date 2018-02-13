@@ -32,12 +32,7 @@ struct clip_eds{
 };
 
 
-struct clip_flash{
-    const unsigned int size, blocks;
-    unsigned char playing, flash;
-    unsigned int block_index;
-    long address;
-};
+
 
 void genSine(unsigned int);
 

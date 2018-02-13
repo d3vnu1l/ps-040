@@ -286,7 +286,11 @@ void initSPI3_MEM(void){
     
     SPI3STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
     SPI3STATbits.SPIEN = 1;     // Start SPI module
-    //IEC5bits.SPI3IE = 0;      // Enable the Interrupt    
+    //IEC5bits.SPI3IE = 0;      // Enable the Interrupt   
+    
+    flashSoftSetup();           // Set up flash memory map
+    
+    flashWriteBreg(0x80);            // 4 byte addressing
 }
 
 /* Quadradure Encoder */

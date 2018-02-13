@@ -142,6 +142,8 @@ void screenDebugFlash(void){
         lcdWriteByteQ(RxBufferA[12]);
         lcdSetCursorQ(18,1);
         lcdWriteByteQ(RxBufferA[13]);
+        lcdSetCursorQ(0,3);
+        lcdWriteStringQ("Stat:");
     } else {
         //update here
         lcdSetCursorQ(0,0);
@@ -173,10 +175,12 @@ void screenDebugFlash(void){
         lcdSetCursorQ(18,1);
         lcdWriteByteQ(RxBufferA[13]);
 
-        lcdSetCursorQ(9,3);
+        lcdSetCursorQ(0,3);
         lcdWriteStringQ("Stat:");
         lcdWriteWordUnsignedQ(flashStatusCheck(FLASH_RDSR1));
-        //lcdWriteWordQ(flashStatusCheck(FLASH_BRRD));
+        lcdWriteStringQ(", ");
+        lcdWriteWordUnsignedQ(flashStatusCheck(FLASH_BRRD));
+        
     }
 }
 

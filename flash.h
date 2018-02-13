@@ -22,7 +22,20 @@
 #define FLASH_PP    0x02    // Page program 512 bytes   (1.5 MB/s)
 #define FLASH_4PP   0x12    // Page program 512 bytes   (1.5 MB/s)
 
+struct clip_flash{
+    unsigned long start_address;
+    unsigned long end_address;
+    unsigned long read_index;
+    unsigned long write_index;
+    unsigned long erase_index;
+    unsigned long block_index;
+    unsigned int  voices;
+    unsigned char one_shot;
+    unsigned char choke;
+    unsigned char playing;
+};
 
+void flashSoftSetup(void);
 void flashWriteReg(char);
 void flashWriteBreg(char);
 char flashStatusCheck(char);
@@ -32,6 +45,7 @@ void flashProcessRead(void);
 void flashBulkErase(void);
 void flashEraseSector(unsigned long);
 void flashFXops(fractional*);
+
 
 
 #endif	/* XC_HEADER_TEMPLATE_H */

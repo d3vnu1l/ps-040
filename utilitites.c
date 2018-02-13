@@ -67,7 +67,7 @@ void scanButtons(void){
     
     // SAMPLE TRIGGERS 
     if(ctrl.pad[0]==0){                                         //kick
-        kick.playing=TRUE;
+        //kick.playing=TRUE;
     }
     /*
     if(controls.pad[2]==0&&hat_playing==FALSE){                                          //hat
@@ -75,7 +75,7 @@ void scanButtons(void){
     }
     */
     if(ctrl.pad[1]==0&&snare.playing==FALSE){                                        //snare
-        snare.playing=TRUE;
+        //snare.playing=TRUE;
     }
 }
 
