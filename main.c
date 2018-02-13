@@ -29,7 +29,7 @@ unsigned char   TxBufferA[FLASH_DMAXFER_BYTES] __attribute__((space(xmemory))),
 fractional      RxBufferB[STREAMBUF] __attribute__((space(xmemory)));
 
 /* Debug Variables */
-unsigned int process_time=0, flash_time = 0;;
+unsigned int process_time=0, flash_time = 0;
 
 struct sflags stat = {  .UART_ON = FALSE,
                         .TEST_SIN = FALSE,
@@ -75,16 +75,19 @@ int main(void) {
     initADC1();                     // Configure & enable internal ADC
     initPMP();
     initQEI_ENC();
-    if(stat.UART_ON) initUART1();        // Configure & enable UART
+    if(stat.UART_ON) initUART1();       // Configure & enable UART
     
-    initT1();                       // Configure & start T1 
-    initT2();                       // Configure & start T2 
-    initT3();                       // Configure & start T3 for lcd
+    initT1();                           // Configure & start T1 display
+    //initT2();                         // Configure & start T2 btns & pots
+    initT3();                           // Configure & start T3 for lcd
     //initT5();
     fractional *ping, *pong;
     
     while(1){    
         if(frameReady) {
+            scanButtons();                  // Read button matrix
+            if(_AD1IF) readPots();          // Check potentiometers
+            
             if(rw){
                 ping = streamA;
                 pong = outputB;
@@ -107,11 +110,6 @@ int main(void) {
             while(!SS3a);               //wait for flash transmissions to complete
             flash_time=write_ptr;
             frameReady=0;
-        }
-        if(_T2IF){
-            scanButtons();                   //read button matrix
-            if(_AD1IF) readPots();
-            _T2IF=0;
         }
         if(_T1IF){
             display();
