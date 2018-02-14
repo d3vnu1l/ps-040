@@ -17,7 +17,7 @@ extern struct sflags stat;
 extern struct clip_psv sine, kick, snare;
 
 void scanButtons(void){
-    
+    int i;
     static unsigned char pad_last[BUTTONS]={1};
     int portrdG, portrdD, portrdF;
 
@@ -65,18 +65,22 @@ void scanButtons(void){
         ctrl.pad[27]=(portrdD>>4)&1;
     }
     
+    //find last pressed button
+    for(i=(BUTTONS-1); i>=0; i--){
+        if(!ctrl.pad[i]) ctrl.last_pressed=i;
+    }
+    /*
     // SAMPLE TRIGGERS 
     if(ctrl.pad[0]==0){                                         //kick
         //kick.playing=TRUE;
     }
-    /*
-    if(controls.pad[2]==0&&hat_playing==FALSE){                                          //hat
+    if(controls.pad[2]==0&&hat_playing==FALSE){                 //hat
         hat_playing=TRUE;
     }
-    */
-    if(ctrl.pad[1]==0&&snare.playing==FALSE){                                        //snare
+    if(ctrl.pad[1]==0&&snare.playing==FALSE){                   //snare
         //snare.playing=TRUE;
     }
+    */
 }
 
 void readPots(void){

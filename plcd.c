@@ -1,7 +1,8 @@
 /*
  * File:   plcd.c
  */
-#include "xc.h"
+#include <xc.h>
+#include <stdlib.h> // For splash rand
 #include "plcd.h"
 #include "common.h"
 #include "screens.h"
@@ -44,9 +45,14 @@ void lcdSetCursorQ(unsigned char col, unsigned char row) {
 }
 
 void lcdWriteStringQ(char *string) {
+    const int limit = 20;
     char *it = string;
+    int i=0;
+    
     for (; *it; it++) {
         lcdWriteQMac(*it);
+        if(i++==(limit-1)) return;
+        
   }
 }
 
@@ -168,6 +174,70 @@ void lcdDrawPads(unsigned char col){
     if(!ctrl.pad[1]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
     if(!ctrl.pad[2]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
     if(!ctrl.pad[3]){lcdWriteQMac(' ');} else lcdWriteQMac(block);
+}
+
+void lcdDrawSlots(unsigned char col, unsigned char grid[16]){
+    
+    lcdSetCursorQ(col, 0);
+    if(grid[12]){lcdWriteQMac('*');} else lcdWriteQMac(0xFF);
+    if(grid[13]){lcdWriteQMac('*');} else lcdWriteQMac(0xFF);
+    if(grid[14]){lcdWriteQMac('*');} else lcdWriteQMac(0xFF);
+    if(grid[15]){lcdWriteQMac('*');} else lcdWriteQMac(0xFF);
+    lcdSetCursorQ(col, 1);
+    if(grid[8]){lcdWriteQMac('*');} else lcdWriteQMac(0xFF);
+    if(grid[9]){lcdWriteQMac('*');} else lcdWriteQMac(0xFF);
+    if(grid[10]){lcdWriteQMac('*');} else lcdWriteQMac(0xFF);
+    if(grid[11]){lcdWriteQMac('*');} else lcdWriteQMac(0xFF);
+    lcdSetCursorQ(col, 2);
+    if(grid[4]){lcdWriteQMac('*');} else lcdWriteQMac(0xFF);
+    if(grid[5]){lcdWriteQMac('*');} else lcdWriteQMac(0xFF);
+    if(grid[6]){lcdWriteQMac('*');} else lcdWriteQMac(0xFF);
+    if(grid[7]){lcdWriteQMac('*');} else lcdWriteQMac(0xFF);
+    lcdSetCursorQ(col, 3);
+    if(grid[0]){lcdWriteQMac('*');} else lcdWriteQMac(0xFF);
+    if(grid[1]){lcdWriteQMac('*');} else lcdWriteQMac(0xFF);
+    if(grid[2]){lcdWriteQMac('*');} else lcdWriteQMac(0xFF);
+    if(grid[3]){lcdWriteQMac('*');} else lcdWriteQMac(0xFF);
+}
+
+void lcdDrawSplash(void){
+    int i, j, k, size=20;
+    int frames = 6;
+    unsigned char splash[4][size];
+    //unsigned char* ptrA = splash;
+    
+    i=0;
+    while(i<frames){
+        if(_T1IF){    
+            _T1IF=0;
+            for(j=0; j<4; j++){
+                for(k=0; k<size; k++){
+                    if(j>=0 && j<size){
+                        srand(i+j+k+TMR1);
+                        unsigned char randchar = (unsigned char)(rand() % 93 + 33);
+                        splash[j][k]=randchar;
+                    }
+                    else splash[j][k] = ' ';
+                }
+            }
+            lcdClearQ(); 
+            lcdSetCursorQ(0,0);
+            lcdWriteStringQ(&splash[3][0]);
+            lcdSetCursorQ(0,1);
+            lcdWriteStringQ(&splash[2][0]);
+            lcdSetCursorQ(0,2);
+            lcdWriteStringQ(&splash[1][0]);
+            lcdSetCursorQ(0,3);
+            lcdWriteStringQ(&splash[0][0]);
+            //ptrA++;
+            i++;
+        }
+        if(_T3IF) {
+            lcdPoll();
+            _T3IF=0;
+        }
+        Delay_us(50);
+    }
 }
 
 void lcdPoll(void){  

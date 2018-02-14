@@ -29,7 +29,7 @@
 #define POTS	12                       
 #define NUMFX   5
 #define NUMFXUNITS 2
-#define SCREENS 5
+#define SCREENS 7
 
 /* Pin Map */
 #define SLED _LATF0                                                            
@@ -101,6 +101,7 @@ enum fxStruct{
 
 struct ctrlsrfc {
     unsigned char pad[BUTTONS];
+    unsigned char last_pressed;
     fractional pots[POTS];
     fractional pots_scaled[POTS];
     fractional pots_custom[POTS];

@@ -81,6 +81,7 @@ int main(void) {
     //initT2();                         // Configure & start T2 btns & pots
     initT3();                           // Configure & start T3 for lcd
     //initT5();
+    lcdDrawSplash();
     fractional *ping, *pong;
     
     while(1){    

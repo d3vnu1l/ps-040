@@ -32,6 +32,7 @@ struct clip_flash{
     unsigned int  voices;
     unsigned char one_shot;
     unsigned char choke;
+    unsigned char loop;
     unsigned char playing;
 };
 

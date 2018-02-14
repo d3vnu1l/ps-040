@@ -31,7 +31,7 @@ extern struct sflags stat;
 int fxLast=0, fxNow=0;
 
 void (*fxModPointers[NUMFX])(unsigned int, fractional, fractional, fractional) = {screenNoFXmod, screenLPFmod, screenTRMmod, screenLOPmod, screenBTCmod};
-void (*screenPointers[SCREENS])(void) = {screenFX, screenRecord, screenDebugPots, screenDebugFlash, screenDebugBuffers, screenSHIFT};
+void (*screenPointers[SCREENS])(void) = {screenFX, screenRecord, screenDebugPots, screenDebugFlash, screenDebugBuffers, screenDebugInput, screenSHIFT};
 
 void screenDebugAudio(void){
 
@@ -360,14 +360,30 @@ void screenSHIFT(void){
 }
 
 void screenRecord(void){
+    int i;
+    char grid[16];
+    for(i=0; i<16; i++){
+        if(ctrl.last_pressed==i)
+            grid[i]=1;
+        else grid[i]=0;
+    }
+    
     if(state!=laststate){
         //setup here
         lcdClearQ();
         lcdSetCursorQ(0,0);
-        lcdWriteStringQ("REC:");
+        lcdWriteStringQ("EDIT SAMPLE:");
+        lcdSetCursorQ(0,1);
+        lcdWriteStringQ("1SHOT:");
+        lcdSetCursorQ(0,2);
+        lcdWriteStringQ("CHOKE:");
+        lcdSetCursorQ(0,3);
+        lcdWriteStringQ("VOICE:");
     } else {
         //update here 
-        lcdDrawPads(16);
+        lcdSetCursorQ(13,0);
+        lcdWriteDecimalQ((ctrl.last_pressed+1), 2);
+        lcdDrawSlots(16, grid);
     }
 }
 
