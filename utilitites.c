@@ -15,6 +15,7 @@ extern enum screenStruc state;
 extern struct ctrlsrfc ctrl;
 extern struct sflags stat;
 extern struct clip_psv sine, kick, snare;
+extern struct clip_flash clipmap[FLASH_NUMCHUNKS];
 
 /* Buttons have 4 states
     held          0 0 (represented as 3)
@@ -80,7 +81,6 @@ void scanButtons(void){
     
     for(i=0; i<BUTTONS; i++){
         unsigned char temp = ((pad_last[i]&1)<<1) + (pad_now[i]&1);
-        
         switch(temp){
             case 0x00: 
                 ctrl.pad[i] = 3;    // HELD
@@ -104,18 +104,6 @@ void scanButtons(void){
     for(i=0; i<BUTTONS; i++){
         if(ctrl.pad[i]>1) ctrl.last_pressed=i;
     }
-    /*
-    // SAMPLE TRIGGERS 
-    if(ctrl.pad[0]==0){                                         //kick
-        //kick.playing=TRUE;
-    }
-    if(controls.pad[2]==0&&hat_playing==FALSE){                 //hat
-        hat_playing=TRUE;
-    }
-    if(ctrl.pad[1]==0&&snare.playing==FALSE){                   //snare
-        //snare.playing=TRUE;
-    }
-    */
 }
 
 void readPots(void){
@@ -128,7 +116,7 @@ void readPots(void){
     const unsigned int shift = 0xFE00;
     int i;
     _AD1IF = 0; // Clear conversion done status bit
-    if(ctrl.pad[34]>1)i=0;
+    if(ctrl.pad[34]<2)i=0;
     else i=POTS/2;
     pots_buf[0]=(ADC1BUF5>>1)|0x7;
     pots_buf[1]=(ADC1BUF2>>1)|0x7;
@@ -241,6 +229,7 @@ void display(void){
     changeFX();
     
     //if(!ctrl.pad[BTN_ENC]) state = scrnSHIFT;
+    
     
     if(state==debugscrnFLASH){
         if(ctrl.pad[33]==3) flashBulkErase();

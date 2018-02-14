@@ -27,6 +27,7 @@ extern enum fxStruct fxUnits[NUMFXUNITS];
 extern struct clip sine;
 extern struct ctrlsrfc ctrl;
 extern struct sflags stat;
+extern struct clip_flash clipmap[FLASH_NUMCHUNKS];
 
 int fxLast=0, fxNow=0;
 
@@ -383,6 +384,20 @@ void screenRecord(void){
         //update here 
         lcdSetCursorQ(13,0);
         lcdWriteDecimalQ((ctrl.last_pressed+1), 2);
+        
+        lcdSetCursorQ(7,1);
+        if(clipmap[ctrl.last_pressed].one_shot) 
+            lcdWriteStringQ("y");
+        else
+            lcdWriteStringQ("n");
+        lcdSetCursorQ(7,2);
+                if(clipmap[ctrl.last_pressed].choke) 
+            lcdWriteStringQ("y");
+        else
+            lcdWriteStringQ("n");
+        lcdSetCursorQ(7,3);
+        lcdWriteDecimalQ(clipmap[ctrl.last_pressed].voices, 1);
+        
         lcdDrawSlots(16, grid);
     }
 }

@@ -104,7 +104,7 @@ int main(void) {
                 //VectorAdd(STREAMBUF, ping, ping, RxBufferB);
             }
             if(state==scrnFX||state==debugscrnBUFFERS){
-                flashFXops(ping);
+                consFXops(ping);
             }
             processAudio(ping, pong);
             process_time=write_ptr;    //DEBUG
