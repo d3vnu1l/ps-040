@@ -21,7 +21,7 @@ void screenBTCmod(unsigned int, fractional, fractional, fractional);
 
 void screenFX(void);
 void screenSHIFT(void);
-void screenStart(char);
+void screenRecord(void);
 
 void screenUpdate(void);
 

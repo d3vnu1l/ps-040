@@ -29,6 +29,7 @@
 #define POTS	12                       
 #define NUMFX   5
 #define NUMFXUNITS 2
+#define SCREENS 5
 
 /* Pin Map */
 #define SLED _LATF0                                                            
@@ -78,15 +79,16 @@
 #define FLASH_NUMCHUNKS 16
 
 enum screenStruc{
-    invalid,
     scrnFX,
-    scrnSHIFT,
+    scrnREC,
     debugscrnPOTS,
     debugscrnFLASH,
     debugscrnBUFFERS,
     debugscrnINPUT,
     debugscrnAUDIO,
-    start
+    scrnSHIFT,
+    start,
+    invalid
 };
 
 enum fxStruct{

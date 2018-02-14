@@ -182,10 +182,25 @@ void checkFunctions(){
 }
 
 void display(void){
+    long int newstate;
+    static long int laststate;
+    
     scalePots();
-    changeFX();
+    
     // Update ui state logic here
-    state = (ENCODERCNTL/4)+1;
+    newstate = (ENCODERCNTL/4);
+    if(newstate > laststate){
+        if(state<(SCREENS-1))
+            state++;
+    } 
+    else if(newstate < laststate){
+        if(state>0)
+            state--;
+    }
+    laststate=newstate;
+    
+    changeFX();
+    
     //if(!ctrl.pad[BTN_ENC]) state = scrnSHIFT;
     
     if(state==debugscrnFLASH){

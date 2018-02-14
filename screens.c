@@ -31,12 +31,13 @@ extern struct sflags stat;
 int fxLast=0, fxNow=0;
 
 void (*fxModPointers[NUMFX])(unsigned int, fractional, fractional, fractional) = {screenNoFXmod, screenLPFmod, screenTRMmod, screenLOPmod, screenBTCmod};
+void (*screenPointers[SCREENS])(void) = {screenFX, screenRecord, screenDebugPots, screenDebugFlash, screenDebugBuffers, screenSHIFT};
 
-void screenDebugAudio(){
+void screenDebugAudio(void){
 
 }
 
-void screenDebugBuffers(){
+void screenDebugBuffers(void){
     if(state!=laststate){
         //setup here
         lcdClearQ();
@@ -108,7 +109,6 @@ void screenDebugPots(void){
         lcdWriteWordUnsignedQ(ctrl.pots[bank++]);
     }
 }
-
 
 void screenDebugFlash(void){
         if(state!=laststate){
@@ -359,41 +359,23 @@ void screenSHIFT(void){
     }
 }
 
+void screenRecord(void){
+    if(state!=laststate){
+        //setup here
+        lcdClearQ();
+        lcdSetCursorQ(0,0);
+        lcdWriteStringQ("REC:");
+    } else {
+        //update here 
+        lcdDrawPads(16);
+    }
+}
+
 void screenUpdate(void){
     fxNow=fxUnits[0]+fxUnits[1];
     
-    switch(state){
-        case start: break;
-        case scrnFX:            screenFX(); 
-        break;
-        case scrnSHIFT:         screenSHIFT();
-        break;
-        case debugscrnPOTS:     screenDebugPots();
-        break;
-        case debugscrnFLASH:    screenDebugFlash();
-        break;
-        case debugscrnBUFFERS:  screenDebugBuffers();
-        break;
-        case debugscrnINPUT:    screenDebugInput();
-        break;
-                        
-        default: break;
-    }
+    screenPointers[state]();
     
     laststate=state;
     fxLast=fxUnits[0]+fxUnits[1];
 }
-    /*
-    lcdSetCursorQ(0,3);
-    if(hard_clipped==TRUE){                                                     //CLIP CONTROL    
-        lcdWriteStringQ("CLIP");
-        hard_clipped=FALSE;  
-    }
-    else if(TEST_SIN==TRUE)lcdWriteStringQ("SINE");
-    else lcdWriteStringQ("THRU");
-     * 
-     *    lcdSetCursorQ(10,3);
-   lcdWriteWordQ(ENCODERCNTL);
-    */
-
-
