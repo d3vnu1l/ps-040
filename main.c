@@ -97,13 +97,13 @@ int main(void) {
             }
 
             if(stat.DMA_JUSTREAD==TRUE){    
-                    flashProcessRead();                             // Process DMA requested read data
-                    stat.DMA_JUSTREAD=FALSE;
-                    VectorCopy(STREAMBUF, ping, RxBufferB);
-                    //VectorAdd(STREAMBUF, ping, ping, RxBufferB);
+                flashProcessRead();                             // Process DMA requested read data
+                stat.DMA_JUSTREAD=FALSE;
+                VectorCopy(STREAMBUF, ping, RxBufferB);
+                //VectorAdd(STREAMBUF, ping, ping, RxBufferB);
             }
             if(state==scrnFX||state==debugscrnBUFFERS){
-                    flashFXops(ping);
+                flashFXops(ping);
             }
             processAudio(ping, pong);
             process_time=write_ptr;    //DEBUG

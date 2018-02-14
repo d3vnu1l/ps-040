@@ -186,7 +186,7 @@ void display(void){
     changeFX();
     // Update ui state logic here
     state = (ENCODERCNTL/4)+1;
-    if(!ctrl.pad[BTN_ENC]) state = scrnSHIFT;
+    //if(!ctrl.pad[BTN_ENC]) state = scrnSHIFT;
     
     if(state==debugscrnFLASH){
         if(!ctrl.pad[33]) flashBulkErase();

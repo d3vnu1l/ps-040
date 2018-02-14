@@ -220,7 +220,7 @@ void flashFXops(fractional* stream){
     for(i=0; i<FLASH_NUMCHUNKS; i++){
         if(!ctrl.pad[i+17]){    //use shifted pads to trigger recording
             flashWritePage(stream, clipmap[i].write_index);
-            if(clipmap[i].write_index!=clipmap[i].end_address){
+            if(clipmap[i].write_index<clipmap[i].end_address){
                 clipmap[i].write_index+=FLASH_PAGE;
             }
             else {
@@ -232,45 +232,35 @@ void flashFXops(fractional* stream){
         }
     }
     
-    /*
-    if(!ctrl.pad[3]){
-        flashWritePage(stream, writeAddr);
-        writeAddr+=FLASH_PAGE;
-    } else writeAddr=0;
-    */
-    
     //check read triggers
-    for(i=0; i<FLASH_NUMCHUNKS; i++){
-        if(!ctrl.pad[i]){
-            flashStartRead(clipmap[i].read_index);     // READBACK
-            if(clipmap[i].read_index!=clipmap[i].end_address){
-                clipmap[i].read_index+=FLASH_PAGE;
-            }
+    if(ctrl.pad[BTN_ENC]){
+        for(i=0; i<FLASH_NUMCHUNKS; i++){
+            if(!ctrl.pad[i]){
+                flashStartRead(clipmap[i].read_index);     // READBACK
+                if(clipmap[i].read_index<clipmap[i].end_address){
+                    clipmap[i].read_index+=FLASH_PAGE;
+                }
+                else {
+                    clipmap[i].read_index=clipmap[i].start_address;
+                }
+            } 
             else {
                 clipmap[i].read_index=clipmap[i].start_address;
             }
-        } 
-        else {
-            clipmap[i].read_index=clipmap[i].start_address;
         }
     }
     
-    /*
-    if(!ctrl.pad[4]){
-        flashStartRead(readAddr);     // READBACK
-        readAddr+=FLASH_PAGE;
-    } else readAddr=0;
-    
-    
-    if(!ctrl.pad[5]){
-        if(flashStatusCheck(FLASH_RDSR1)==0x03);
-        else{
-            flashEraseSector(eraseAddr);
-            eraseAddr+=FLASH_PAGE;
+    // Check erase
+    if(!ctrl.pad[BTN_ENC]){
+        for(i=0; i<FLASH_NUMCHUNKS; i++){
+            if(!ctrl.pad[i]){
+                if(flashStatusCheck(FLASH_RDSR1)&&0x04);
+                else{
+                    flashEraseSector(clipmap[i].erase_index);
+                    if(clipmap[i].write_index!=clipmap[i].end_address)
+                        clipmap[i].erase_index+=FLASH_SECTOR;
+                }
+            } else clipmap[i].erase_index=clipmap[i].start_address;
         }
-    } else eraseAddr=0;
-    if(!ctrl.pad[6])flashWriteReg(FLASH_WREN);
-    */
-    //if(!ctrl.pad[7]) stat.TEST_SIN=TRUE;
-    //else stat.TEST_SIN = FALSE;
+    }
 }

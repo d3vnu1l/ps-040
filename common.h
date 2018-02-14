@@ -72,6 +72,7 @@
 /* Flash Variable */
 #define FLASH_DMAXFER_BYTES 512 // Must be double of streambuf
 #define FLASH_PAGE 512
+#define FLASH_SECTOR 256000
 /* Memory Map */
 #define FLASH_MAX 0x04000000
 #define FLASH_NUMCHUNKS 16
