@@ -57,7 +57,7 @@ void initBuffers(void){
     }
     
     for(i=0; i<BUTTONS; i++)
-        ctrl.pad[i]=1;
+        ctrl.pad[i]=0;
     
     for(i=0; i<FLASH_DMAXFER_BYTES; i++){
         TxBufferA[i]=0;

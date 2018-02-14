@@ -214,11 +214,11 @@ void flashBulkErase(void) {
 void flashFXops(fractional* stream){
     int i;
     
-    if(!ctrl.pad[33]) flashBulkErase();
+    if(ctrl.pad[33]>1) flashBulkErase();
     
     //check write triggers
     for(i=0; i<FLASH_NUMCHUNKS; i++){
-        if(!ctrl.pad[i+17]){    //use shifted pads to trigger recording
+        if(ctrl.pad[i+17]>1){    //use shifted pads to trigger recording
             flashWritePage(stream, clipmap[i].write_index);
             if(clipmap[i].write_index<clipmap[i].end_address){
                 clipmap[i].write_index+=FLASH_PAGE;
@@ -233,9 +233,9 @@ void flashFXops(fractional* stream){
     }
     
     //check read triggers
-    if(ctrl.pad[BTN_ENC]){
+    if(ctrl.pad[BTN_ENC]<2){
         for(i=0; i<FLASH_NUMCHUNKS; i++){
-            if(!ctrl.pad[i]){
+            if(ctrl.pad[i]>1){
                 flashStartRead(clipmap[i].read_index);     // READBACK
                 if(clipmap[i].read_index<clipmap[i].end_address){
                     clipmap[i].read_index+=FLASH_PAGE;
@@ -251,9 +251,9 @@ void flashFXops(fractional* stream){
     }
     
     // Check erase
-    if(!ctrl.pad[BTN_ENC]){
+    if(ctrl.pad[BTN_ENC]>1){
         for(i=0; i<FLASH_NUMCHUNKS; i++){
-            if(!ctrl.pad[i]){
+            if(ctrl.pad[i]>1){
                 if(flashStatusCheck(FLASH_RDSR1)&&0x04);
                 else{
                     flashEraseSector(clipmap[i].erase_index);

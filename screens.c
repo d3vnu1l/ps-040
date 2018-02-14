@@ -82,7 +82,7 @@ void screenDebugPots(void){
         lcdWriteStringQ("|");
     } else {
         // Update here
-        if(!ctrl.pad[34])bank=POTS/2;
+        if(ctrl.pad[34]>1)bank=POTS/2;
         lcdSetCursorQ(0,1);
         lcdWriteDecimalQ(ctrl.pots_scaled[bank], 3);
         lcdWriteQ(',');

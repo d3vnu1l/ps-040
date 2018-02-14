@@ -16,58 +16,93 @@ extern struct ctrlsrfc ctrl;
 extern struct sflags stat;
 extern struct clip_psv sine, kick, snare;
 
+/* Buttons have 4 states
+    held          0 0 (represented as 3)
+    pressed       1 0 (represented as 1)
+    depressed     0 1 (represented as 2)
+    inactive      1 1 (represented as 0)
+ * So that a pad value > 1 indicates playing
+*/
 void scanButtons(void){
     int i;
-    static unsigned char pad_last[BUTTONS]={1};
+    static unsigned char pad_last[BUTTONS]={[0 ... (BUTTONS-1)] = 1};
+    static unsigned char pad_now[BUTTONS]={[0 ... (BUTTONS-1)] = 1};
     int portrdG, portrdD, portrdF;
 
     portrdG = PORTG;
     portrdD = PORTD;
     portrdF = PORTF;
     
-    ctrl.pad[34]=(portrdF>>7)&1;     // Special function button
+    for(i=0; i<BUTTONS; i++){      // Get last button history
+        pad_last[i]=pad_now[i];
+    }
     
-    if(ctrl.pad[34]){
-        ctrl.pad[6]=(portrdF>>6)&1;
-        ctrl.pad[5]=(portrdF>>5)&1;
-        ctrl.pad[4]=(portrdF>>4)&1;
-        ctrl.pad[0]=(portrdG)&1;
-        ctrl.pad[1]=(portrdG>>1)&1;
-        ctrl.pad[2]=(portrdG>>2)&1;
-        ctrl.pad[3]=(portrdG>>3)&1;
-        ctrl.pad[16]=(portrdG>>10)&1;    // Encoder button
-        ctrl.pad[11]=(portrdG>>11)&1;
-        ctrl.pad[12]=(portrdG>>12)&1;
-        ctrl.pad[13]=(portrdG>>13)&1;
-        ctrl.pad[14]=(portrdG>>14)&1;
-        ctrl.pad[15]=(portrdG>>15)&1;
-        ctrl.pad[7]=(portrdD>>1)&1;
-        ctrl.pad[8]=(portrdD>>2)&1;
-        ctrl.pad[9]=(portrdD>>3)&1;
-        ctrl.pad[10]=(portrdD>>4)&1;
+    pad_now[34]=(portrdF>>7)&1;        // Special function button
+    
+    if(pad_now[34]){
+        pad_now[6]=(portrdF>>6)&1;
+        pad_now[5]=(portrdF>>5)&1;
+        pad_now[4]=(portrdF>>4)&1;
+        pad_now[0]=(portrdG)&1;
+        pad_now[1]=(portrdG>>1)&1;
+        pad_now[2]=(portrdG>>2)&1;
+        pad_now[3]=(portrdG>>3)&1;
+        pad_now[16]=(portrdG>>10)&1;    // Encoder button
+        pad_now[11]=(portrdG>>11)&1;
+        pad_now[12]=(portrdG>>12)&1;
+        pad_now[13]=(portrdG>>13)&1;
+        pad_now[14]=(portrdG>>14)&1;
+        pad_now[15]=(portrdG>>15)&1;
+        pad_now[7]=(portrdD>>1)&1;
+        pad_now[8]=(portrdD>>2)&1;
+        pad_now[9]=(portrdD>>3)&1;
+        pad_now[10]=(portrdD>>4)&1;
     } else {
-        ctrl.pad[23]=(portrdF>>6)&1;
-        ctrl.pad[22]=(portrdF>>5)&1;
-        ctrl.pad[21]=(portrdF>>4)&1;
-        ctrl.pad[17]=(portrdG)&1;
-        ctrl.pad[18]=(portrdG>>1)&1;
-        ctrl.pad[19]=(portrdG>>2)&1;
-        ctrl.pad[20]=(portrdG>>3)&1;
-        ctrl.pad[33]=(portrdG>>10)&1;    // Encoder button
-        ctrl.pad[28]=(portrdG>>11)&1;
-        ctrl.pad[29]=(portrdG>>12)&1;
-        ctrl.pad[30]=(portrdG>>13)&1;
-        ctrl.pad[31]=(portrdG>>14)&1;
-        ctrl.pad[32]=(portrdG>>15)&1;
-        ctrl.pad[24]=(portrdD>>1)&1;
-        ctrl.pad[25]=(portrdD>>2)&1;
-        ctrl.pad[26]=(portrdD>>3)&1;
-        ctrl.pad[27]=(portrdD>>4)&1;
+        pad_now[23]=(portrdF>>6)&1;
+        pad_now[22]=(portrdF>>5)&1;
+        pad_now[21]=(portrdF>>4)&1;
+        pad_now[17]=(portrdG)&1;
+        pad_now[18]=(portrdG>>1)&1;
+        pad_now[19]=(portrdG>>2)&1;
+        pad_now[20]=(portrdG>>3)&1;
+        pad_now[33]=(portrdG>>10)&1;    // Encoder button
+        pad_now[28]=(portrdG>>11)&1;
+        pad_now[29]=(portrdG>>12)&1;
+        pad_now[30]=(portrdG>>13)&1;
+        pad_now[31]=(portrdG>>14)&1;
+        pad_now[32]=(portrdG>>15)&1;
+        pad_now[24]=(portrdD>>1)&1;
+        pad_now[25]=(portrdD>>2)&1;
+        pad_now[26]=(portrdD>>3)&1;
+        pad_now[27]=(portrdD>>4)&1;
+    }
+    
+    
+    for(i=0; i<BUTTONS; i++){
+        unsigned char temp = ((pad_last[i]&1)<<1) + (pad_now[i]&1);
+        
+        switch(temp){
+            case 0x00: 
+                ctrl.pad[i] = 3;    // HELD
+                break;
+            case 0x01: 
+                ctrl.pad[i] = 1;    // DEPRESSED
+                break;
+            case 0x02: 
+                ctrl.pad[i] = 2;    // PRESSED
+                break;
+            case 0x03: 
+                ctrl.pad[i] = 0;    // INACTIVE
+                break;
+            default: 
+                ctrl.pad[i]=0;
+                break;
+        }
     }
     
     //find last pressed button
-    for(i=(BUTTONS-1); i>=0; i--){
-        if(!ctrl.pad[i]) ctrl.last_pressed=i;
+    for(i=0; i<BUTTONS; i++){
+        if(ctrl.pad[i]>1) ctrl.last_pressed=i;
     }
     /*
     // SAMPLE TRIGGERS 
@@ -93,7 +128,7 @@ void readPots(void){
     const unsigned int shift = 0xFE00;
     int i;
     _AD1IF = 0; // Clear conversion done status bit
-    if(ctrl.pad[34])i=0;
+    if(ctrl.pad[34]>1)i=0;
     else i=POTS/2;
     pots_buf[0]=(ADC1BUF5>>1)|0x7;
     pots_buf[1]=(ADC1BUF2>>1)|0x7;
@@ -208,11 +243,11 @@ void display(void){
     //if(!ctrl.pad[BTN_ENC]) state = scrnSHIFT;
     
     if(state==debugscrnFLASH){
-        if(!ctrl.pad[33]) flashBulkErase();
-        if(!ctrl.pad[3])flashWritePage(NULL, 0);
-        if(!ctrl.pad[4])flashStartRead((long)(0));     // READBACK
-        if(!ctrl.pad[5])flashEraseSector((long)(0));
-        if(!ctrl.pad[6])flashWriteReg(FLASH_WREN);
+        if(ctrl.pad[33]==3) flashBulkErase();
+        if(ctrl.pad[3]>1)   flashWritePage(NULL, 0);
+        if(ctrl.pad[4]>1)   flashStartRead((long)(0));     // READBACK
+        if(ctrl.pad[5]>1)   flashEraseSector((long)(0));
+        if(ctrl.pad[6]>1)   flashWriteReg(FLASH_WREN);
     }
     // Update screen here
     checkFunctions();
