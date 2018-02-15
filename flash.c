@@ -26,10 +26,9 @@ void flashSoftSetup(void){
     clipmap[0].read_index=clipmap[0].start_address;
     clipmap[0].write_index=clipmap[0].start_address;
     clipmap[0].erase_index=clipmap[0].start_address;
-    clipmap[0].voices=1;
-    clipmap[0].one_shot=FALSE;
+    clipmap[0].gate=TRUE;
+    clipmap[i].loop=FALSE;
     clipmap[0].choke=FALSE;
-    clipmap[0].block_index=0;
     clipmap[0].playing=FALSE;
     
     for(; i<FLASH_NUMCHUNKS; i++){
@@ -37,15 +36,14 @@ void flashSoftSetup(void){
         clipmap[i].read_index=clipmap[i].start_address;
         clipmap[i].write_index=clipmap[i].start_address;
         clipmap[i].erase_index=clipmap[i].start_address;
-        clipmap[i].voices=1;
-        clipmap[i].one_shot=FALSE;
+        clipmap[i].gate=TRUE;
+        clipmap[i].loop=FALSE;
         clipmap[i].choke=FALSE;
-        clipmap[i].block_index=0;
         clipmap[i].playing=FALSE;
         
-        clipmap[i-1].end_address=clipmap[i].start_address;
+        clipmap[i-1].end_limit=clipmap[i].start_address;
     }
-    clipmap[FLASH_NUMCHUNKS-1].end_address=FLASH_MAX;
+    clipmap[FLASH_NUMCHUNKS-1].end_limit=FLASH_MAX;
 }
 
 void flashWriteReg(char command) {

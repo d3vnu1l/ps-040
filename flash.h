@@ -24,15 +24,13 @@
 
 struct clip_flash{
     unsigned long start_address;
-    unsigned long end_address;
+    unsigned long end_limit;
     unsigned long read_index;
     unsigned long write_index;
     unsigned long erase_index;
-    unsigned long block_index;
-    unsigned int  voices;
-    unsigned char one_shot;
-    unsigned char choke;
+    unsigned char gate;
     unsigned char loop;
+    unsigned char choke;
     unsigned char playing;
 };
 

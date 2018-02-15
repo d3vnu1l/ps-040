@@ -375,29 +375,31 @@ void screenRecord(void){
         lcdSetCursorQ(0,0);
         lcdWriteStringQ("EDIT SAMPLE:");
         lcdSetCursorQ(0,1);
-        lcdWriteStringQ("1SHOT:");
+        lcdWriteStringQ("LOOP :");
         lcdSetCursorQ(0,2);
-        lcdWriteStringQ("CHOKE:");
+        lcdWriteStringQ("GATE :");
         lcdSetCursorQ(0,3);
-        lcdWriteStringQ("VOICE:");
+        lcdWriteStringQ("CHOKE:");
     } else {
         //update here 
         lcdSetCursorQ(13,0);
         lcdWriteDecimalQ((ctrl.last_pressed+1), 2);
         
         lcdSetCursorQ(7,1);
-        if(clipmap[ctrl.last_pressed].one_shot==TRUE) 
+        if(clipmap[ctrl.last_pressed].loop==TRUE) 
             lcdWriteStringQ("y");
         else
             lcdWriteStringQ("n");
         lcdSetCursorQ(7,2);
-                if(clipmap[ctrl.last_pressed].choke) 
+                if(clipmap[ctrl.last_pressed].gate) 
             lcdWriteStringQ("y");
         else
             lcdWriteStringQ("n");
         lcdSetCursorQ(7,3);
-        lcdWriteDecimalQ(clipmap[ctrl.last_pressed].voices, 1);
-        
+        if(clipmap[ctrl.last_pressed].choke) 
+            lcdWriteStringQ("y");
+        else
+            lcdWriteStringQ("n");
         lcdDrawSlots(16, grid);
     }
 }

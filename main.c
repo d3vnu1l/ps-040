@@ -108,7 +108,7 @@ int main(void) {
             consPADops(ping);
             
             /* State dependent controls*/
-            if(state==scrnEDITone) consEDITops();
+            if(state==scrnEDITone || state== debugscrnBUFFERS) consEDITops();
             
             
             processAudio(ping, pong);
