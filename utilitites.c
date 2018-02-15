@@ -111,7 +111,9 @@ void readPots(void){
     fractional pots_buf[POTS/2]; 
     fractional pots_last[POTS/2];
     static fractional pots_smoothed[POTS/2];
-    const fractional pot_alpha = 0x0F80;    //larger = rougher, lower = more latency
+    fractional speed, a1, aIn1;
+    
+    const fractional pot_alpha = 0x0F80;    //3968, (.12) larger = rougher, lower = more latency
     const fractional pot_alpha_inv = 32767-pot_alpha;
     const unsigned int shift = 0xFE00;
     int i, j;
@@ -132,15 +134,19 @@ void readPots(void){
     pots_buf[4]=(ADC1BUF3>>1)|0x7;
     pots_buf[5]=(ADC1BUF0>>1)|0x7;
     
-    pots_last[0]=(pots_smoothed[0]&shift);
+    speed=(pots_last[0]-pots_buf[0])&0x7FFF;    //get speed
+    aIn1=(32767/(1+speed));
+    a1=32767-aIn1;
+    
+    pots_last[0]=(pots_smoothed[0]);
     pots_last[1]=(pots_smoothed[1]&shift);
     pots_last[2]=(pots_smoothed[2]&shift);
     pots_last[3]=(pots_smoothed[3]&shift);
     pots_last[4]=(pots_smoothed[4]&shift);
     pots_last[5]=(pots_smoothed[5]&shift);
     
-    result =__builtin_mpy(pots_buf[0],pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
-    result =__builtin_mac(result, pots_smoothed[0], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
+    result =__builtin_mpy(pots_buf[0],a1, NULL, NULL, 0, NULL, NULL, 0);
+    result =__builtin_mac(result, pots_smoothed[0], aIn1, NULL, NULL, 0, NULL, NULL, 0, 0, result);
     pots_smoothed[0]=__builtin_sac(result, 0);
     result =__builtin_mpy(pots_buf[1],pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
     result =__builtin_mac(result, pots_smoothed[1], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
@@ -224,17 +230,7 @@ void display(void){
     laststate=newstate;
     
     changeFX();
-    
-    //if(!ctrl.pad[BTN_ENC]) state = scrnSHIFT;
-    
-    
-    if(state==debugscrnFLASH){
-        if(ctrl.pad[33]==3) flashBulkErase();
-        if(ctrl.pad[3]>1)   flashWritePage(NULL, 0);
-        if(ctrl.pad[4]>1)   flashStartRead((long)(0));     // READBACK
-        if(ctrl.pad[5]>1)   flashEraseSector((long)(0));
-        if(ctrl.pad[6]>1)   flashWriteReg(FLASH_WREN);
-    }
+
     // Update screen here
     screenUpdate();
    
