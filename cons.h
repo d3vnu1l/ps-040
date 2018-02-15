@@ -7,11 +7,11 @@
 
 
 
-#ifndef CONTROLS_H
-#define	CONTROLS_H
+#ifndef CONS_H
+#define	CONS_H
 
-void consFXops(fractional*);
+void consPADops(fractional* stream);
+void consEDITops(void);
 
 
 #endif	/* CONTROLS_H */
-

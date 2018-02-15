@@ -386,7 +386,7 @@ void screenRecord(void){
         lcdWriteDecimalQ((ctrl.last_pressed+1), 2);
         
         lcdSetCursorQ(7,1);
-        if(clipmap[ctrl.last_pressed].one_shot) 
+        if(clipmap[ctrl.last_pressed].one_shot==TRUE) 
             lcdWriteStringQ("y");
         else
             lcdWriteStringQ("n");

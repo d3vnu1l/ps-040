@@ -13,7 +13,7 @@
       <itemPath>plcd.h</itemPath>
       <itemPath>flash.h</itemPath>
       <itemPath>screens.h</itemPath>
-      <itemPath>C:/Users/ryan/Documents/seniorproject/ps-040/controls.h</itemPath>
+      <itemPath>cons.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -31,7 +31,7 @@
       <itemPath>plcd.c</itemPath>
       <itemPath>flash.c</itemPath>
       <itemPath>screens.c</itemPath>
-      <itemPath>C:/Users/ryan/Documents/seniorproject/ps-040/controls.c</itemPath>
+      <itemPath>cons.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -52,8 +52,8 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>PICkit3PlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
-        <languageToolchainVersion>1.30</languageToolchainVersion>
-        <platform>3</platform>
+        <languageToolchainVersion>1.31</languageToolchainVersion>
+        <platform>2</platform>
       </toolsSet>
       <compileType>
         <linkerTool>
@@ -252,7 +252,6 @@
         <property key="UART 2" value="true"/>
         <property key="UART 3" value="true"/>
         <property key="UART 4" value="true"/>
-        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>

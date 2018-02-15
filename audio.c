@@ -12,12 +12,10 @@ extern fractional       RxBufferB[STREAMBUF] __attribute__((space(xmemory)));
 
 extern fractional sintab[SINRES];
 static fractional loopbuf[LOOP_BUF_SIZE] __attribute__ ((eds)) = {0};
-
-
-fractional lpf_alpha=Q15(0.5), lpf_inv_alpha=Q15(0.5);
 static fractional psvbuf[STREAMBUF]={0};
 
 extern enum fxStruct fxUnits[NUMFXUNITS];
+extern enum screenStruc state;
 extern struct clip_psv sine, kick, snare;
 extern struct sflags stat;
 extern struct ctrlsrfc ctrl;
@@ -52,6 +50,8 @@ void runBufferLooper(fractional *source){
 
 void runLPF(fractional *source, fractional *destination, fractional param1, fractional param2, fractional param3){
     volatile register int result asm("A");
+    static fractional lpf_alpha=Q15(0.5), lpf_inv_alpha=Q15(0.5);
+    
     static fractional delayed_sample;
     volatile fractional sample;
     if(param3>=0x3FFF){     //LPF CONTROL
@@ -172,11 +172,11 @@ void runLOP(fractional *source, fractional *destination, fractional param1, frac
 void processAudio(fractional *source, fractional *destination){
     volatile register int result1 asm("A");
     
-    
-    //Run each FX unit
-    if(fxUnits[0]==0); else fxFuncPointers[fxUnits[0]](source, source, ctrl.pots[FX_1], ctrl.pots[FX_2], ctrl.pots[FX_3]);
-    if(fxUnits[1]==0); else fxFuncPointers[fxUnits[1]](source, source, ctrl.pots[FX_4], ctrl.pots[FX_5], ctrl.pots[FX_6]);
-   
+    if(state==scrnFX){
+        if(fxUnits[0]==0); else fxFuncPointers[fxUnits[0]](source, source, ctrl.pots[FX_1], ctrl.pots[FX_2], ctrl.pots[FX_3]);
+        if(fxUnits[1]==0); else fxFuncPointers[fxUnits[1]](source, source, ctrl.pots[FX_4], ctrl.pots[FX_5], ctrl.pots[FX_6]);
+    }
+
     if(kick.playing==TRUE){
         ClipCopy_psv(STREAMBUF, psvbuf, kick.read_ptr);
            

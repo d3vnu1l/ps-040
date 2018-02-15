@@ -80,7 +80,7 @@
 
 enum screenStruc{
     scrnFX,
-    scrnREC,
+    scrnEDITone,
     debugscrnPOTS,
     debugscrnFLASH,
     debugscrnBUFFERS,
@@ -103,6 +103,7 @@ struct ctrlsrfc {
     unsigned char pad[BUTTONS];
     unsigned char last_pressed;
     fractional pots[POTS];
+    unsigned char pot_moved[POTS];
     fractional pots_scaled[POTS];
     fractional pots_custom[POTS];
 };

@@ -6,4 +6,5 @@ utilities.h  \
  audio.h  \
 sounds.h  \
 flash.h  \
-plcd.h 
+plcd.h  \
+cons.h 

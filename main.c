@@ -8,6 +8,7 @@
 #include "sounds.h"
 #include "flash.h"
 #include "plcd.h"
+#include "cons.h""
 
 #pragma config ICS = PGD1       //pgeDC 1 is used
 #pragma config JTAGEN = OFF     //disable jtag
@@ -103,9 +104,13 @@ int main(void) {
                 VectorCopy(STREAMBUF, ping, RxBufferB);
                 //VectorAdd(STREAMBUF, ping, ping, RxBufferB);
             }
-            if(state==scrnFX||state==debugscrnBUFFERS){
-                consFXops(ping);
-            }
+            
+            consPADops(ping);
+            
+            /* State dependent controls*/
+            if(state==scrnEDITone) consEDITops();
+            
+            
             processAudio(ping, pong);
             process_time=write_ptr;    //DEBUG
             while(!SS3a);               //wait for flash transmissions to complete

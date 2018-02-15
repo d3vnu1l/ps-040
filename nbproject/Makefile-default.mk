@@ -19,7 +19,7 @@ endif
 endif
 
 # Environment
-MKDIR=gnumkdir -p
+MKDIR=mkdir -p
 RM=rm -f 
 MV=mv 
 CP=cp 
@@ -44,6 +44,12 @@ else
 COMPARISON_BUILD=
 endif
 
+ifdef SUB_IMAGE_ADDRESS
+SUB_IMAGE_ADDRESS_COMMAND=--image-address $(SUB_IMAGE_ADDRESS)
+else
+SUB_IMAGE_ADDRESS_COMMAND=
+endif
+
 # Object Directory
 OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 
@@ -51,17 +57,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=devInits.c main.c utilitites.c routines.c sounds.c audio.c plcd.c flash.c screens.c C:/Users/ryan/Documents/seniorproject/ps-040/controls.c
+SOURCEFILES_QUOTED_IF_SPACED=devInits.c main.c utilitites.c routines.c sounds.c audio.c plcd.c flash.c screens.c cons.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/devInits.o ${OBJECTDIR}/main.o ${OBJECTDIR}/utilitites.o ${OBJECTDIR}/routines.o ${OBJECTDIR}/sounds.o ${OBJECTDIR}/audio.o ${OBJECTDIR}/plcd.o ${OBJECTDIR}/flash.o ${OBJECTDIR}/screens.o ${OBJECTDIR}/_ext/1809592793/controls.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/devInits.o.d ${OBJECTDIR}/main.o.d ${OBJECTDIR}/utilitites.o.d ${OBJECTDIR}/routines.o.d ${OBJECTDIR}/sounds.o.d ${OBJECTDIR}/audio.o.d ${OBJECTDIR}/plcd.o.d ${OBJECTDIR}/flash.o.d ${OBJECTDIR}/screens.o.d ${OBJECTDIR}/_ext/1809592793/controls.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/devInits.o ${OBJECTDIR}/main.o ${OBJECTDIR}/utilitites.o ${OBJECTDIR}/routines.o ${OBJECTDIR}/sounds.o ${OBJECTDIR}/audio.o ${OBJECTDIR}/plcd.o ${OBJECTDIR}/flash.o ${OBJECTDIR}/screens.o ${OBJECTDIR}/cons.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/devInits.o.d ${OBJECTDIR}/main.o.d ${OBJECTDIR}/utilitites.o.d ${OBJECTDIR}/routines.o.d ${OBJECTDIR}/sounds.o.d ${OBJECTDIR}/audio.o.d ${OBJECTDIR}/plcd.o.d ${OBJECTDIR}/flash.o.d ${OBJECTDIR}/screens.o.d ${OBJECTDIR}/cons.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/devInits.o ${OBJECTDIR}/main.o ${OBJECTDIR}/utilitites.o ${OBJECTDIR}/routines.o ${OBJECTDIR}/sounds.o ${OBJECTDIR}/audio.o ${OBJECTDIR}/plcd.o ${OBJECTDIR}/flash.o ${OBJECTDIR}/screens.o ${OBJECTDIR}/_ext/1809592793/controls.o
+OBJECTFILES=${OBJECTDIR}/devInits.o ${OBJECTDIR}/main.o ${OBJECTDIR}/utilitites.o ${OBJECTDIR}/routines.o ${OBJECTDIR}/sounds.o ${OBJECTDIR}/audio.o ${OBJECTDIR}/plcd.o ${OBJECTDIR}/flash.o ${OBJECTDIR}/screens.o ${OBJECTDIR}/cons.o
 
 # Source Files
-SOURCEFILES=devInits.c main.c utilitites.c routines.c sounds.c audio.c plcd.c flash.c screens.c C:/Users/ryan/Documents/seniorproject/ps-040/controls.c
+SOURCEFILES=devInits.c main.c utilitites.c routines.c sounds.c audio.c plcd.c flash.c screens.c cons.c
 
 
 CFLAGS=
@@ -151,12 +157,12 @@ ${OBJECTDIR}/screens.o: screens.c  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} $(MP_EXTRA_CC_PRE)  screens.c  -o ${OBJECTDIR}/screens.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/screens.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -menable-large-arrays -O1 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/screens.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
-${OBJECTDIR}/_ext/1809592793/controls.o: C:/Users/ryan/Documents/seniorproject/ps-040/controls.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/_ext/1809592793" 
-	@${RM} ${OBJECTDIR}/_ext/1809592793/controls.o.d 
-	@${RM} ${OBJECTDIR}/_ext/1809592793/controls.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  C:/Users/ryan/Documents/seniorproject/ps-040/controls.c  -o ${OBJECTDIR}/_ext/1809592793/controls.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/_ext/1809592793/controls.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -menable-large-arrays -O1 -msmart-io=1 -Wall -msfr-warn=off  
-	@${FIXDEPS} "${OBJECTDIR}/_ext/1809592793/controls.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+${OBJECTDIR}/cons.o: cons.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/cons.o.d 
+	@${RM} ${OBJECTDIR}/cons.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  cons.c  -o ${OBJECTDIR}/cons.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/cons.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -menable-large-arrays -O1 -msmart-io=1 -Wall -msfr-warn=off  
+	@${FIXDEPS} "${OBJECTDIR}/cons.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 else
 ${OBJECTDIR}/devInits.o: devInits.c  nbproject/Makefile-${CND_CONF}.mk
@@ -222,12 +228,12 @@ ${OBJECTDIR}/screens.o: screens.c  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} $(MP_EXTRA_CC_PRE)  screens.c  -o ${OBJECTDIR}/screens.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/screens.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -menable-large-arrays -O1 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/screens.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
-${OBJECTDIR}/_ext/1809592793/controls.o: C:/Users/ryan/Documents/seniorproject/ps-040/controls.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/_ext/1809592793" 
-	@${RM} ${OBJECTDIR}/_ext/1809592793/controls.o.d 
-	@${RM} ${OBJECTDIR}/_ext/1809592793/controls.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  C:/Users/ryan/Documents/seniorproject/ps-040/controls.c  -o ${OBJECTDIR}/_ext/1809592793/controls.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/_ext/1809592793/controls.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -menable-large-arrays -O1 -msmart-io=1 -Wall -msfr-warn=off  
-	@${FIXDEPS} "${OBJECTDIR}/_ext/1809592793/controls.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+${OBJECTDIR}/cons.o: cons.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/cons.o.d 
+	@${RM} ${OBJECTDIR}/cons.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  cons.c  -o ${OBJECTDIR}/cons.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/cons.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -menable-large-arrays -O1 -msmart-io=1 -Wall -msfr-warn=off  
+	@${FIXDEPS} "${OBJECTDIR}/cons.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 endif
 
@@ -254,7 +260,7 @@ else
 dist/${CND_CONF}/${IMAGE_TYPE}/ps-040.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk   
 	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
 	${MP_CC} $(MP_EXTRA_LD_PRE)  -o dist/${CND_CONF}/${IMAGE_TYPE}/ps-040.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}      -mcpu=$(MP_PROCESSOR_OPTION)        -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -Wl,--local-stack,,--defsym=__MPLAB_BUILD=1,$(MP_LINKER_FILE_OPTION),--stack=16,--check-sections,--data-init,--pack-data,--handles,--isr,--no-gc-sections,--fill-upper=0,--stackguard=16,--library=p33EP512GM310-elf,--library=dsp,--library-path="plibs",--library-path="plibs/dsPIC33E",--no-force-link,--smart-io,-Map="${DISTDIR}/${PROJECTNAME}.${IMAGE_TYPE}.map",--report-mem,--memorysummary,dist/${CND_CONF}/${IMAGE_TYPE}/memoryfile.xml$(MP_EXTRA_LD_POST) 
-	${MP_CC_DIR}\\xc16-bin2hex dist/${CND_CONF}/${IMAGE_TYPE}/ps-040.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX} -a  -omf=elf  
+	${MP_CC_DIR}/xc16-bin2hex dist/${CND_CONF}/${IMAGE_TYPE}/ps-040.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX} -a  -omf=elf  
 	
 endif
 
@@ -274,7 +280,7 @@ endif
 # Enable dependency checking
 .dep.inc: .depcheck-impl
 
-DEPFILES=$(shell mplabwildcard ${POSSIBLE_DEPFILES})
+DEPFILES=$(shell "${PATH_TO_IDE_BIN}"mplabwildcard ${POSSIBLE_DEPFILES})
 ifneq (${DEPFILES},)
 include ${DEPFILES}
 endif

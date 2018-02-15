@@ -114,10 +114,17 @@ void readPots(void){
     const fractional pot_alpha = 0x0F80;    //larger = rougher, lower = more latency
     const fractional pot_alpha_inv = 32767-pot_alpha;
     const unsigned int shift = 0xFE00;
-    int i;
+    int i, j;
+    
     _AD1IF = 0; // Clear conversion done status bit
+    
     if(ctrl.pad[34]<2)i=0;
     else i=POTS/2;
+    
+    for(j=0; j<POTS; j++){
+        ctrl.pot_moved[j]=FALSE;
+    }
+    
     pots_buf[0]=(ADC1BUF5>>1)|0x7;
     pots_buf[1]=(ADC1BUF2>>1)|0x7;
     pots_buf[2]=(ADC1BUF4>>1)|0x7;
@@ -151,18 +158,12 @@ void readPots(void){
     result =__builtin_mac(result, pots_smoothed[5], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
     pots_smoothed[5]=__builtin_sac(result, 0);
     
-    if((pots_smoothed[0]&shift)!=pots_last[0]) 
-        ctrl.pots[i]=pots_buf[0];
-    if((pots_smoothed[1]&shift)!=pots_last[1]) 
-        ctrl.pots[i+1]=pots_buf[1];
-    if((pots_smoothed[2]&shift)!=pots_last[2]) 
-        ctrl.pots[i+2]=pots_buf[2];
-    if((pots_smoothed[3]&shift)!=pots_last[3]) 
-        ctrl.pots[i+3]=pots_buf[3];
-    if((pots_smoothed[4]&shift)!=pots_last[4]) 
-        ctrl.pots[i+4]=pots_buf[4];
-    if((pots_smoothed[5]&shift)!=pots_last[5]) 
-        ctrl.pots[i+5]=pots_buf[5];     
+    for(j=0; j<(POTS/2); j++){
+        if((pots_smoothed[j]&shift)!=pots_last[j]){ 
+            ctrl.pots[i+j]=pots_buf[j];
+            ctrl.pot_moved[i+j]=TRUE;
+        }
+    }
 }
 
 void scalePots(void){
@@ -204,10 +205,6 @@ void changeFX(void){
     fxUnits[1]=ctrl.pots_scaled[POT_FX_SELECT2];
 }
 
-void checkFunctions(){
-    //if
-}
-
 void display(void){
     long int newstate;
     static long int laststate;
@@ -239,7 +236,6 @@ void display(void){
         if(ctrl.pad[6]>1)   flashWriteReg(FLASH_WREN);
     }
     // Update screen here
-    checkFunctions();
     screenUpdate();
    
    if(stat.UART_ON==TRUE){

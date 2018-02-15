@@ -1,16 +1,20 @@
 #include <xc.h>
 #include <dsp.h>
-#include "controls.h"
+#include "cons.h"
 #include "common.h"
 #include "flash.h"
 
 extern struct clip_flash clipmap[FLASH_NUMCHUNKS];
+extern enum fxStruct fxUnits[NUMFXUNITS];
 extern struct ctrlsrfc ctrl;
+extern *fxFuncPointers;
 
-void consFXops(fractional* stream){
+void consPADops(fractional* stream){
     int i;
     
-    if(ctrl.pad[33]>1) flashBulkErase();
+    if(ctrl.pad[33]>1){
+        flashBulkErase();
+    }
     
     //check write triggers
     for(i=0; i<FLASH_NUMCHUNKS; i++){
@@ -61,3 +65,24 @@ void consFXops(fractional* stream){
     }
 }
 
+void consEDITops(void){    
+    // One Shot
+    if(ctrl.pot_moved[0]){
+        if(ctrl.pots[0]>=0x3FFF) 
+            clipmap[ctrl.last_pressed].one_shot = TRUE;
+        else 
+            clipmap[ctrl.last_pressed].one_shot = FALSE;
+    }
+    if(ctrl.pot_moved[2]){
+        // Choke
+        if(ctrl.pots[2]>=0x3FFF) 
+            clipmap[ctrl.last_pressed].choke = TRUE;
+        else 
+            clipmap[ctrl.last_pressed].choke = FALSE;
+        //Voices
+    }
+}
+
+
+    
+    
