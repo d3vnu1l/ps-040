@@ -18,9 +18,8 @@
 extern unsigned int process_time, flash_time;
 extern unsigned char btread;
 
-extern unsigned char    TxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory))), 
-                        RxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory)));
-extern fractional       RxBufferB[STREAMBUF] __attribute__((space(xmemory)));
+extern fractional       TxBufferA[FLASH_DMAXFER_WORDS]__attribute__((space(xmemory))), 
+                        RxBufferA[FLASH_DMA_RX_WORDS]__attribute__((space(xmemory)));
 
 extern enum screenStruc state, laststate;
 extern enum fxStruct fxUnits[NUMFXUNITS];

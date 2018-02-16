@@ -9,9 +9,11 @@ extern struct ctrlsrfc ctrl;
 extern struct sflags stat;
 extern unsigned long readQueue[VOICES];
 
+extern fractional       RxBufferA[FLASH_DMA_RX_WORDS]__attribute__((space(xmemory)));
+
 void consPADops(fractional* stream){
     int i;
-    stat.dma_queue=0;
+    stat.dma_queue=stat.dma_rx_index=0;
     
     if(ctrl.pad[BTN_ENCSPEC]==2){
         flashBulkErase();
@@ -36,7 +38,7 @@ void consPADops(fractional* stream){
         
         
         if(clipmap[i].action==2){
-            flashWritePage((char*)(stream), clipmap[i].write_index);
+            flashWritePage(stream, clipmap[i].write_index);
             if(clipmap[i].write_index<clipmap[i].end_limit)
                 clipmap[i].write_index+=FLASH_PAGE;
         }
@@ -82,14 +84,17 @@ void consPADops(fractional* stream){
                     clipmap[i].action=0;
             }
             if(clipmap[i].action==1){
-                //flashStartRead(clipmap[i].read_index);      // READBACK
-                readQueue[stat.dma_queue++]=clipmap[i].read_index;
-                if(clipmap[i].read_index<clipmap[i].end_address)
-                    clipmap[i].read_index+=FLASH_PAGE;
-                else if(clipmap[i].loop) 
-                    clipmap[i].read_index=clipmap[i].start_address;    // Loop-back
+                if(stat.dma_queue<VOICES){                  // Check queue size to avoid overflow
+                    readQueue[stat.dma_queue++]=clipmap[i].read_index;
+                    if(clipmap[i].read_index<clipmap[i].end_address)
+                        clipmap[i].read_index+=FLASH_PAGE;
+                    else if(clipmap[i].loop) 
+                        clipmap[i].read_index=clipmap[i].start_address;    // Loop-back
+                    else 
+                        clipmap[i].action=0;
+                }
                 else 
-                    clipmap[i].action=0;
+                        clipmap[i].action=0;
             } 
             else {
                 clipmap[i].read_index=clipmap[i].start_address;
@@ -97,10 +102,14 @@ void consPADops(fractional* stream){
         }
     }
     
+    
     // Kick off reads
-    if(stat.dma_queue>0){
-        flashStartRead(readQueue[0]);
-        stat.dma_queue--;
+    stat.dma_framesize=stat.dma_queue;
+    stat.dma_queue=0;
+    if(stat.dma_queue<stat.dma_framesize){
+        flashStartRead(readQueue[0], &RxBufferA[0]);
+        stat.dma_rx_index+=FLASH_DMAXFER_WORDS;
+        stat.dma_queue++;
     }
 }
 

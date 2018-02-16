@@ -11,9 +11,8 @@
 #include "flash.h"
 #include "dsp.h"
 
-extern unsigned char    TxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory))), 
-                        RxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory)));
-extern fractional       RxBufferB[STREAMBUF] __attribute__((space(xmemory)));
+extern fractional       TxBufferA[FLASH_DMAXFER_WORDS]__attribute__((space(xmemory))), 
+                        RxBufferA[FLASH_DMA_RX_WORDS]__attribute__((space(xmemory)));
 
 void initPorts(void){
     /* Clock Setup */

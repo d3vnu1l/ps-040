@@ -10,13 +10,11 @@ char receive;
 unsigned long  eraseAddr=0;
 struct clip_flash clipmap[FLASH_NUMCHUNKS];
 
-
-extern unsigned char    TxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory))), 
-                        RxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory)));
-extern fractional       RxBufferB[STREAMBUF] __attribute__((space(xmemory)));
-
 extern struct sflags stat;
 extern struct ctrlsrfc ctrl;
+
+extern fractional       TxBufferA[FLASH_DMAXFER_WORDS]__attribute__((space(xmemory))), 
+                        RxBufferA[FLASH_DMA_RX_WORDS]__attribute__((space(xmemory)));
 
 void flashSoftSetup(void){
     int i=1;
@@ -101,13 +99,7 @@ void flashWritePage(fractional* source, unsigned long address){
         
         flashWriteReg(FLASH_WREN);
         
-        //for(i=0; i<FLASH_DMAXFER_BYTES; i++){
-         //   sample=*source++;
-        //    TxBufferA[i++]=(sample>>8)&0xFF;
-        //    TxBufferA[i]=sample&0xFF;
-        //}
         SS3a=0;
-
         SPI3BUF=FLASH_PP;
         while(!_SPI3IF); 
         _SPI3IF=0;
@@ -139,12 +131,9 @@ void flashWritePage(fractional* source, unsigned long address){
     }
 }
 
-void flashStartRead(unsigned long address){
+void flashStartRead(unsigned long address, fractional* rcvPtr){
     if(SS3a){
-        int i;
-
-        stat.DMA_READING=TRUE;
-        stat.DMA_JUSTREAD=FALSE;
+        int i;  
         
         SS3a=0;
         SPI3BUF=FLASH_READ;
@@ -166,7 +155,7 @@ void flashStartRead(unsigned long address){
         receive=SPI3BUF;
 
         DMA0STAL = (unsigned int)(&TxBufferA);
-        DMA1STAL = (unsigned int)(&RxBufferA);
+        DMA1STAL = (unsigned int)(rcvPtr);
         
         
         /* Kick off dma read here */
@@ -178,16 +167,6 @@ void flashStartRead(unsigned long address){
         //while (DMA0REQbits.FORCE == 1);
         //DMA1REQbits.FORCE = 1; // Manual mode: Kick-start the 1st transfer
     }
-}
-
-void flashProcessRead(void){
-    int i,j; 
-    fractional* rcvPtr = &RxBufferA[0];
-    for(i=j=0; i<STREAMBUF; i++){
-        //unsigned int temp = (RxBufferA[j++]<<8)&0xFF00;
-        //RxBufferB[i]=(temp|RxBufferA[j++]);
-        RxBufferB[i]=*rcvPtr++;
-    }    
 }
 
 void flashEraseSector(unsigned long address){

@@ -25,9 +25,8 @@ fractional  outputA[STREAMBUF], outputB[STREAMBUF],
             streamA[STREAMBUF], streamB[STREAMBUF];
 unsigned int write_ptr=0, rw=0, frameReady=0;
 
-unsigned char   TxBufferA[FLASH_DMAXFER_BYTES] __attribute__((space(xmemory))),
-                RxBufferA[FLASH_DMAXFER_BYTES] __attribute__((space(xmemory)));
-fractional      RxBufferB[STREAMBUF] __attribute__((space(xmemory)));
+fractional      TxBufferA[FLASH_DMAXFER_WORDS] __attribute__((space(xmemory))),
+                RxBufferA[FLASH_DMA_RX_WORDS] __attribute__((space(xmemory)));
 
 unsigned long readQueue[VOICES];
 
@@ -37,10 +36,10 @@ unsigned int process_time=0, flash_time = 0;
 
 struct sflags stat = {  .UART_ON = FALSE,
                         .TEST_SIN = FALSE,
-                        .DMA_JUSTREAD = FALSE,
-                        .DMA_READING = FALSE,
                         .hard_clipped = FALSE,
-                        .dma_queue = 0};
+                        .dma_queue = 0,
+                        .dma_framesize=0,
+                        .dma_rx_index=0};
 
 
 /* Screen state variables */
@@ -64,13 +63,20 @@ void initBuffers(void){
     for(i=0; i<BUTTONS; i++)
         ctrl.pad[i]=0;
     
-    for(i=0; i<FLASH_DMAXFER_BYTES; i++){
+    for(i=0; i<FLASH_DMAXFER_WORDS; i++){
         TxBufferA[i]=0;
+    }
+    
+    for(i=0; i<FLASH_DMA_RX_WORDS; i++){
         RxBufferA[i]=0;
     }
+    
 }
 
 int main(void) {
+    fractional *ping, *pong;
+    fractional* rcvPtr;
+    
     initPorts();                    // Configure io device & adc 
     initBuffers();
     initDMA();
@@ -81,13 +87,11 @@ int main(void) {
     initPMP();
     initQEI_ENC();
     if(stat.UART_ON) initUART1();       // Configure & enable UART
-    
     initT1();                           // Configure & start T1 display
     //initT2();                         // Configure & start T2 btns & pots
     initT3();                           // Configure & start T3 for lcd
     //initT5();
     lcdDrawSplash();
-    fractional *ping, *pong;
     
     while(1){    
         if(frameReady) {
@@ -101,19 +105,18 @@ int main(void) {
                 ping = streamB;
                 pong = outputA;
             }
-
-            if(stat.DMA_JUSTREAD==TRUE){    
-                flashProcessRead();                             // Process DMA requested read data
-                stat.DMA_JUSTREAD=FALSE;
-                VectorCopy(STREAMBUF, ping, RxBufferB);
-                //VectorAdd(STREAMBUF, ping, ping, RxBufferB);
+            
+            stat.dma_rx_index=0;
+            while(stat.dma_framesize>0){
+                //VectorCopy(STREAMBUF, ping, rcvPtr);
+                VectorAdd(STREAMBUF, ping, ping, &RxBufferA[stat.dma_rx_index]);
+                stat.dma_rx_index+=FLASH_DMAXFER_WORDS;
+                stat.dma_framesize--;
             }
             
             consPADops(ping);
-            
             /* State dependent controls*/
             if(state==scrnEDITone || state== debugscrnBUFFERS) consEDITops();
-            
             
             processAudio(ping, pong);
             process_time=write_ptr;    //DEBUG

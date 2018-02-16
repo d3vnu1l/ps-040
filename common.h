@@ -30,7 +30,7 @@
 #define NUMFX   5
 #define NUMFXUNITS 2
 #define SCREENS 7
-#define VOICES 2
+#define VOICES 6
 
 /* Pin Map */
 #define SLED _LATF0                                                            
@@ -73,10 +73,12 @@
 #define BTN_ENCSPEC         17
 
 /* Flash Variable */
-#define FLASH_DMAXFER_BYTES 512 // Must be double of streambuf
-#define FLASH_DMA_RX_BYTES=FLASH_DMAXFER_BYTES*VOICES
-#define FLASH_PAGE 512
-#define FLASH_SECTOR 256000
+#define FLASH_DMAXFER_BYTES     512                     // Must be double of streambuf
+#define FLASH_DMAXFER_WORDS     FLASH_DMAXFER_BYTES/2   
+//#define FLASH_DMA_RX_BYTES      FLASH_DMAXFER_BYTES*VOICES
+#define FLASH_DMA_RX_WORDS      FLASH_DMAXFER_WORDS*VOICES
+#define FLASH_PAGE              512
+#define FLASH_SECTOR            256000
 /* Memory Map */
 #define FLASH_MAX 0x04000000
 #define FLASH_NUMCHUNKS 16
@@ -114,10 +116,10 @@ struct ctrlsrfc {
 struct sflags {
     unsigned char UART_ON;
     unsigned char TEST_SIN;
-    unsigned char DMA_JUSTREAD;
-    unsigned char DMA_READING;
     unsigned char hard_clipped; 
     unsigned char dma_queue; 
+    unsigned char dma_framesize;
+    unsigned int  dma_rx_index;
 };
 
 #endif	/* COMMON_H */

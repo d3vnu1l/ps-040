@@ -3,13 +3,14 @@
 #include <dsp.h>
 #include "common.h"
 #include "routines.h"
+#include "flash.h"
 
 extern fractional   outputA[STREAMBUF], outputB[STREAMBUF],
                     streamA[STREAMBUF], streamB[STREAMBUF];
 extern unsigned int write_ptr, rw, frameReady;
 
-extern unsigned char    TxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory))), 
-                        RxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory)));
+extern fractional       TxBufferA[FLASH_DMAXFER_WORDS]__attribute__((space(xmemory))), 
+                        RxBufferA[FLASH_DMA_RX_WORDS]__attribute__((space(xmemory)));
 
 extern unsigned long readQueue[VOICES];
 
@@ -60,18 +61,16 @@ void __attribute__((interrupt, auto_psv)) _DMA1Interrupt(void){
     IFS0bits.DMA1IF = 0;        // Clear the DMA1 Interrupt flag
     SS3a=SS3b=1;
     
-    if(stat.DMA_READING==TRUE){
-        stat.DMA_READING=FALSE;
-        stat.DMA_JUSTREAD=TRUE;
-    }
-    
     DMA1CONbits.CHEN = 0;
     DMA0CONbits.CHEN = 0;
     SPI3STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
     IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
     
-    if(stat.dma_queue>0){
-        flashStartRead(readQueue[stat.dma_queue--]);
+    // Continue queue'd reads
+    if(stat.dma_queue<stat.dma_framesize){
+        flashStartRead(readQueue[stat.dma_queue], &RxBufferA[stat.dma_rx_index]);
+        stat.dma_rx_index+=FLASH_DMAXFER_WORDS;
+        stat.dma_queue++;
     }
     
 }
