@@ -202,7 +202,7 @@ void lcdDrawSlots(unsigned char col, unsigned char grid[16]){
 
 void lcdDrawSplash(void){
     int i, j, k, size=20;
-    int frames = 6;
+    int frames = Fdisp/2;               // About 1/2 second
     unsigned char splash[4][size];
     //unsigned char* ptrA = splash;
     

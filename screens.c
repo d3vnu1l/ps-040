@@ -67,7 +67,7 @@ void screenDebugBuffers(void){
 }
 
 void screenDebugPots(void){
-    int bank=0;
+    int bank=0, i;
     
     if(state!=laststate){
         // Setup here
@@ -83,100 +83,47 @@ void screenDebugPots(void){
     } else {
         // Update here
         if(ctrl.pad[BTN_SPECIAL]>1)bank=POTS/2;
-        lcdSetCursorQ(0,1);
-        lcdWriteDecimalQ(ctrl.pots_scaled[bank], 3);
-        lcdWriteQ(',');
-        lcdWriteWordUnsignedQ(ctrl.pots[bank++]);
-        lcdSetCursorQ(11,1);
-        lcdWriteDecimalQ(ctrl.pots_scaled[bank], 3);
-        lcdWriteQ(',');
-        lcdWriteWordUnsignedQ(ctrl.pots[bank++]);
-        lcdSetCursorQ(0,2);
-        lcdWriteDecimalQ(ctrl.pots_scaled[bank], 3);
-        lcdWriteQ(',');
-        lcdWriteWordUnsignedQ(ctrl.pots[bank++]);
-        lcdSetCursorQ(11,2);
-        lcdWriteDecimalQ(ctrl.pots_scaled[bank], 3);
-        lcdWriteQ(',');
-        lcdWriteWordUnsignedQ(ctrl.pots[bank++]);
-        lcdSetCursorQ(0,3);
-        lcdWriteDecimalQ(ctrl.pots_scaled[bank], 3);
-        lcdWriteQ(',');
-        lcdWriteWordUnsignedQ(ctrl.pots[bank++]);
-        lcdSetCursorQ(11,3);
-        lcdWriteDecimalQ(ctrl.pots_scaled[bank], 3);
-        lcdWriteQ(',');
-        lcdWriteWordUnsignedQ(ctrl.pots[bank++]);
+        
+        for(i=1; i<4; i++){
+            lcdSetCursorQ(0,i);
+            lcdWriteDecimalQ(ctrl.pots_scaled[bank], 3);
+            lcdWriteQ(',');
+            lcdWriteWordUnsignedQ(ctrl.pots[bank++]);
+            lcdSetCursorQ(11,i);
+            lcdWriteDecimalQ(ctrl.pots_scaled[bank], 3);
+            lcdWriteQ(',');
+            lcdWriteWordUnsignedQ(ctrl.pots[bank++]);
+        }
     }
 }
 
 void screenDebugFlash(void){
-        if(state!=laststate){
+    int i, j, k;
+    
+    if(state!=laststate){
         //setup here
         lcdClearQ();
-        lcdSetCursorQ(0,0);
-        lcdWriteByteQ(RxBufferA[0]);
-         lcdSetCursorQ(3,0);
-        lcdWriteByteQ(RxBufferA[1]);
-         lcdSetCursorQ(6,0);
-        lcdWriteByteQ(RxBufferA[2]);
-         lcdSetCursorQ(9,0);
-        lcdWriteByteQ(RxBufferA[3]);
-        lcdSetCursorQ(12,0);
-        lcdWriteByteQ(RxBufferA[4]);
-        lcdSetCursorQ(15,0);
-        lcdWriteByteQ(RxBufferA[5]);
-        lcdSetCursorQ(18,0);
-        lcdWriteByteQ(RxBufferA[6]);
-        lcdSetCursorQ(0,1);
-        lcdWriteByteQ(RxBufferA[7]);
-         lcdSetCursorQ(3,1);
-        lcdWriteByteQ(RxBufferA[8]);
-         lcdSetCursorQ(6,1);
-        lcdWriteByteQ(RxBufferA[9]);
-         lcdSetCursorQ(9,1);
-        lcdWriteByteQ(RxBufferA[10]);
-        lcdSetCursorQ(12,1);
-        lcdWriteByteQ(RxBufferA[11]);
-        lcdSetCursorQ(15,1);
-        lcdWriteByteQ(RxBufferA[12]);
-        lcdSetCursorQ(18,1);
-        lcdWriteByteQ(RxBufferA[13]);
+        
+        k=0;
+        for(i=0; i<3; i++){
+            for(j=0; j<18; j+=3){
+                lcdSetCursorQ(j,i);
+                lcdWriteByteQ(RxBufferA[k++]);
+            }
+        }  
         lcdSetCursorQ(0,3);
         lcdWriteStringQ("Stat:");
     } else {
         //update here
-        lcdSetCursorQ(0,0);
-        lcdWriteByteQ(RxBufferA[0]);
-         lcdSetCursorQ(3,0);
-        lcdWriteByteQ(RxBufferA[1]);
-         lcdSetCursorQ(6,0);
-        lcdWriteByteQ(RxBufferA[2]);
-         lcdSetCursorQ(9,0);
-        lcdWriteByteQ(RxBufferA[3]);
-        lcdSetCursorQ(12,0);
-        lcdWriteByteQ(RxBufferA[4]);
-        lcdSetCursorQ(15,0);
-        lcdWriteByteQ(RxBufferA[5]);
-        lcdSetCursorQ(18,0);
-        lcdWriteByteQ(RxBufferA[6]);
-        lcdSetCursorQ(0,1);
-        lcdWriteByteQ(RxBufferA[7]);
-         lcdSetCursorQ(3,1);
-        lcdWriteByteQ(RxBufferA[8]);
-         lcdSetCursorQ(6,1);
-        lcdWriteByteQ(RxBufferA[9]);
-         lcdSetCursorQ(9,1);
-        lcdWriteByteQ(RxBufferA[10]);
-        lcdSetCursorQ(12,1);
-        lcdWriteByteQ(RxBufferA[11]);
-        lcdSetCursorQ(15,1);
-        lcdWriteByteQ(RxBufferA[12]);
-        lcdSetCursorQ(18,1);
-        lcdWriteByteQ(RxBufferA[13]);
-
-        lcdSetCursorQ(0,3);
-        lcdWriteStringQ("Stat:");
+        
+        k=0;
+        for(i=0; i<3; i++){
+            for(j=0; j<=18; j+=3){
+                lcdSetCursorQ(j,i);
+                lcdWriteByteQ(RxBufferA[k++]);
+            }
+        }
+        lcdSetCursorQ(6,3);
         lcdWriteWordUnsignedQ(flashStatusCheck(FLASH_RDSR1));
         lcdWriteStringQ(", ");
         lcdWriteWordUnsignedQ(flashStatusCheck(FLASH_BRRD));
