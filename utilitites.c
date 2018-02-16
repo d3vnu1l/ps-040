@@ -208,17 +208,7 @@ void display(void){
     laststate=newstate;
     
     changeFX();
-    
-    //if(!ctrl.pad[BTN_ENC]) state = scrnSHIFT;
-    
-    
-    if(state==debugscrnFLASH){
-        if(ctrl.pad[BTN_ENCSPEC]==3) flashBulkErase();
-        if(ctrl.pad[3]>1)   flashWritePage(NULL, 0);
-        if(ctrl.pad[4]>1)   flashStartRead((long)(0));     // READBACK
-        if(ctrl.pad[5]>1)   flashEraseSector((long)(0));
-        if(ctrl.pad[6]>1)   flashWriteReg(FLASH_WREN);
-    }
+
     // Update screen here
     screenUpdate();
    

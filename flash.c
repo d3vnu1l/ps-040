@@ -200,9 +200,11 @@ void flashEraseSector(unsigned long address){
         while(!_SPI3IF); _SPI3IF=0;
         receive=SPI3BUF;
         SPI3BUF=(address & 0x000000ffUL);            
-        while(!_SPI3IF); _SPI3IF=0;
-        receive=SPI3BUF;
+        while(!_SPI3IF); 
         SS3a=1;
+        _SPI3IF=0;
+        receive=SPI3BUF;
+        
     }
 }
 
