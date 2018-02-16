@@ -38,45 +38,29 @@ void scanButtons(void){
         pad_last[i]=pad_now[i];
     }
     
-    pad_now[34]=(portrdF>>7)&1;        // Special function button
+    pad_now[BTN_SPECIAL]=(portrdF>>7)&1;        // Special function button
     
-    if(pad_now[34]){
-        pad_now[6]=(portrdF>>6)&1;
-        pad_now[5]=(portrdF>>5)&1;
-        pad_now[4]=(portrdF>>4)&1;
-        pad_now[0]=(portrdG)&1;
-        pad_now[1]=(portrdG>>1)&1;
-        pad_now[2]=(portrdG>>2)&1;
-        pad_now[3]=(portrdG>>3)&1;
-        pad_now[16]=(portrdG>>10)&1;    // Encoder button
-        pad_now[11]=(portrdG>>11)&1;
-        pad_now[12]=(portrdG>>12)&1;
-        pad_now[13]=(portrdG>>13)&1;
-        pad_now[14]=(portrdG>>14)&1;
-        pad_now[15]=(portrdG>>15)&1;
-        pad_now[7]=(portrdD>>1)&1;
-        pad_now[8]=(portrdD>>2)&1;
-        pad_now[9]=(portrdD>>3)&1;
-        pad_now[10]=(portrdD>>4)&1;
-    } else {
-        pad_now[23]=(portrdF>>6)&1;
-        pad_now[22]=(portrdF>>5)&1;
-        pad_now[21]=(portrdF>>4)&1;
-        pad_now[17]=(portrdG)&1;
-        pad_now[18]=(portrdG>>1)&1;
-        pad_now[19]=(portrdG>>2)&1;
-        pad_now[20]=(portrdG>>3)&1;
-        pad_now[33]=(portrdG>>10)&1;    // Encoder button
-        pad_now[28]=(portrdG>>11)&1;
-        pad_now[29]=(portrdG>>12)&1;
-        pad_now[30]=(portrdG>>13)&1;
-        pad_now[31]=(portrdG>>14)&1;
-        pad_now[32]=(portrdG>>15)&1;
-        pad_now[24]=(portrdD>>1)&1;
-        pad_now[25]=(portrdD>>2)&1;
-        pad_now[26]=(portrdD>>3)&1;
-        pad_now[27]=(portrdD>>4)&1;
-    }
+    pad_now[6]=(portrdF>>6)&1;
+    pad_now[5]=(portrdF>>5)&1;
+    pad_now[4]=(portrdF>>4)&1;
+    pad_now[0]=(portrdG)&1;
+    pad_now[1]=(portrdG>>1)&1;
+    pad_now[2]=(portrdG>>2)&1;
+    pad_now[3]=(portrdG>>3)&1;
+    pad_now[16]=(portrdG>>10)&1;    // Encoder button
+    pad_now[11]=(portrdG>>11)&1;
+    pad_now[12]=(portrdG>>12)&1;
+    pad_now[13]=(portrdG>>13)&1;
+    pad_now[14]=(portrdG>>14)&1;
+    pad_now[15]=(portrdG>>15)&1;
+    pad_now[7]=(portrdD>>1)&1;
+    pad_now[8]=(portrdD>>2)&1;
+    pad_now[9]=(portrdD>>3)&1;
+    pad_now[10]=(portrdD>>4)&1;  
+    
+    if(!pad_now[BTN_SPECIAL])
+        pad_now[BTN_ENCSPEC]=pad_now[16];
+    else pad_now[BTN_ENCSPEC]=1;
     
     
     for(i=0; i<BUTTONS; i++){
@@ -101,7 +85,7 @@ void scanButtons(void){
     }
     
     //find last pressed button
-    for(i=0; i<BUTTONS; i++){
+    for(i=0; i<(BUTTONS-3); i++){
         if(ctrl.pad[i]>1) ctrl.last_pressed=i;
     }
 }
@@ -118,7 +102,7 @@ void readPots(void){
     
     _AD1IF = 0; // Clear conversion done status bit
     
-    if(ctrl.pad[34]<2)i=0;
+    if(ctrl.pad[BTN_SPECIAL]<2)i=0;
     else i=POTS/2;
     
     for(j=0; j<POTS; j++){
@@ -229,7 +213,7 @@ void display(void){
     
     
     if(state==debugscrnFLASH){
-        if(ctrl.pad[33]==3) flashBulkErase();
+        if(ctrl.pad[BTN_ENCSPEC]==3) flashBulkErase();
         if(ctrl.pad[3]>1)   flashWritePage(NULL, 0);
         if(ctrl.pad[4]>1)   flashStartRead((long)(0));     // READBACK
         if(ctrl.pad[5]>1)   flashEraseSector((long)(0));

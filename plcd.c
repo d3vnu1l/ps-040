@@ -152,7 +152,7 @@ void lcdWriteDecimalQ(char word, int digits){
 //4x4 pad debug
 void lcdDrawPads(unsigned char col){
     unsigned char block=0xFF;
-    if(ctrl.pad[34]>1||ctrl.pad[16]>1) block='*';
+    if(ctrl.pad[BTN_SPECIAL]>1||ctrl.pad[BTN_ENC]>1) block='*';
     
     lcdSetCursorQ(col, 0);
     if(ctrl.pad[12]>1){lcdWriteQMac(' ');} else lcdWriteQMac(block);

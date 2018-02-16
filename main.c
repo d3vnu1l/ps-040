@@ -8,7 +8,7 @@
 #include "sounds.h"
 #include "flash.h"
 #include "plcd.h"
-#include "cons.h""
+#include "cons.h"
 
 #pragma config ICS = PGD1       //pgeDC 1 is used
 #pragma config JTAGEN = OFF     //disable jtag

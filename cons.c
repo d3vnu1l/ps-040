@@ -7,62 +7,88 @@
 extern struct clip_flash clipmap[FLASH_NUMCHUNKS];
 extern enum fxStruct fxUnits[NUMFXUNITS];
 extern struct ctrlsrfc ctrl;
-extern *fxFuncPointers;
+
+//enum action_states;
 
 void consPADops(fractional* stream){
     int i;
     
-    if(ctrl.pad[33]>1){
+    if(ctrl.pad[BTN_ENCSPEC]==2){
         flashBulkErase();
     }
     
     //check write triggers
     for(i=0; i<FLASH_NUMCHUNKS; i++){
-        if(ctrl.pad[i+17]==3){                              // Use shifted pads to trigger recording
+        /* Check for records */
+        if(ctrl.pad[BTN_SPECIAL]==3){
+            if(ctrl.pad[i]==2){
+                clipmap[i].action=2;            // Record
+            }
+            else if(ctrl.pad[i]==1){
+                clipmap[i].action=0;            // off
+                clipmap[i].end_address=clipmap[i].write_index;
+            }
+        }
+        else if(ctrl.pad[BTN_SPECIAL]==1 && clipmap[i].action==2){
+            clipmap[i].action=0;                // off
+            clipmap[i].end_address=clipmap[i].write_index;
+        }
+        
+        if(clipmap[i].action==2){
             flashWritePage(stream, clipmap[i].write_index);
-            if(clipmap[i].write_index<clipmap[i].end_limit){
+            if(clipmap[i].write_index<clipmap[i].end_limit)
                 clipmap[i].write_index+=FLASH_PAGE;
+        }
+        /* Check for erase */
+        if(ctrl.pad[BTN_ENC]==3){
+            if(ctrl.pad[i]==2){
+                clipmap[i].action=3;            // Erase
+            }
+        }
+        if(clipmap[i].action==3){
+            if(flashStatusCheck(FLASH_RDSR1)&&0x04);
+            else{
+                flashEraseSector(clipmap[i].erase_index);
+                if(clipmap[i].erase_index<(clipmap[i].end_limit-FLASH_SECTOR))
+                    clipmap[i].erase_index+=FLASH_SECTOR;
+                else {
+                    clipmap[i].action=0; 
+                    clipmap[i].write_index=clipmap[i].start_address;
+                    clipmap[i].erase_index=clipmap[i].start_address;
+                    clipmap[i].end_address=clipmap[i].start_address;
+                }
             }
         } 
-    }
-    
-    //check read triggers
-    if(ctrl.pad[BTN_ENC]==0){
-        for(i=0; i<FLASH_NUMCHUNKS; i++){
-            
-            if(ctrl.pad[i]==2){                         // Pressed
-                clipmap[i].playing=!clipmap[i].playing;
-            }
-            else if (ctrl.pad[i]==1){                   // Depressed
-                if(clipmap[i].gate)
-                    clipmap[i].playing=FALSE;
-            }
-            
-            if(clipmap[i].playing){
-                flashStartRead(clipmap[i].read_index);      // READBACK
-                if(clipmap[i].read_index<clipmap[i].write_index){
-                    clipmap[i].read_index+=FLASH_PAGE;
+        /* Check for read */
+        if(ctrl.pad[BTN_ENC]==0){
+            if(ctrl.pad[i]==2){                             // Pressed
+                if(clipmap[i].end_address!=clipmap[i].start_address){
+                    if(!clipmap[i].gate){
+                        if(clipmap[i].action==0)
+                            clipmap[i].action=1;
+                        else 
+                            clipmap[i].action=0;
+                    }
+                    else 
+                        clipmap[i].action=1;
                 }
-                else if(clipmap[i].loop) clipmap[i].read_index=clipmap[i].start_address;    // Loop-back
-                else clipmap[i].playing=FALSE;
+            }
+            else if (ctrl.pad[i]==1){                       // Depressed
+                if(clipmap[i].gate)
+                    clipmap[i].action=0;
+            }
+            if(clipmap[i].action==1){
+                flashStartRead(clipmap[i].read_index);      // READBACK
+                if(clipmap[i].read_index<clipmap[i].end_address)
+                    clipmap[i].read_index+=FLASH_PAGE;
+                else if(clipmap[i].loop) 
+                    clipmap[i].read_index=clipmap[i].start_address;    // Loop-back
+                else 
+                    clipmap[i].action=0;
             } 
             else {
                 clipmap[i].read_index=clipmap[i].start_address;
             }
-        }
-    }
-    
-    // Check erase
-    if(ctrl.pad[BTN_ENC]>1){
-        for(i=0; i<FLASH_NUMCHUNKS; i++){
-            if(ctrl.pad[i]>1){
-                if(flashStatusCheck(FLASH_RDSR1)&&0x04);
-                else{
-                    flashEraseSector(clipmap[i].erase_index);
-                    if(clipmap[i].write_index!=clipmap[i].end_limit)
-                        clipmap[i].erase_index+=FLASH_SECTOR;
-                }
-            } else clipmap[i].erase_index=clipmap[i].start_address;
         }
     }
 }

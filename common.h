@@ -25,7 +25,7 @@
 /* MISC */
 #define TRUE    0xFF
 #define FALSE   0x00
-#define BUTTONS 35
+#define BUTTONS 19
 #define POTS	12                       
 #define NUMFX   5
 #define NUMFXUNITS 2
@@ -62,13 +62,14 @@
 
 
 /* Button Mapping
-    12  13  14  15  |   29  30  31  32      Encoder:
-    8   9   10  11  |   25  26  27  28              16  |   33
-    4   5   6   7   |   21  22  23  24      Function:
- `` 0   1   2   3   |   17  18  19  20              34
+    12  13  14  15  |         Encoder:
+    8   9   10  11  |                 16  |   17
+    4   5   6   7   |         Function:
+    0   1   2   3   |                 18
  */
-#define BTN_SPECIAL         34
+#define BTN_SPECIAL         18
 #define BTN_ENC             16
+#define BTN_ENCSPEC         17
 
 /* Flash Variable */
 #define FLASH_DMAXFER_BYTES 512 // Must be double of streambuf

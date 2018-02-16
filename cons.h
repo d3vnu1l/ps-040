@@ -13,5 +13,13 @@
 void consPADops(fractional* stream);
 void consEDITops(void);
 
+/*
+enum action_states{
+    off,
+    play,
+    record,
+    erase
+};
+*/
 
 #endif	/* CONTROLS_H */

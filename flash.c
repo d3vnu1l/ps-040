@@ -26,20 +26,22 @@ void flashSoftSetup(void){
     clipmap[0].read_index=clipmap[0].start_address;
     clipmap[0].write_index=clipmap[0].start_address;
     clipmap[0].erase_index=clipmap[0].start_address;
+    clipmap[0].end_address=clipmap[0].start_address;
     clipmap[0].gate=TRUE;
     clipmap[i].loop=FALSE;
     clipmap[0].choke=FALSE;
-    clipmap[0].playing=FALSE;
+    clipmap[0].action=0;
     
     for(; i<FLASH_NUMCHUNKS; i++){
         clipmap[i].start_address=chunksize*i;
         clipmap[i].read_index=clipmap[i].start_address;
         clipmap[i].write_index=clipmap[i].start_address;
         clipmap[i].erase_index=clipmap[i].start_address;
+        clipmap[i].end_address=clipmap[i].start_address;
         clipmap[i].gate=TRUE;
         clipmap[i].loop=FALSE;
         clipmap[i].choke=FALSE;
-        clipmap[i].playing=FALSE;
+        clipmap[i].action=0;
         
         clipmap[i-1].end_limit=clipmap[i].start_address;
     }

@@ -25,14 +25,18 @@
 struct clip_flash{
     unsigned long start_address;
     unsigned long end_limit;
+    unsigned long end_address;
     unsigned long read_index;
     unsigned long write_index;
     unsigned long erase_index;
     unsigned char gate;
     unsigned char loop;
     unsigned char choke;
-    unsigned char playing;
+    unsigned char action;   //0 off, 1 play, 2 record, 3 erase
 };
+
+
+
 
 void flashSoftSetup(void);
 void flashWriteReg(char);
