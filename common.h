@@ -30,6 +30,7 @@
 #define NUMFX   5
 #define NUMFXUNITS 2
 #define SCREENS 7
+#define VOICES 2
 
 /* Pin Map */
 #define SLED _LATF0                                                            
@@ -73,6 +74,7 @@
 
 /* Flash Variable */
 #define FLASH_DMAXFER_BYTES 512 // Must be double of streambuf
+#define FLASH_DMA_RX_BYTES=FLASH_DMAXFER_BYTES*VOICES
 #define FLASH_PAGE 512
 #define FLASH_SECTOR 256000
 /* Memory Map */
@@ -115,6 +117,7 @@ struct sflags {
     unsigned char DMA_JUSTREAD;
     unsigned char DMA_READING;
     unsigned char hard_clipped; 
+    unsigned char dma_queue; 
 };
 
 #endif	/* COMMON_H */

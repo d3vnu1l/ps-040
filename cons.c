@@ -5,13 +5,13 @@
 #include "flash.h"
 
 extern struct clip_flash clipmap[FLASH_NUMCHUNKS];
-extern enum fxStruct fxUnits[NUMFXUNITS];
 extern struct ctrlsrfc ctrl;
-
-//enum action_states;
+extern struct sflags stat;
+extern unsigned long readQueue[VOICES];
 
 void consPADops(fractional* stream){
     int i;
+    stat.dma_queue=0;
     
     if(ctrl.pad[BTN_ENCSPEC]==2){
         flashBulkErase();
@@ -34,17 +34,20 @@ void consPADops(fractional* stream){
             clipmap[i].end_address=clipmap[i].write_index;
         }
         
+        
         if(clipmap[i].action==2){
-            flashWritePage(stream, clipmap[i].write_index);
+            flashWritePage((char*)(stream), clipmap[i].write_index);
             if(clipmap[i].write_index<clipmap[i].end_limit)
                 clipmap[i].write_index+=FLASH_PAGE;
         }
+        
         /* Check for erase */
         if(ctrl.pad[BTN_ENC]==3){
             if(ctrl.pad[i]==2){
                 clipmap[i].action=3;            // Erase
             }
         }
+        
         if(clipmap[i].action==3){
             if(flashStatusCheck(FLASH_RDSR1)&&0x04);
             else{
@@ -59,6 +62,7 @@ void consPADops(fractional* stream){
                 }
             }
         } 
+        
         /* Check for read */
         if(ctrl.pad[BTN_ENC]==0){
             if(ctrl.pad[i]==2){                             // Pressed
@@ -78,7 +82,8 @@ void consPADops(fractional* stream){
                     clipmap[i].action=0;
             }
             if(clipmap[i].action==1){
-                flashStartRead(clipmap[i].read_index);      // READBACK
+                //flashStartRead(clipmap[i].read_index);      // READBACK
+                readQueue[stat.dma_queue++]=clipmap[i].read_index;
                 if(clipmap[i].read_index<clipmap[i].end_address)
                     clipmap[i].read_index+=FLASH_PAGE;
                 else if(clipmap[i].loop) 
@@ -90,6 +95,12 @@ void consPADops(fractional* stream){
                 clipmap[i].read_index=clipmap[i].start_address;
             }
         }
+    }
+    
+    // Kick off reads
+    if(stat.dma_queue>0){
+        flashStartRead(readQueue[0]);
+        stat.dma_queue--;
     }
 }
 

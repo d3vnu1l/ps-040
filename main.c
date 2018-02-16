@@ -29,6 +29,9 @@ unsigned char   TxBufferA[FLASH_DMAXFER_BYTES] __attribute__((space(xmemory))),
                 RxBufferA[FLASH_DMAXFER_BYTES] __attribute__((space(xmemory)));
 fractional      RxBufferB[STREAMBUF] __attribute__((space(xmemory)));
 
+unsigned long readQueue[VOICES];
+
+
 /* Debug Variables */
 unsigned int process_time=0, flash_time = 0;
 
@@ -36,7 +39,8 @@ struct sflags stat = {  .UART_ON = FALSE,
                         .TEST_SIN = FALSE,
                         .DMA_JUSTREAD = FALSE,
                         .DMA_READING = FALSE,
-                        .hard_clipped = FALSE};
+                        .hard_clipped = FALSE,
+                        .dma_queue = 0};
 
 
 /* Screen state variables */

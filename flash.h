@@ -42,7 +42,7 @@ void flashSoftSetup(void);
 void flashWriteReg(char);
 void flashWriteBreg(char);
 char flashStatusCheck(char);
-void flashWritePage(fractional*,unsigned long);
+void flashWritePage(fractional*, unsigned long);
 void flashStartRead(unsigned long);
 void flashProcessRead(void);
 void flashBulkErase(void);

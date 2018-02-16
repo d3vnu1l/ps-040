@@ -11,8 +11,9 @@ extern unsigned int write_ptr, rw, frameReady;
 extern unsigned char    TxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory))), 
                         RxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory)));
 
-extern struct sflags stat;
+extern unsigned long readQueue[VOICES];
 
+extern struct sflags stat;
 extern unsigned char btread;
 
 //Description: This interrupt triggers at the completion of DCI output
@@ -52,38 +53,10 @@ void __attribute__ ((interrupt, auto_psv)) _DCIInterrupt(void){
 }
 
 void __attribute__((interrupt, auto_psv)) _DMA0Interrupt(void) {
-    //DMA1CONbits.CHEN = 0;
-    //DMA0CONbits.CHEN = 0;
-    /*
-    SS3a=SS3b=1;
-    stat.FLASH_DMA=FALSE;
-    
-    if(stat.DMA_READING==TRUE){
-        stat.DMA_READING=FALSE;
-        stat.DMA_JUSTREAD=TRUE;
-    }
-    
-    DMA1CONbits.CHEN = 0;
-    DMA0CONbits.CHEN = 0;
-    
-    IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
-     */ 
-    //SS3a=SS3b=1;
-    //SPI3STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
-    //IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
     IFS0bits.DMA0IF = 0; // Clear the DMA0 Interrupt flag
 }
 
 void __attribute__((interrupt, auto_psv)) _DMA1Interrupt(void){
-    //static unsigned int BufferCount = 0; // Keep record of the buffer that contains RX data
-    //if(BufferCount == 0) ;
-        //ProcessRxData(TxBufferA); // Process received SPI data in DMA RAM Primary buffer
-    //else;
-        //ProcessRxData(TxBufferB); // Process received SPI data in DMA RAM Secondary buffer
- 
-    //BufferCount ^= 1;
-    
-    //BufferCount ^= 1;
     IFS0bits.DMA1IF = 0;        // Clear the DMA1 Interrupt flag
     SS3a=SS3b=1;
     
@@ -96,6 +69,10 @@ void __attribute__((interrupt, auto_psv)) _DMA1Interrupt(void){
     DMA0CONbits.CHEN = 0;
     SPI3STATbits.SPIROV = 0;    // Clear SPI1 receive overflow flag if set
     IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
+    
+    if(stat.dma_queue>0){
+        flashStartRead(readQueue[stat.dma_queue--]);
+    }
     
 }
 
