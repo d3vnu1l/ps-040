@@ -105,6 +105,7 @@ int main(void) {
                 ping = streamB;
                 pong = outputA;
             }
+            dcHPF(ping, ping);          // Remove DC offset
             
             stat.dma_rx_index=0;
             while(stat.dma_framesize>0){

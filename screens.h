@@ -18,6 +18,7 @@ void screenLPFmod(unsigned int, fractional, fractional, fractional);
 void screenTRMmod(unsigned int, fractional, fractional, fractional);
 void screenLOPmod(unsigned int, fractional, fractional, fractional);
 void screenBTCmod(unsigned int, fractional, fractional, fractional);
+void screenHPFmod(unsigned int, fractional, fractional, fractional);
 
 void screenFX(void);
 void screenSHIFT(void);

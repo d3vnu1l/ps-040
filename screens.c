@@ -30,7 +30,7 @@ extern struct clip_flash clipmap[FLASH_NUMCHUNKS];
 
 int fxLast=0, fxNow=0;
 
-void (*fxModPointers[NUMFX])(unsigned int, fractional, fractional, fractional) = {screenNoFXmod, screenLPFmod, screenTRMmod, screenLOPmod, screenBTCmod};
+void (*fxModPointers[NUMFX])(unsigned int, fractional, fractional, fractional) = {screenNoFXmod, screenLPFmod, screenTRMmod, screenLOPmod, screenBTCmod, screenHPFmod};
 void (*screenPointers[SCREENS])(void) = {screenFX, screenRecord, screenDebugPots, screenDebugFlash, screenDebugBuffers, screenDebugInput, screenSHIFT};
 
 void screenDebugAudio(void){
@@ -270,6 +270,30 @@ void screenBTCmod(unsigned int col, fractional param1, fractional param2, fracti
             lcdWriteStringQ(" ON");
         else lcdWriteStringQ("OFF");
     }
+}
+
+void screenHPFmod(unsigned int col, fractional param1, fractional param2, fractional param3){
+    if(fxNow!=fxLast || state!=laststate){
+        // Setup here
+        lcdSetCursorQ(col+5,0);
+        lcdWriteStringQ("HPF");
+        lcdSetCursorQ(col,1);
+        lcdWriteStringQ("frq");
+        lcdSetCursorQ(col,2);
+        lcdWriteStringQ("d/w");
+        lcdSetCursorQ(col,3);
+        lcdWriteStringQ("pwr");
+    } else {
+        // Update here
+        lcdSetCursorQ(col+5,1);
+        lcdWriteDecimalQ(param1, 3);
+        lcdSetCursorQ(col+5,2);
+        lcdWriteDecimalQ(param2, 3);
+        lcdSetCursorQ(col+5,3);
+        if(param3>=50)
+            lcdWriteStringQ(" ON");
+        else lcdWriteStringQ("OFF");
+    }    
 }
 
 void screenFX(void){

@@ -28,7 +28,7 @@ struct clip_eds history = { .size = LOOP_BUF_SIZE,
                             .read_ptr=loopbuf};
 
 
-void (*fxFuncPointers[NUMFX])(fractional *, fractional *, fractional, fractional, fractional) = {NULL, runLPF, runTRM, runLOP, runBTC};
+void (*fxFuncPointers[NUMFX])(fractional *, fractional *, fractional, fractional, fractional) = {NULL, runLPF, runTRM, runLOP, runBTC, runHPF};
 
 void runBufferLooper(fractional *source){
     volatile fractional sample;
@@ -109,7 +109,7 @@ void runTRM(fractional *source, fractional *destination, fractional param1, frac
             }
             else{
                 trem_delay=0;
-                if(tremelo_ptr==1024)
+                if(tremelo_ptr>=(SINRES-1))
                     tremelo_ptr=0;
                 else tremelo_ptr++;
                 
@@ -167,6 +167,62 @@ void runLOP(fractional *source, fractional *destination, fractional param1, frac
         ClipCopy_eds(STREAMBUF, destination, history.read_ptr);
     }
     history.read_ptr+=STREAMBUF;
+}
+
+void runHPF(fractional *source, fractional *destination, fractional param1, fractional param2, fractional param3){
+    volatile register int resultA asm("A");
+    volatile register int resultB asm("B");
+    static fractional hpf_alpha=Q15(0.6433475106); 
+    const fractional gain = Q15(0.82167375536);
+    int counter;
+    static fractional new_out, last_out, new_in, last_in;                 
+    int *readPTR=source;
+    int *rewritePTR=destination;
+
+    VectorScale(STREAMBUF, readPTR, readPTR, gain);
+    
+    if(param3>0x3FFF){
+        for(counter=0; counter<STREAMBUF; counter++){
+            new_in=*readPTR++;
+            resultA = __builtin_lac(new_in, 0);
+            resultB = __builtin_lac(last_in, 0);
+            resultA = __builtin_subab(resultA, resultB);
+            resultA = __builtin_mac(resultA, last_out, hpf_alpha, NULL, NULL, 0, NULL, NULL, 0, 0, resultA);
+            new_out=__builtin_sac(resultA, 0);
+
+            *rewritePTR++=new_out; 
+            last_out = new_out;
+            last_in = new_in;
+        }
+    }
+}
+
+// See http://www-users.cs.york.ac.uk/~fisher/cgi-bin/mkfscript
+void dcHPF(fractional *source,  fractional *destination){
+    volatile register int resultA asm("A");
+    volatile register int resultB asm("B");
+    static fractional hpf_alpha=Q15(0.9978651426);  // Tuned for 15 Hz
+    const fractional gain = Q15(0.99893257162);
+    int counter;
+    static fractional new_out, last_out, new_in, last_in;
+                
+    int *readPTR=source;
+    int *rewritePTR=destination;
+
+    VectorScale(STREAMBUF, readPTR, readPTR, gain);
+    for(counter=0; counter<STREAMBUF; counter++){
+        new_in=*readPTR++;
+        
+        resultA = __builtin_lac(new_in, 0);
+        resultB = __builtin_lac(last_in, 0);
+        resultA = __builtin_subab(resultA, resultB);
+        resultA = __builtin_mac(resultA, last_out, hpf_alpha, NULL, NULL, 0, NULL, NULL, 0, 0, resultA);
+        new_out=__builtin_sac(resultA, 0);
+
+        *rewritePTR++=new_out; 
+        last_out = new_out;
+        last_in = new_in;
+    }
 }
 
 void processAudio(fractional *source, fractional *destination){

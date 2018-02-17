@@ -27,7 +27,7 @@
 #define FALSE   0x00
 #define BUTTONS 19
 #define POTS	12                       
-#define NUMFX   5
+#define NUMFX   6
 #define NUMFXUNITS 2
 #define SCREENS 7
 #define VOICES 6
@@ -101,7 +101,8 @@ enum fxStruct{
     lpf,
     trm,
     lop,
-    btc
+    btc,
+    hpf
 };
 
 struct ctrlsrfc {
