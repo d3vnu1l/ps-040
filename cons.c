@@ -30,13 +30,16 @@ void consPADops(fractional* stream){
             else if(ctrl.pad[i]==1){
                 clipmap[i].action=0;            // off
                 clipmap[i].end_address=clipmap[i].write_index;
-                clipmap[i].size_chunks=(clipmap[i].write_index-clipmap[i].start_address)/(2*STREAMBUF);
+                clipmap[i].size_chunks=(clipmap[i].write_index-clipmap[i].start_address)/FLASH_PAGE;
                 clipmap[i].end_chunk=clipmap[i].size_chunks;
+                //clipmap[i].start_chunk=0;
             }
         }
         else if(ctrl.pad[BTN_SPECIAL]==1 && clipmap[i].action==2){
             clipmap[i].action=0;                // off
             clipmap[i].end_address=clipmap[i].write_index;
+            clipmap[i].size_chunks=(clipmap[i].write_index-clipmap[i].start_address)/FLASH_PAGE;
+            clipmap[i].end_chunk=clipmap[i].size_chunks;
         }
         
         
@@ -95,7 +98,7 @@ void consPADops(fractional* stream){
                     if(clipmap[i].read_index<clipmap[i].end_address)
                         clipmap[i].read_index+=FLASH_PAGE;
                     else if(clipmap[i].loop) 
-                        clipmap[i].read_index=clipmap[i].start_address;    // Loop-back
+                        clipmap[i].read_index=clipmap[i].start_address+(clipmap[i].start_chunk*FLASH_PAGE);    // Loop-back
                     else 
                         clipmap[i].action=0;
                 }
@@ -103,7 +106,8 @@ void consPADops(fractional* stream){
                         clipmap[i].action=0;
             } 
             else {
-                clipmap[i].read_index=clipmap[i].start_address;
+                clipmap[i].read_index=clipmap[i].start_address+(clipmap[i].start_chunk*FLASH_PAGE);
+                clipmap[i].end_address=clipmap[i].start_address+(clipmap[i].end_chunk*FLASH_PAGE);
             }
         }
     }
@@ -149,6 +153,7 @@ void consEDITTWOops(void){
     if(ctrl.pot_moved[0]){
         tempp= scalePotsCustom(clipmap[ctrl.last_pressed].end_chunk , ctrl.pots[0]);
         clipmap[ctrl.last_pressed].start_chunk= tempp;
+        clipmap[ctrl.last_pressed].read_index=clipmap[ctrl.last_pressed].start_address+(clipmap[ctrl.last_pressed].start_chunk*FLASH_PAGE);
     }
     // gate
     if(ctrl.pot_moved[2]){
@@ -156,6 +161,7 @@ void consEDITTWOops(void){
         clipmap[ctrl.last_pressed].end_chunk= tempp;
         if(tempp<clipmap[ctrl.last_pressed].start_chunk)
             clipmap[ctrl.last_pressed].start_chunk= tempp;
+            clipmap[ctrl.last_pressed].end_address=clipmap[ctrl.last_pressed].start_address+clipmap[ctrl.last_pressed].end_chunk*FLASH_PAGE;
     }
     // choke
     if(ctrl.pot_moved[4]){

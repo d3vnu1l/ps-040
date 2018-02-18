@@ -119,7 +119,7 @@ int main(void) {
             /* State dependent controls*/
             if(state==scrnEDITone) 
                 consEDITONEops();
-            else if(state== scrnEDITtwo) 
+            else if(state==scrnEDITtwo) 
                 consEDITTWOops();
             
             processAudio(ping, pong);

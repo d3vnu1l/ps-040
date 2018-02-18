@@ -175,8 +175,8 @@ void runLOP(fractional *source, fractional *destination, fractional param1, frac
 void runHPF(fractional *source, fractional *destination, fractional param1, fractional param2, fractional param3){
     volatile register int resultA asm("A");
     volatile register int resultB asm("B");
-    static fractional hpf_alpha=Q15(0.6433475106); 
-    const fractional gain = Q15(0.82167375536);
+    static fractional hpf_alpha=Q15(0.8360692637); 
+    const fractional gain = Q15(0.91803463198);
     int counter;
     static fractional new_out, last_out, new_in, last_in;                 
     int *readPTR=source;

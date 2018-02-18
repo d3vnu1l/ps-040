@@ -29,9 +29,9 @@ struct clip_flash{
     unsigned long read_index;
     unsigned long write_index;
     unsigned long erase_index;
-    unsigned int  start_chunk;
-    unsigned int  end_chunk;
-    unsigned int  size_chunks;
+    unsigned long  start_chunk;
+    unsigned long  end_chunk;
+    unsigned long size_chunks;
     unsigned char gate;
     unsigned char loop;
     unsigned char choke;

@@ -12,6 +12,7 @@
 
 extern enum fxStruct fxUnits[NUMFXUNITS];
 extern enum screenStruc state;
+extern enum screenStruc laststate;
 extern struct ctrlsrfc ctrl;
 extern struct sflags stat;
 extern struct clip_psv sine, kick, snare;
@@ -191,21 +192,21 @@ void changeFX(void){
 
 void display(void){
     long int newstate;
-    static long int laststate;
+    static long int _laststate=0;
     
     scalePots();
     
     // Update ui state logic here
     newstate = (ENCODERCNTL/4);
-    if(newstate > laststate){
+    if(newstate > _laststate){
         if(state<(SCREENS-1))
             state++;
     } 
-    else if(newstate < laststate){
+    else if(newstate < _laststate){
         if(state>0)
             state--;
     }
-    laststate=newstate;
+    _laststate=newstate;
     
     changeFX();
 
