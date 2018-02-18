@@ -117,7 +117,10 @@ int main(void) {
             
             consPADops(ping);
             /* State dependent controls*/
-            if(state==scrnEDITone || state== debugscrnBUFFERS) consEDITops();
+            if(state==scrnEDITone) 
+                consEDITONEops();
+            else if(state== scrnEDITtwo) 
+                consEDITTWOops();
             
             processAudio(ping, pong);
             process_time=write_ptr;    //DEBUG

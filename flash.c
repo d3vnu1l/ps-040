@@ -10,6 +10,7 @@ char receive;
 unsigned long  eraseAddr=0;
 struct clip_flash clipmap[FLASH_NUMCHUNKS];
 
+
 extern struct sflags stat;
 extern struct ctrlsrfc ctrl;
 
@@ -18,24 +19,29 @@ extern fractional       TxBufferA[FLASH_DMAXFER_WORDS]__attribute__((space(xmemo
 
 void flashSoftSetup(void){
     int i=1;
-    unsigned long chunksize = (FLASH_MAX/FLASH_NUMCHUNKS);
     
     clipmap[0].start_address=0;
     clipmap[0].read_index=clipmap[0].start_address;
     clipmap[0].write_index=clipmap[0].start_address;
     clipmap[0].erase_index=clipmap[0].start_address;
     clipmap[0].end_address=clipmap[0].start_address;
+    clipmap[0].start_chunk=0;
+    clipmap[0].end_chunk=0;
+    clipmap[0].size_chunks=0;
     clipmap[0].gate=TRUE;
-    clipmap[i].loop=FALSE;
+    clipmap[0].loop=FALSE;
     clipmap[0].choke=FALSE;
     clipmap[0].action=0;
     
     for(; i<FLASH_NUMCHUNKS; i++){
-        clipmap[i].start_address=chunksize*i;
+        clipmap[i].start_address=CHUNKSIZE*i;
         clipmap[i].read_index=clipmap[i].start_address;
         clipmap[i].write_index=clipmap[i].start_address;
         clipmap[i].erase_index=clipmap[i].start_address;
         clipmap[i].end_address=clipmap[i].start_address;
+        clipmap[i].start_chunk=0;
+        clipmap[i].end_chunk=0;
+        clipmap[i].size_chunks=0;
         clipmap[i].gate=TRUE;
         clipmap[i].loop=FALSE;
         clipmap[i].choke=FALSE;

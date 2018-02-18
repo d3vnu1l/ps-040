@@ -29,7 +29,7 @@
 #define POTS	12                       
 #define NUMFX   6
 #define NUMFXUNITS 2
-#define SCREENS 7
+#define SCREENS 8
 #define VOICES 6
 
 /* Pin Map */
@@ -80,12 +80,15 @@
 #define FLASH_PAGE              512
 #define FLASH_SECTOR            256000
 /* Memory Map */
-#define FLASH_MAX 0x04000000
-#define FLASH_NUMCHUNKS 16
+#define FLASH_MAX               0x04000000
+#define FLASH_NUMCHUNKS         16
+#define CHUNKSIZE               (FLASH_MAX/FLASH_NUMCHUNKS)
+#define FLASH_CHUNKSPER         CHUNKSIZE/(2*STREAMBUF)
 
 enum screenStruc{
     scrnFX,
     scrnEDITone,
+    scrnEDITtwo,
     debugscrnPOTS,
     debugscrnFLASH,
     debugscrnBUFFERS,

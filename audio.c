@@ -3,12 +3,12 @@
 #include "common.h"
 #include "sounds.h"
 #include <dsp.h>
+#include <math.h>
 #include "utilities.h"
 #include "flash.h"
 
-extern unsigned char    TxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory))), 
-                        RxBufferA[FLASH_DMAXFER_BYTES]__attribute__((space(xmemory)));
-extern fractional       RxBufferB[STREAMBUF] __attribute__((space(xmemory)));
+extern fractional       TxBufferA[FLASH_DMAXFER_WORDS]__attribute__((space(xmemory))), 
+                        RxBufferA[FLASH_DMA_RX_WORDS]__attribute__((space(xmemory)));
 
 extern fractional sintab[SINRES];
 static fractional loopbuf[LOOP_BUF_SIZE] __attribute__ ((eds)) = {0};
@@ -49,31 +49,34 @@ void runBufferLooper(fractional *source){
 }
 
 void runLPF(fractional *source, fractional *destination, fractional param1, fractional param2, fractional param3){
-    volatile register int result asm("A");
-    static fractional lpf_alpha=Q15(0.5), lpf_inv_alpha=Q15(0.5);
+    volatile register int resultA asm("A");
+    volatile register int resultB asm("B");
+    float costh, coef;
+    static fractional del;
+    int counter;
     
-    static fractional delayed_sample;
+    //static fractional delayed_sample;
     volatile fractional sample;
     if(param3>=0x3FFF){     //LPF CONTROL
         if(param1>=310){                      
-            lpf_alpha=param1;
-            lpf_inv_alpha=(32767-lpf_alpha); 
+            costh=2.0-cos(2*PI*param1/Fout);
+            coef=sqrt(costh*costh-1.0); 
         }
-
 
         int *readPTR=source;
         int *rewritePTR=destination;
 
-
-        int counter=0;
-        for(; counter<STREAMBUF; counter++){
+        for(counter=0; counter<STREAMBUF; counter++){
             sample=*readPTR++; //!rw
 
+            sample=(fractional)(sample*(1 + coef) - del*coef);
+            del = sample;
+            
             //LPF-EMA//   y(i)= ??x(i)+(1-?)?y(i-1)
-            result =__builtin_mpy(sample,lpf_alpha, NULL, NULL, 0, NULL, NULL, 0);
-            result =__builtin_mac(result, delayed_sample, lpf_inv_alpha, NULL, NULL, 0, NULL, NULL, 0, 0, result);
-            delayed_sample=__builtin_sac(result, 0);
-            sample=delayed_sample;
+            //resultA =__builtin_mpy(sample,lpf_alpha, NULL, NULL, 0, NULL, NULL, 0);
+            //resultA =__builtin_mac(resultA, delayed_sample, lpf_inv_alpha, NULL, NULL, 0, NULL, NULL, 0, 0, resultA);
+            //delayed_sample=__builtin_sac(resultA, 0);
+            //sample=delayed_sample;
 
             *rewritePTR++=sample; //rw
         }

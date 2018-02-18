@@ -132,19 +132,19 @@ void lcdWriteWordUnsignedQ(unsigned int word){
    lcdWriteQMac(inchar[0]);
 }
 
-void lcdWriteDecimalQ(char word, int digits){
-    const char maxdigits = 4;
+void lcdWriteDecimalQ(int word, int digits){
+    const char maxdigits = 8;
     char result[maxdigits];
-    char i = 3;
+    char i = 0;
     do {
         result[i] = '0' + word % 10;
         word /= 10;
-        i--;
+        i++;
     }
-    while (word > 0);
-    while (i>=0) result[i--] = ' '; 
+    while ((word > 0)&&(i<digits));
+    while (i<digits) result[i++] = ' '; 
   
-    for (i=maxdigits-digits; i<maxdigits; i++) {
+    for (i=(digits-1); i>=0; i--) {
         lcdWriteQMac(result[i]);
     }
 }
@@ -236,7 +236,7 @@ void lcdDrawSplash(void){
             lcdPoll();
             _T3IF=0;
         }
-        Delay_us(50);
+        Delay_us(60);
     }
 }
 

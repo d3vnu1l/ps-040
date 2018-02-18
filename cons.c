@@ -2,6 +2,7 @@
 #include <dsp.h>
 #include "cons.h"
 #include "common.h"
+#include "utilities.h"
 #include "flash.h"
 
 extern struct clip_flash clipmap[FLASH_NUMCHUNKS];
@@ -29,6 +30,8 @@ void consPADops(fractional* stream){
             else if(ctrl.pad[i]==1){
                 clipmap[i].action=0;            // off
                 clipmap[i].end_address=clipmap[i].write_index;
+                clipmap[i].size_chunks=(clipmap[i].write_index-clipmap[i].start_address)/(2*STREAMBUF);
+                clipmap[i].end_chunk=clipmap[i].size_chunks;
             }
         }
         else if(ctrl.pad[BTN_SPECIAL]==1 && clipmap[i].action==2){
@@ -45,7 +48,7 @@ void consPADops(fractional* stream){
         
         /* Check for erase */
         if(ctrl.pad[BTN_ENC]==3){
-            if(ctrl.pad[i]==2){
+            if(ctrl.pad[i]==3){
                 clipmap[i].action=3;            // Erase
             }
         }
@@ -61,6 +64,9 @@ void consPADops(fractional* stream){
                     clipmap[i].write_index=clipmap[i].start_address;
                     clipmap[i].erase_index=clipmap[i].start_address;
                     clipmap[i].end_address=clipmap[i].start_address;
+                    clipmap[i].start_chunk=0;
+                    clipmap[i].end_chunk=0;
+                    clipmap[i].size_chunks=0;
                 }
             }
         } 
@@ -113,7 +119,7 @@ void consPADops(fractional* stream){
     }
 }
 
-void consEDITops(void){    
+void consEDITONEops(void){    
     // loop
     if(ctrl.pot_moved[0]){
         if(ctrl.pots[0]>=0x3FFF) 
@@ -127,6 +133,29 @@ void consEDITops(void){
             clipmap[ctrl.last_pressed].gate = TRUE;
         else 
             clipmap[ctrl.last_pressed].gate = FALSE;
+    }
+    // choke
+    if(ctrl.pot_moved[4]){
+        if(ctrl.pots[4]>=0x3FFF) 
+            clipmap[ctrl.last_pressed].choke = TRUE;
+        else 
+            clipmap[ctrl.last_pressed].choke = FALSE;
+    }
+}
+
+void consEDITTWOops(void){    
+    int tempp;
+    
+    if(ctrl.pot_moved[0]){
+        tempp= scalePotsCustom(clipmap[ctrl.last_pressed].end_chunk , ctrl.pots[0]);
+        clipmap[ctrl.last_pressed].start_chunk= tempp;
+    }
+    // gate
+    if(ctrl.pot_moved[2]){
+        tempp= scalePotsCustom(clipmap[ctrl.last_pressed].size_chunks , ctrl.pots[2]);
+        clipmap[ctrl.last_pressed].end_chunk= tempp;
+        if(tempp<clipmap[ctrl.last_pressed].start_chunk)
+            clipmap[ctrl.last_pressed].start_chunk= tempp;
     }
     // choke
     if(ctrl.pot_moved[4]){

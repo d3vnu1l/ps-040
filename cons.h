@@ -11,7 +11,8 @@
 #define	CONS_H
 
 void consPADops(fractional* stream);
-void consEDITops(void);
+void consEDITONEops(void);
+void consEDITTWOops(void);
 
 /*
 enum action_states{

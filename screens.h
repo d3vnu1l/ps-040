@@ -22,7 +22,8 @@ void screenHPFmod(unsigned int, fractional, fractional, fractional);
 
 void screenFX(void);
 void screenSHIFT(void);
-void screenRecord(void);
+void screenEditOne(void);
+void screenEditTwo(void);
 
 void screenUpdate(void);
 

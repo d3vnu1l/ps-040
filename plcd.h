@@ -29,7 +29,7 @@ void lcdSetCursorQ(unsigned char, unsigned char);
 void lcdWriteWordQ(int);
 void lcdWriteByteQ(char);
 void lcdWriteWordUnsignedQ(unsigned int);
-void lcdWriteDecimalQ(char, int);
+void lcdWriteDecimalQ(int, int);
 void lcdDrawPads(unsigned char);
 void lcdDrawSlots(unsigned char, unsigned char[16]);
 void lcdDrawSplash(void);

@@ -31,7 +31,7 @@ extern struct clip_flash clipmap[FLASH_NUMCHUNKS];
 int fxLast=0, fxNow=0;
 
 void (*fxModPointers[NUMFX])(unsigned int, fractional, fractional, fractional) = {screenNoFXmod, screenLPFmod, screenTRMmod, screenLOPmod, screenBTCmod, screenHPFmod};
-void (*screenPointers[SCREENS])(void) = {screenFX, screenRecord, screenDebugPots, screenDebugFlash, screenDebugBuffers, screenDebugInput, screenSHIFT};
+void (*screenPointers[SCREENS])(void) = {screenFX, screenEditOne, screenEditTwo, screenDebugPots, screenDebugFlash, screenDebugBuffers, screenDebugInput, screenSHIFT};
 
 void screenDebugAudio(void){
 
@@ -82,7 +82,8 @@ void screenDebugPots(void){
         lcdWriteStringQ("|");
     } else {
         // Update here
-        if(ctrl.pad[BTN_SPECIAL]>1)bank=POTS/2;
+        if(ctrl.pad[BTN_SPECIAL]>1)
+            bank=POTS/2;
         
         for(i=1; i<4; i++){
             lcdSetCursorQ(0,i);
@@ -332,7 +333,7 @@ void screenSHIFT(void){
     }
 }
 
-void screenRecord(void){
+void screenEditOne(void){
     int i;
     char grid[16];
     for(i=0; i<16; i++){
@@ -345,34 +346,95 @@ void screenRecord(void){
         //setup here
         lcdClearQ();
         lcdSetCursorQ(0,0);
-        lcdWriteStringQ("EDIT SAMPLE:");
+        lcdWriteStringQ("EDIT");
         lcdSetCursorQ(0,1);
         lcdWriteStringQ("LOOP :");
         lcdSetCursorQ(0,2);
         lcdWriteStringQ("GATE :");
         lcdSetCursorQ(0,3);
         lcdWriteStringQ("CHOKE:");
+        
+        lcdSetCursorQ(5,0);
+        lcdWriteQ('(');
+        lcdSetCursorQ(8,0);
+        lcdWriteStringQ(")(");
+        lcdSetCursorQ(14,0);
+        lcdWriteQ(')');
     } else {
         //update here 
-        lcdSetCursorQ(13,0);
+        lcdSetCursorQ(6,0);
         lcdWriteDecimalQ((ctrl.last_pressed+1), 2);
+        lcdSetCursorQ(10,0);
+        if(clipmap[ctrl.last_pressed].start_address==clipmap[ctrl.last_pressed].end_address)
+            lcdWriteStringQ("empt");
+        else 
+            lcdWriteStringQ("full");
         
         lcdSetCursorQ(7,1);
         if(clipmap[ctrl.last_pressed].loop==TRUE) 
-            lcdWriteStringQ("y");
+            lcdWriteStringQ("repeat");
         else
-            lcdWriteStringQ("n");
+            lcdWriteStringQ("1-shot");
         lcdSetCursorQ(7,2);
                 if(clipmap[ctrl.last_pressed].gate) 
-            lcdWriteStringQ("y");
+            lcdWriteStringQ("on ");
         else
-            lcdWriteStringQ("n");
+            lcdWriteStringQ("off");
         lcdSetCursorQ(7,3);
         if(clipmap[ctrl.last_pressed].choke) 
             lcdWriteStringQ("y");
         else
             lcdWriteStringQ("n");
         lcdDrawSlots(16, grid);
+    }
+}
+
+void screenEditTwo(void){
+    int i;
+    
+    if(state!=laststate){
+        //setup here
+        lcdClearQ();
+        lcdSetCursorQ(0,0);
+        lcdWriteStringQ("EDIT :");
+        lcdSetCursorQ(0,1);
+        lcdWriteStringQ("BEGIN:");
+        lcdSetCursorQ(0,2);
+        lcdWriteStringQ("END  :");
+        lcdSetCursorQ(0,3);
+        lcdWriteStringQ("VOL  :");
+        
+        lcdSetCursorQ(5,0);
+        lcdWriteQ('(');
+        lcdSetCursorQ(8,0);
+        lcdWriteStringQ(")(");
+        lcdSetCursorQ(14,0);
+        lcdWriteQ(')');
+    } else {
+        //update here 
+        lcdSetCursorQ(6,0);
+        lcdWriteDecimalQ((ctrl.last_pressed+1), 2);
+        lcdSetCursorQ(10,0);
+        if(clipmap[ctrl.last_pressed].start_address==clipmap[ctrl.last_pressed].end_address)
+            lcdWriteStringQ("empt");
+        else 
+            lcdWriteStringQ("full");
+        
+        
+        lcdSetCursorQ(7,1);
+        lcdWriteDecimalQ(clipmap[ctrl.last_pressed].start_chunk, 4);
+        lcdSetCursorQ(11,1);
+        lcdWriteQ('/');
+        lcdWriteDecimalQ(clipmap[ctrl.last_pressed].end_chunk, 4);
+        
+
+        lcdSetCursorQ(7,2);
+        lcdWriteDecimalQ(clipmap[ctrl.last_pressed].end_chunk, 4);
+        lcdSetCursorQ(11,2);
+        lcdWriteQ('/');
+        lcdWriteDecimalQ(clipmap[ctrl.last_pressed].size_chunks, 4);
+        
+        
     }
 }
 
