@@ -12,8 +12,9 @@ extern unsigned long readQueue[VOICES];
 
 extern fractional       RxBufferA[FLASH_DMA_RX_WORDS]__attribute__((space(xmemory)));
 
-void consPADops(fractional* stream){
+void consPADops(fractional* source){
     int i;
+    stat.dma_writeQ_index = -1;
     stat.dma_queue=stat.dma_rx_index=0;
     
     if(ctrl.pad[BTN_ENCSPEC]==2){
@@ -21,41 +22,37 @@ void consPADops(fractional* stream){
     }
     
     //check write triggers
-    for(i=0; i<FLASH_NUMCHUNKS; i++){
-        /* Check for records */
-        if(ctrl.pad[BTN_SPECIAL]==3){
+    for(i=0; i<FLASH_NUMCHUNKS; i++){  
+        /* Check for erase triggers */
+        if(ctrl.pad[BTN_ENC]>=2){
             if(ctrl.pad[i]==2){
-                clipmap[i].action=2;            // Record
-            }
-            else if(ctrl.pad[i]==1){
-                clipmap[i].action=0;            // off
-                clipmap[i].end_address=clipmap[i].write_index;
-                clipmap[i].size_chunks=(clipmap[i].write_index-clipmap[i].start_address)/FLASH_PAGE;
-                clipmap[i].end_chunk=clipmap[i].size_chunks;
-                //clipmap[i].start_chunk=0;
-            }
-        }
-        else if(ctrl.pad[BTN_SPECIAL]==1 && clipmap[i].action==2){
-            clipmap[i].action=0;                // off
-            clipmap[i].end_address=clipmap[i].write_index;
-            clipmap[i].size_chunks=(clipmap[i].write_index-clipmap[i].start_address)/FLASH_PAGE;
-            clipmap[i].end_chunk=clipmap[i].size_chunks;
-        }
-        
-        
-        if(clipmap[i].action==2){
-            flashWritePage(stream, clipmap[i].write_index);
-            if(clipmap[i].write_index<clipmap[i].end_limit)
-                clipmap[i].write_index+=FLASH_PAGE;
-        }
-        
-        /* Check for erase */
-        if(ctrl.pad[BTN_ENC]==3){
-            if(ctrl.pad[i]==3){
                 clipmap[i].action=3;            // Erase
             }
+        }    
+        /* Check for record triggers */
+        else if(ctrl.pad[BTN_SPECIAL]>=2 && clipmap[i].action==0){
+            if(ctrl.pad[i]==2){
+                clipmap[i].action=2;            // Trigger record
+            }
+        }
+        /* Check for read triggers */
+        else if(ctrl.pad[i]==2 && clipmap[i].action<2){                             // Pressed
+            if(clipmap[i].end_address!=clipmap[i].start_address){
+                if(!clipmap[i].gate){
+                    if(clipmap[i].action==0)
+                        clipmap[i].action=1;
+                    else {
+                        clipmap[i].action=0;
+                        clipmap[i].read_index=clipmap[i].start_address+(clipmap[i].start_chunk*FLASH_PAGE);
+                    }
+                }
+                else 
+                    clipmap[i].action=1;
+            }
         }
         
+ 
+        /* ERASE actions */
         if(clipmap[i].action==3){
             if(flashStatusCheck(FLASH_RDSR1)&&0x04);
             else{
@@ -73,45 +70,43 @@ void consPADops(fractional* stream){
                 }
             }
         } 
-        
-        /* Check for read */
-        if(ctrl.pad[BTN_ENC]==0){
-            if(ctrl.pad[i]==2){                             // Pressed
-                if(clipmap[i].end_address!=clipmap[i].start_address){
-                    if(!clipmap[i].gate){
-                        if(clipmap[i].action==0)
-                            clipmap[i].action=1;
-                        else 
-                            clipmap[i].action=0;
-                    }
-                    else 
-                        clipmap[i].action=1;
-                }
-            }
-            else if (ctrl.pad[i]==1){                       // Depressed
-                if(clipmap[i].gate)
+        /* PLAY actions */
+        else if(clipmap[i].action==1){
+            if (ctrl.pad[i]==1){                       // Depressed
+                if(clipmap[i].gate){
                     clipmap[i].action=0;
-            }
-            if(clipmap[i].action==1){
-                if(stat.dma_queue<VOICES){                  // Check queue size to avoid overflow
-                    readQueue[stat.dma_queue++]=clipmap[i].read_index;
-                    if(clipmap[i].read_index<clipmap[i].end_address)
-                        clipmap[i].read_index+=FLASH_PAGE;
-                    else if(clipmap[i].loop) 
-                        clipmap[i].read_index=clipmap[i].start_address+(clipmap[i].start_chunk*FLASH_PAGE);    // Loop-back
-                    else 
-                        clipmap[i].action=0;
+                    clipmap[i].read_index=clipmap[i].start_address+(clipmap[i].start_chunk*FLASH_PAGE);
                 }
-                else 
-                        clipmap[i].action=0;
-            } 
-            else {
-                clipmap[i].read_index=clipmap[i].start_address+(clipmap[i].start_chunk*FLASH_PAGE);
-                clipmap[i].end_address=clipmap[i].start_address+(clipmap[i].end_chunk*FLASH_PAGE);
             }
+            else if(stat.dma_queue<VOICES){                  // Check queue size to avoid overflow
+                readQueue[stat.dma_queue++]=clipmap[i].read_index;
+                if(clipmap[i].read_index<clipmap[i].end_address)
+                    clipmap[i].read_index+=FLASH_PAGE;
+                else if(clipmap[i].loop) 
+                    clipmap[i].read_index=clipmap[i].start_address+(clipmap[i].start_chunk*FLASH_PAGE);    // Loop-back
+                else{ 
+                    clipmap[i].read_index=clipmap[i].start_address+(clipmap[i].start_chunk*FLASH_PAGE);
+                    clipmap[i].action=0;
+                }
+            }
+            else 
+                clipmap[i].action=0;
+        }
+        /* RECORD actions */
+        else if(clipmap[i].action==2){
+            stat.dma_write_buffer=source;
+            stat.dma_writeQ_index=i;                                             //Store write pad
+            if(clipmap[i].write_index<clipmap[i].end_limit)
+                clipmap[i].write_index+=FLASH_PAGE;
+            
+            if(ctrl.pad[i]==1){                                    // Reset case 1
+                clipmap[i].action=0;            // off
+                clipmap[i].end_address=clipmap[i].write_index;
+                clipmap[i].size_chunks=(clipmap[i].write_index-clipmap[i].start_address)/FLASH_PAGE;
+                clipmap[i].end_chunk=clipmap[i].size_chunks;
+            } 
         }
     }
-    
     
     // Kick off reads
     stat.dma_framesize=stat.dma_queue;
@@ -120,6 +115,10 @@ void consPADops(fractional* stream){
         flashStartRead(readQueue[0], &RxBufferA[0]);
         stat.dma_rx_index+=FLASH_DMAXFER_WORDS;
         stat.dma_queue++;
+    }
+    else if(stat.dma_writeQ_index!=-1){
+        flashWritePage(stat.dma_write_buffer, clipmap[stat.dma_writeQ_index].write_index);
+        stat.dma_writeQ_index=-1;
     }
 }
 

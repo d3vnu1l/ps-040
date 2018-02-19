@@ -39,7 +39,8 @@ struct sflags stat = {  .UART_ON = FALSE,
                         .hard_clipped = FALSE,
                         .dma_queue = 0,
                         .dma_framesize=0,
-                        .dma_rx_index=0};
+                        .dma_rx_index=0,
+                        .dma_writeQ_index=-1};
 
 
 /* Screen state variables */

@@ -13,7 +13,7 @@ extern fractional       TxBufferA[FLASH_DMAXFER_WORDS]__attribute__((space(xmemo
                         RxBufferA[FLASH_DMA_RX_WORDS]__attribute__((space(xmemory)));
 
 extern unsigned long readQueue[VOICES];
-
+extern struct clip_flash clipmap[FLASH_NUMCHUNKS];
 extern struct sflags stat;
 extern unsigned char btread;
 
@@ -72,7 +72,10 @@ void __attribute__((interrupt, auto_psv)) _DMA1Interrupt(void){
         stat.dma_rx_index+=FLASH_DMAXFER_WORDS;
         stat.dma_queue++;
     }
-    
+    else if(stat.dma_writeQ_index!=-1){
+        flashWritePage(stat.dma_write_buffer, clipmap[stat.dma_writeQ_index].write_index);
+        stat.dma_writeQ_index=-1;
+    }
 }
 
 //Description: This interrupt handles UART reception

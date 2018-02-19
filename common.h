@@ -124,6 +124,8 @@ struct sflags {
     unsigned char dma_queue; 
     unsigned char dma_framesize;
     unsigned int  dma_rx_index;
+    unsigned long dma_writeQ_index;
+    fractional*   dma_write_buffer;
 };
 
 #endif	/* COMMON_H */
