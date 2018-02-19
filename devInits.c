@@ -3,6 +3,8 @@
  */
 #include <xc.h>
 #include <p33EP512GM310.h>
+#include <stdio.h>              /* Required for printf */
+#include <stdarg.h>             /* Required for printf */
 #include "common.h"
 #include "devInits.h"
 #include "utilities.h"
@@ -95,6 +97,17 @@ void initUART1(void){
     IEC0bits.U1RXIE = 1;        //enable rx interrupt
     U1MODEbits.UARTEN = 1;      //start uart
     U1STAbits.UTXEN = 1;
+    
+    Delay_us(20);
+    
+    /*
+    if(ctrl.pad[0]==2) printf("AT+ROLE=1\r\n");
+    if(ctrl.pad[1]==2) printf("AT+NAME=PS-040\r\n");
+    if(ctrl.pad[2]==2) printf("AT+UART=38400,0,0\r\n");
+    if(ctrl.pad[3]==2) printf("AT+ROLE=0\r\n");
+    if(ctrl.pad[15]==2) printf("AT+RESET\r\n");
+    if(ctrl.pad[14]==2) printf("AT+ORGL\r\n");
+    */
 }
 
 void initADC1(void){ 

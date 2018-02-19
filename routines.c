@@ -17,6 +17,10 @@ extern struct clip_flash clipmap[FLASH_NUMCHUNKS];
 extern struct sflags stat;
 extern unsigned char btread;
 
+extern int btRXbuf[BTBUF_WORDS];
+extern char *btWritePtr;
+extern char *btReadPtr;
+
 //Description: This interrupt triggers at the completion of DCI output
 //Dependancies: initSPI2(); 
 void __attribute__ ((interrupt, auto_psv)) _DCIInterrupt(void){
@@ -83,6 +87,13 @@ void __attribute__((interrupt, auto_psv)) _DMA1Interrupt(void){
 void __attribute__ ((interrupt, auto_psv)) _U1RXInterrupt(void){
     //unsigned char trash;
     btread=U1RXREG;
+    
+    *btWritePtr++=btread;
+    if(btWritePtr==&btRXbuf[BTBUF_WORDS]){
+        btWritePtr=&btRXbuf[0];
+        //BLOCKING SEND CHUNK TO flash
+    }
+    
     IFS0bits.U1RXIF = 0;            //clear flag, restart
 }
 

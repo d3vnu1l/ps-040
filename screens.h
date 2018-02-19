@@ -24,6 +24,7 @@ void screenFX(void);
 void screenSHIFT(void);
 void screenEditOne(void);
 void screenEditTwo(void);
+void screenBluetooth(void);
 
 void screenUpdate(void);
 

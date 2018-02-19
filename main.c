@@ -1,6 +1,8 @@
 #include <xc.h>
 #include <p33EP512GM310.h>
 #include <dsp.h>
+#include <stdio.h>              /* Required for printf */
+#include <stdarg.h>             /* Required for printf */
 #include "common.h"
 #include "devInits.h"
 #include "utilities.h"
@@ -30,11 +32,15 @@ fractional      TxBufferA[FLASH_DMAXFER_WORDS] __attribute__((space(xmemory))),
 
 unsigned long readQueue[VOICES];
 
+int btRXbuf[BTBUF_WORDS];
+char *btWritePtr=btRXbuf;
+char *btReadPtr=btRXbuf;
+
 
 /* Debug Variables */
 unsigned int process_time=0, flash_time = 0;
 
-struct sflags stat = {  .UART_ON = FALSE,
+struct sflags stat = {  .UART_ON = TRUE,
                         .TEST_SIN = FALSE,
                         .hard_clipped = FALSE,
                         .dma_queue = 0,

@@ -31,7 +31,7 @@ extern struct clip_flash clipmap[FLASH_NUMCHUNKS];
 int fxLast=0, fxNow=0;
 
 void (*fxModPointers[NUMFX])(unsigned int, fractional, fractional, fractional) = {screenNoFXmod, screenLPFmod, screenTRMmod, screenLOPmod, screenBTCmod, screenHPFmod};
-void (*screenPointers[SCREENS])(void) = {screenFX, screenEditOne, screenEditTwo, screenDebugPots, screenDebugFlash, screenDebugBuffers, screenDebugInput, screenSHIFT};
+void (*screenPointers[SCREENS])(void) = {screenFX, screenEditOne, screenEditTwo, screenBluetooth, screenDebugPots, screenDebugFlash, screenDebugBuffers, screenDebugInput, screenSHIFT};
 
 void screenDebugAudio(void){
 
@@ -435,6 +435,34 @@ void screenEditTwo(void){
         lcdWriteDecimalQ(clipmap[ctrl.last_pressed].size_chunks, 4);
         
         
+    }
+}
+
+void screenBluetooth(void){
+    int i;
+    
+    if(state!=laststate){
+        //setup here
+        lcdClearQ();
+        lcdSetCursorQ(0,0);
+        lcdWriteStringQ("BT LOAD");
+
+        
+        lcdSetCursorQ(9,0);
+        lcdWriteQ('(');
+        lcdSetCursorQ(12,0);
+        lcdWriteStringQ(")(");
+        lcdSetCursorQ(18,0);
+        lcdWriteQ(')');
+    } else {
+        //update here 
+        lcdSetCursorQ(10,0);
+        lcdWriteDecimalQ((ctrl.last_pressed+1), 2);
+        lcdSetCursorQ(14,0);
+        if(clipmap[ctrl.last_pressed].start_address==clipmap[ctrl.last_pressed].end_address)
+            lcdWriteStringQ("empt");
+        else 
+            lcdWriteStringQ("full");
     }
 }
 

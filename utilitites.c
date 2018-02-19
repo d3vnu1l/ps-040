@@ -4,6 +4,8 @@
 #include <xc.h>
 #include <p33EP512GM310.h>
 #include <dsp.h>
+#include <stdio.h>              /* Required for printf */
+#include <stdarg.h>             /* Required for printf */
 #include "common.h"
 #include "sounds.h"
 #include "flash.h"
@@ -214,7 +216,8 @@ void display(void){
     screenUpdate();
    
    if(stat.UART_ON==TRUE){
-        U1TXREG = 0x61;
+        //U1TXREG = 0x61;
+       printf("test\r\n");
     }
    
    SLED=~SLED;

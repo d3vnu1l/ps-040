@@ -8,11 +8,11 @@
 #define Fcy     Fosc/2
 
 /* Timers and Frequencies */
-#define BAUDRATE 9600                  //target baud rate for *UART*           //peripheral configs
-#define BRGVAL  ((Fcy/BAUDRATE)/16)-1    //calculate baud value (MAY TRUNCATE)
-#define Fscan   200                       //target buttons & pots sampling rate
-#define Fout    44100                      //target output sampling rate (~45k last measured)
-#define Fdisp   24                        //20hz display update rate
+#define BAUDRATE 38400                      //target baud rate for *UART*           //peripheral configs
+#define BRGVAL  ((Fcy/BAUDRATE)/16)-1       //calculate baud value (MAY TRUNCATE)
+#define Fscan   200                         //target buttons & pots sampling rate
+#define Fout    44100                       //target output sampling rate (~45k last measured)
+#define Fdisp   24                          //20hz display update rate
 
 #define SINRES  1024
 
@@ -21,6 +21,8 @@
 #define STREAMBUF       256                   //input adc stack size, must be divisible by 2
 #define LOOP_BUF_SIZE   17408             
 #define LCDBUF          256                     //lcd command buffer size
+#define BTBUF_BYTES     512
+#define BTBUF_WORDS     BTBUF_BYTES/2
 
 /* MISC */
 #define TRUE    0xFF
@@ -29,7 +31,7 @@
 #define POTS	12                       
 #define NUMFX   6
 #define NUMFXUNITS 2
-#define SCREENS 8
+#define SCREENS 9
 #define VOICES 6
 
 /* Pin Map */
@@ -89,6 +91,7 @@ enum screenStruc{
     scrnFX,
     scrnEDITone,
     scrnEDITtwo,
+    scrnBT,
     debugscrnPOTS,
     debugscrnFLASH,
     debugscrnBUFFERS,
