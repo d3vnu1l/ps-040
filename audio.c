@@ -11,6 +11,7 @@ extern fractional       TxBufferA[FLASH_DMAXFER_WORDS]__attribute__((space(xmemo
                         RxBufferA[FLASH_DMA_RX_WORDS]__attribute__((space(xmemory)));
 
 extern fractional sintab[SINRES];
+extern fractional vol2log[LOGVOLUME_SIZE];
 static fractional loopbuf[LOOP_BUF_SIZE] __attribute__ ((eds)) = {0};
 static fractional psvbuf[STREAMBUF]={0};
 
@@ -231,13 +232,13 @@ void dcHPF(fractional *source,  fractional *destination){
 void getAudioIntensity(fractional *signal){
     volatile register int resultA asm("A");
     volatile register int resultB asm("B");
-    static fractional lpf_alpha=Q15(0.0548501278);  // Tuned for 10 Hz
+    static fractional lpf_alpha=Q15(0.0548501278);  // Tuned for 40 Hz
     const fractional gain = Q15(0.4725749361);
-    //const fractional gain = Q15(1.0);
+    //const fractional gain = Q15(0.75);
     static fractional new_out, last_out, new_in, last_in;
     
     new_in = VectorMax(STREAMBUF, signal, NULL);
-    if((int)(new_in>20000)) stat.hard_clipped=TRUE;
+    if((int)(new_in>32700)) stat.hard_clipped=TRUE;
 
     resultA =__builtin_mpy(new_in, gain, NULL, NULL, 0, NULL, NULL, 0);
     new_in=__builtin_sac(resultA, 0);
@@ -256,10 +257,13 @@ void getAudioIntensity(fractional *signal){
     }
     else if(new_out>stat.power)
         stat.power=new_out;
+    
 }
 
 void processAudio(fractional *source, fractional *destination){
-    volatile register int result1 asm("A");
+    volatile register int resultA asm("A");
+    const fractional scale_vollog = Q15(0.125003814814); // Scales value between 0-4096 for lookup
+    fractional temp;
     
     if(state==scrnFX){
         if(fxUnits[0]==0); else fxFuncPointers[fxUnits[0]](source, source, ctrl.pots[FX_1], ctrl.pots[FX_2], ctrl.pots[FX_3]);
@@ -281,25 +285,7 @@ void processAudio(fractional *source, fractional *destination){
         //VectorScale(STREAMBUF, psvbuf, psvbuf, Q15(0.9));
         VectorAdd(STREAMBUF, source, source, psvbuf);
                 
-        //result1 =__builtin_mpy(sample,Q15(0.85), NULL, NULL, 0, NULL, NULL, 0);
-        //result1 = __builtin_add(result1,kick[kick_ptr++],0);
-        //sample=__builtin_sac(result1, 0);
     }
-    /*
-    else if (pad[0]==1&&kick_playing==TRUE&&kick_ptr==kick_max){
-        kick_playing=FALSE;
-        kick_ptr=0;
-    }
-
-    if(snare.playing==TRUE){
-        result1 =__builtin_mpy(sample,Q15(0.85), NULL, NULL, 0, NULL, NULL, 0);
-
-        result1 = __builtin_add(result1,snare[snare_ptr++],0);
-        sample=__builtin_sac(result1, 0);
-
-        snare_playing=FALSE;
-    }
-    */
 
     if (stat.TEST_SIN==TRUE){
         ClipCopy_psv(STREAMBUF, source, sine.read_ptr);
@@ -314,9 +300,14 @@ void processAudio(fractional *source, fractional *destination){
     VectorCopy(STREAMBUF, destination, source);     //copy from ping to pong buffer
     
     //VOLUME CONTROL
-    //if(pots[POT_VOLUME]<=0x000F); 
     if(ctrl.pots[POT_VOLUME]>=0x7FF7);
+    else if(ctrl.pots[POT_VOLUME]<=0x000F)
+        VectorScale(STREAMBUF, destination, destination, 0);
     else{
-        VectorScale(STREAMBUF, destination, destination, ctrl.pots[POT_VOLUME]);
+        resultA =__builtin_mpy(scale_vollog, ctrl.pots[POT_VOLUME], NULL, NULL, 0, NULL, NULL, 0);
+        temp=__builtin_sac(resultA, 0);
+        temp=vol2log[temp];
+        //VectorScale(STREAMBUF, destination, destination, temp);
+        VectorScale(STREAMBUF, destination, destination, ctrl.pots[POT_VOLUME]); 
     }
 }

@@ -12,7 +12,7 @@
 #define BRGVAL  ((Fcy/BAUDRATE)/16)-1       //calculate baud value (MAY TRUNCATE)
 #define Fscan   200                         //target buttons & pots sampling rate
 #define Fout    44100                       //target output sampling rate (~45k last measured)
-#define Fdisp   15                          //15hz display update rate
+#define Fdisp   20                          //15hz display update rate
 
 #define SINRES  1024
 
@@ -33,6 +33,9 @@
 #define NUMFXUNITS 2
 #define SCREENS 9
 #define VOICES 6
+
+#define LOGMETER_SIZE 64
+#define LOGVOLUME_SIZE 4096
 
 /* Pin Map */
 #define SLED _LATF0                                                            

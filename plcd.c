@@ -16,6 +16,13 @@ int lcdBuf[LCDBUF+1]={0};
 int *lcdWritePtr=lcdBuf;
 int *lcdReadPtr=lcdBuf;
 
+int __attribute__((space(psv))) log2Meter[LOGMETER_SIZE] = {
+    0, 5, 8, 11, 12, 14, 15, 16, 17, 18, 18, 19, 20, 20, 21, 21, 22, 22, 23, 
+    23, 23, 24, 24, 24, 25, 25, 25, 26, 26, 26, 26, 27, 27, 27, 27, 28, 28, 
+    28, 28, 28, 29, 29, 29, 29, 29, 29, 30, 30, 30, 30, 30, 30, 31, 31, 31, 
+    31, 31, 31, 31, 32, 32, 32, 32, 32};
+
+
 // There are write and command macros in the header, make sure these match.
 void lcdWriteQ(unsigned char data){
     *lcdWritePtr++=data|0x0000;
@@ -169,7 +176,7 @@ void lcdDrawPads(unsigned char col){
 
 void lcdDrawMeter(unsigned char col){
     volatile register int resultA asm("A");
-    const fractional scale = Q15(0.00097659230323); // Scales value between 0-32
+    const fractional scale = Q15(0.00195318460646); // Scales value between 0-64 for lookup
     int i;
     const int divs=32, row=8;
     int scaledPower;
@@ -177,8 +184,8 @@ void lcdDrawMeter(unsigned char col){
     
                     
     resultA =__builtin_mpy(scale, stat.power, NULL, NULL, 0, NULL, NULL, 0);
-    scaledPower=__builtin_sac(resultA, 0) + 1;
-    
+    scaledPower=__builtin_sac(resultA, 0);
+    scaledPower=log2Meter[scaledPower];
     for(i=3; i>=0; i--){
         lcdSetCursorQ(col, i);
         if(scaledPower<=0){ 

@@ -298,31 +298,33 @@ void screenHPFmod(unsigned int col, fractional param1, fractional param2, fracti
 }
 
 void screenFX(void){
-    int i;
+    int i,j ;
     
     if(state!=laststate){
         //setup here
         lcdClearQ();
         lcdSetCursorQ(0,0);
         lcdWriteStringQ("Fx1:");
-        lcdSetCursorQ(10,0);
+        lcdSetCursorQ(9,0);
         lcdWriteStringQ("Fx2:");
+        for(j=0; j<4; j++){
+           lcdSetCursorQ(8, j);
+           lcdWriteQ('|');
+       }
+        for(j=0; j<4; j++){
+           lcdSetCursorQ(17, j);
+           lcdWriteQ('|');
+       }
+
+
         fxModPointers[fxUnits[0]](0,  ctrl.pots_scaled[FX_1], ctrl.pots_scaled[FX_2], ctrl.pots_scaled[FX_3]);
-        fxModPointers[fxUnits[1]](10, ctrl.pots_scaled[FX_4], ctrl.pots_scaled[FX_5], ctrl.pots_scaled[FX_6]);
+        fxModPointers[fxUnits[1]](9, ctrl.pots_scaled[FX_4], ctrl.pots_scaled[FX_5], ctrl.pots_scaled[FX_6]);
         
     } else {
         //update here 
         fxModPointers[fxUnits[0]](0,  ctrl.pots_scaled[FX_1], ctrl.pots_scaled[FX_2], ctrl.pots_scaled[FX_3]);
-        fxModPointers[fxUnits[1]](10, ctrl.pots_scaled[FX_4], ctrl.pots_scaled[FX_5], ctrl.pots_scaled[FX_6]);
+        fxModPointers[fxUnits[1]](9, ctrl.pots_scaled[FX_4], ctrl.pots_scaled[FX_5], ctrl.pots_scaled[FX_6]);
         if(stat.hard_clipped==TRUE){
-            lcdSetCursorQ(8, 0);
-            lcdWriteQ('C');
-            lcdSetCursorQ(8, 1);
-            lcdWriteQ('L');
-            lcdSetCursorQ(8, 2);
-            lcdWriteQ('I');
-            lcdSetCursorQ(8, 3);
-            lcdWriteQ('P');
             lcdSetCursorQ(18, 0);
             lcdWriteQ('C');
             lcdSetCursorQ(18, 1);
@@ -334,8 +336,8 @@ void screenFX(void){
             stat.hard_clipped=FALSE;
         }
         else {
-            lcdDrawMeter(8);
-            lcdDrawMeter(9);
+            //lcdDrawMeter(8);
+            //lcdDrawMeter(9);
             lcdDrawMeter(18);
             lcdDrawMeter(19);
         }
