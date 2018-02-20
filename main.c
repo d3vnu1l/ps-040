@@ -32,13 +32,10 @@ fractional      TxBufferA[FLASH_DMAXFER_WORDS] __attribute__((space(xmemory))),
 
 unsigned long readQueue[VOICES];
 
-int btRXbuf[BTBUF_WORDS];
-char *btWritePtr=btRXbuf;
-char *btReadPtr=btRXbuf;
-
-
 /* Debug Variables */
 unsigned int process_time=0, flash_time = 0;
+
+struct clip_flash clipmap[FLASH_NUMCHUNKS];
 
 struct sflags stat = {  .UART_ON = TRUE,
                         .TEST_SIN = FALSE,
@@ -46,8 +43,11 @@ struct sflags stat = {  .UART_ON = TRUE,
                         .dma_queue = 0,
                         .dma_framesize=0,
                         .dma_rx_index=0,
-                        .dma_writeQ_index=-1};
+                        .dma_writeQ_index=-1,
+                        .dma_rts=FALSE};
 
+struct bluetooth bluet = {  .btread=0,
+                            .btReady=FALSE};
 
 /* Screen state variables */
 enum screenStruc state = scrnFX;
@@ -57,14 +57,12 @@ enum fxStruct fxUnits[NUMFXUNITS]={0,0};
 /* Buttons & Potentiometers */
 struct ctrlsrfc ctrl = {0};
 
-unsigned char btread;
-
 void initBuffers(void){
     int i;
-    
     for(i=0; i<STREAMBUF; i++){
         streamA[i]=0;
         streamB[i]=0;
+        bluet.btRXbuf[i]=0;
     }
     
     for(i=0; i<BUTTONS; i++)
@@ -78,12 +76,13 @@ void initBuffers(void){
         RxBufferA[i]=0;
     }
     
+    bluet.btWritePtr=&bluet.btRXbuf[0];
+    bluet.btReadPtr=&bluet.btRXbuf[0];
+                            
 }
 
 int main(void) {
     fractional *ping, *pong;
-    fractional* rcvPtr;
-    
     initPorts();                    // Configure io device & adc 
     initBuffers();
     initDMA();
@@ -112,6 +111,7 @@ int main(void) {
                 ping = streamB;
                 pong = outputA;
             }
+            
             dcHPF(ping, ping);          // Remove DC offset
             
             stat.dma_rx_index=0;
@@ -122,19 +122,38 @@ int main(void) {
                 stat.dma_framesize--;
             }
             
-            consPADops(ping);
             /* State dependent controls*/
+            if(state!=scrnBT) 
+                consPADops(ping);
+            else if(bluet.btReady){
+                consBTops();
+                bluet.btReady=FALSE;
+            }
+            
             if(state==scrnEDITone) 
                 consEDITONEops();
             else if(state==scrnEDITtwo) 
                 consEDITTWOops();
             
             processAudio(ping, pong);
-            process_time=write_ptr;    //DEBUG
-            while(!SS3a);               //wait for flash transmissions to complete
+            //while(!SS3a);               //wait for flash transmissions to complete
+
+            if(stat.dma_writeQ_index!=-1){
+                while(stat.dma_rts==FALSE){
+                    if(_T3IF) {
+                        lcdPoll();
+                    _T3IF=0;
+                    }
+                }
+                flashWritePage(pong, clipmap[stat.dma_writeQ_index].write_index); 
+                stat.dma_writeQ_index=-1; 
+            }
+            while(!SS3a);
             flash_time=write_ptr;
+            process_time=write_ptr;    //DEBUG
             frameReady=0;
         }
+
         if(_T1IF){
             display();
             _T1IF=0;

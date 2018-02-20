@@ -15,11 +15,7 @@ extern fractional       TxBufferA[FLASH_DMAXFER_WORDS]__attribute__((space(xmemo
 extern unsigned long readQueue[VOICES];
 extern struct clip_flash clipmap[FLASH_NUMCHUNKS];
 extern struct sflags stat;
-extern unsigned char btread;
-
-extern int btRXbuf[BTBUF_WORDS];
-extern char *btWritePtr;
-extern char *btReadPtr;
+extern struct bluetooth bluet;
 
 //Description: This interrupt triggers at the completion of DCI output
 //Dependancies: initSPI2(); 
@@ -76,21 +72,25 @@ void __attribute__((interrupt, auto_psv)) _DMA1Interrupt(void){
         stat.dma_rx_index+=FLASH_DMAXFER_WORDS;
         stat.dma_queue++;
     }
-    else if(stat.dma_writeQ_index!=-1){
-        flashWritePage(stat.dma_write_buffer, clipmap[stat.dma_writeQ_index].write_index);
-        stat.dma_writeQ_index=-1;
-    }
+    else if(stat.dma_writeQ_index!=-1){ 
+        stat.dma_rts=TRUE;
+        //flashWritePage(stat.dma_write_buffer, clipmap[stat.dma_writeQ_index].write_index); 
+        //stat.dma_writeQ_index=-1; 
+    } 
+    
+
 }
 
 //Description: This interrupt handles UART reception
 //Dependencies: initUART1();
 void __attribute__ ((interrupt, auto_psv)) _U1RXInterrupt(void){
     //unsigned char trash;
-    btread=U1RXREG;
+    bluet.btread=U1RXREG;
     
-    *btWritePtr++=btread;
-    if(btWritePtr==&btRXbuf[BTBUF_WORDS]){
-        btWritePtr=&btRXbuf[0];
+    *bluet.btWritePtr++=bluet.btread;
+    if(bluet.btWritePtr==&bluet.btRXbuf[BTBUF_WORDS]){
+        bluet.btWritePtr=&bluet.btRXbuf[0];
+        bluet.btReady=TRUE;
         //BLOCKING SEND CHUNK TO flash
     }
     

@@ -8,7 +8,7 @@
 
 char receive;
 unsigned long  eraseAddr=0;
-struct clip_flash clipmap[FLASH_NUMCHUNKS];
+extern struct clip_flash clipmap[FLASH_NUMCHUNKS];
 
 
 extern struct sflags stat;

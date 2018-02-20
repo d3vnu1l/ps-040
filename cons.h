@@ -13,6 +13,7 @@
 void consPADops(fractional* stream);
 void consEDITONEops(void);
 void consEDITTWOops(void);
+void consBTops(void);
 
 /*
 enum action_states{

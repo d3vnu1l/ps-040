@@ -8,6 +8,7 @@
 extern struct clip_flash clipmap[FLASH_NUMCHUNKS];
 extern struct ctrlsrfc ctrl;
 extern struct sflags stat;
+extern struct bluetooth bluet;
 extern unsigned long readQueue[VOICES];
 
 extern fractional       RxBufferA[FLASH_DMA_RX_WORDS]__attribute__((space(xmemory)));
@@ -112,13 +113,15 @@ void consPADops(fractional* source){
     stat.dma_framesize=stat.dma_queue;
     stat.dma_queue=0;
     if(stat.dma_queue<stat.dma_framesize){
+        stat.dma_rts=FALSE;
         flashStartRead(readQueue[0], &RxBufferA[0]);
         stat.dma_rx_index+=FLASH_DMAXFER_WORDS;
         stat.dma_queue++;
     }
     else if(stat.dma_writeQ_index!=-1){
-        flashWritePage(stat.dma_write_buffer, clipmap[stat.dma_writeQ_index].write_index);
-        stat.dma_writeQ_index=-1;
+        //flashWritePage(stat.dma_write_buffer, clipmap[stat.dma_writeQ_index].write_index);
+        //stat.dma_writeQ_index=-1;
+        stat.dma_rts=TRUE;
     }
 }
 
@@ -171,6 +174,8 @@ void consEDITTWOops(void){
     }
 }
 
-
+void consBTops(void){
+    flashWritePage(bluet.btRXbuf, clipmap[ctrl.last_pressed].start_address);
+}
     
     

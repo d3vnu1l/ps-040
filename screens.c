@@ -16,7 +16,6 @@
 #include "sounds.h"
 
 extern unsigned int process_time, flash_time;
-extern unsigned char btread;
 
 extern fractional       TxBufferA[FLASH_DMAXFER_WORDS]__attribute__((space(xmemory))), 
                         RxBufferA[FLASH_DMA_RX_WORDS]__attribute__((space(xmemory)));
@@ -27,6 +26,7 @@ extern struct clip sine;
 extern struct ctrlsrfc ctrl;
 extern struct sflags stat;
 extern struct clip_flash clipmap[FLASH_NUMCHUNKS];
+extern struct bluetooth bluet;
 
 int fxLast=0, fxNow=0;
 
@@ -58,7 +58,7 @@ void screenDebugBuffers(void){
         lcdSetCursorQ(6,2);
         lcdWriteDecimalQ(flash_time,3);
         lcdSetCursorQ(6,3);
-        lcdWriteByteQ(btread);
+        lcdWriteByteQ(bluet.btread);
         //lcdWriteDecimalQ();
         //lcdSetCursorQ(6,3);
         //lcdWriteDecimalQ();

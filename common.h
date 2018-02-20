@@ -112,18 +112,19 @@ enum fxStruct{
 };
 
 struct ctrlsrfc {
-    unsigned char pad[BUTTONS];
-    unsigned char last_pressed;
-    fractional pots[POTS];
-    unsigned char pot_moved[POTS];
-    fractional pots_scaled[POTS];
-    fractional pots_custom[POTS];
+    unsigned char   pad[BUTTONS];
+    unsigned char   last_pressed;
+    fractional      pots[POTS];
+    unsigned char   pot_moved[POTS];
+    fractional      pots_scaled[POTS];
+    fractional      pots_custom[POTS];
 };
 
 struct sflags {
     unsigned char UART_ON;
     unsigned char TEST_SIN;
     unsigned char hard_clipped; 
+    unsigned char dma_rts;
     unsigned char dma_queue; 
     unsigned char dma_framesize;
     unsigned int  dma_rx_index;
@@ -131,5 +132,13 @@ struct sflags {
     fractional*   dma_write_buffer;
 };
 
+
+struct bluetooth {
+    fractional      btRXbuf[BTBUF_WORDS];
+    char            *btWritePtr;
+    char            *btReadPtr;
+    unsigned char   btread;
+    unsigned char   btReady;
+};
 #endif	/* COMMON_H */
 
