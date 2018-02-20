@@ -12,7 +12,7 @@
 #define BRGVAL  ((Fcy/BAUDRATE)/16)-1       //calculate baud value (MAY TRUNCATE)
 #define Fscan   200                         //target buttons & pots sampling rate
 #define Fout    44100                       //target output sampling rate (~45k last measured)
-#define Fdisp   24                          //20hz display update rate
+#define Fdisp   15                          //15hz display update rate
 
 #define SINRES  1024
 
@@ -124,6 +124,8 @@ struct sflags {
     unsigned char UART_ON;
     unsigned char TEST_SIN;
     unsigned char hard_clipped; 
+    fractional    power;
+    unsigned char power_ack;
     unsigned char dma_rts;
     unsigned char dma_queue; 
     unsigned char dma_framesize;

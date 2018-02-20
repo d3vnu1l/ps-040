@@ -31,6 +31,7 @@ void lcdWriteByteQ(char);
 void lcdWriteWordUnsignedQ(unsigned int);
 void lcdWriteDecimalQ(int, int);
 void lcdDrawPads(unsigned char);
+void lcdDrawMeter(unsigned char);
 void lcdDrawSlots(unsigned char, unsigned char[16]);
 void lcdDrawSplash(void);
 
@@ -39,6 +40,7 @@ void lcdPoll(void);
 
 /* Blocking send functions */
 void lcdBlockingSend(unsigned char);
+void lcdBlockingCommand(unsigned char);
 void lcdBlockingClear(void);
 void lcdBlockingReturn(void);
 
@@ -53,6 +55,8 @@ void lcdBlockingReturn(void);
     if(lcdWritePtr==&lcdBuf[LCDBUF])\
         lcdWritePtr=lcdBuf;\
 }
+
+
 
 #endif	/* XC_HEADER_TEMPLATE_H */
 

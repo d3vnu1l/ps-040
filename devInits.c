@@ -153,6 +153,7 @@ void initPMP(void){
     /* INIT DEVICE */
     Delay_us(40000);
     lcdInit();
+    lcdCustomSymbols();
 }
 
 

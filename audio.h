@@ -11,6 +11,8 @@ void runLOP(fractional *, fractional *, fractional, fractional, fractional);
 void runBTC(fractional *, fractional *, fractional, fractional, fractional);
 void runHPF(fractional *, fractional *, fractional, fractional, fractional);
 
+void getAudioIntensity(fractional *);
+
 void dcHPF(fractional *,  fractional *);
 void processAudio(fractional *, fractional *);
 

@@ -3,12 +3,14 @@
  */
 #include <xc.h>
 #include <stdlib.h> // For splash rand
+#include <dsp.h>
 #include "plcd.h"
 #include "common.h"
 #include "screens.h"
 #include "utilities.h"
 
 extern struct ctrlsrfc ctrl;
+extern struct sflags stat;
 
 int lcdBuf[LCDBUF+1]={0};
 int *lcdWritePtr=lcdBuf;
@@ -52,18 +54,7 @@ void lcdWriteStringQ(char *string) {
     for (; *it; it++) {
         lcdWriteQMac(*it);
         if(i++==(limit-1)) return;
-        
-  }
-}
-
-void lcdCustomSymbols(void){
-    int i=0;
-    lcdCommandQMac(0x40);
-    Delay_us(200);
-   // for(; i<8; i++)lcdWriteString(loadingOne[i]);
-    //lcdWriteString(loadingTwo);
-    //lcdWriteString(loadingThree);
-    //lcdWriteString(loadingFour);
+    }
 }
 
 void lcdWriteWordQ(int word){
@@ -176,6 +167,44 @@ void lcdDrawPads(unsigned char col){
     if(ctrl.pad[3]>1){lcdWriteQMac(' ');} else lcdWriteQMac(block);
 }
 
+void lcdDrawMeter(unsigned char col){
+    volatile register int resultA asm("A");
+    const fractional scale = Q15(0.00097659230323); // Scales value between 0-32
+    int i;
+    const int divs=32, row=8;
+    int scaledPower;
+    int remainder;
+    
+                    
+    resultA =__builtin_mpy(scale, stat.power, NULL, NULL, 0, NULL, NULL, 0);
+    scaledPower=__builtin_sac(resultA, 0) + 1;
+    
+    for(i=3; i>=0; i--){
+        lcdSetCursorQ(col, i);
+        if(scaledPower<=0){ 
+            lcdWriteQMac(' ');
+        }   
+        else if(scaledPower>=(divs-i*row)){
+            lcdWriteQMac(0xFF);
+        }
+        else if(scaledPower<(divs-i*row)){
+            lcdWriteQMac((char)(0xFF&scaledPower));
+        }
+        else{
+            remainder = scaledPower%row;
+             if(remainder==0){ 
+                lcdWriteQMac(' ');
+            } 
+            else{
+                lcdWriteQMac((char)(0xFF&remainder));
+            }
+        }
+        scaledPower-=row;
+    }
+  
+    stat.power_ack=TRUE;
+}
+
 void lcdDrawSlots(unsigned char col, unsigned char grid[16]){
     
     lcdSetCursorQ(col, 0);
@@ -257,6 +286,12 @@ void lcdBlockingSend(unsigned char data){
     while(PMMODEbits.BUSY)Delay_us(2);
     PMDIN1=data; 
 }
+
+void lcdBlockingCommand(unsigned char data){
+    LCD_RS=0;
+    while(PMMODEbits.BUSY)Delay_us(2);
+    PMDIN1=data; 
+}
 //ALWAYS SENDS, blocks program
 void lcdBlockingClear(void){
     while(PMMODEbits.BUSY)Delay_us(2);
@@ -267,6 +302,32 @@ void lcdBlockingClear(void){
 void lcdBlockingReturn(void){
     while(PMMODEbits.BUSY)Delay_us(2);
     PMDIN1=LCD_RETURNHOME;
+}
+
+void lcdCustomSymbols(void){
+    unsigned char customChars[8][8];
+    const unsigned char line = 0b11111;
+    int i, j;
+    // Generate custom characters
+    for(i=0; i<8; i++){
+        for(j=0; j<8; j++){
+            if(j<=i) 
+                customChars[i][7-j] = line;
+            else 
+                customChars[i][7-j] = 0x00;
+        }
+    }
+    
+    // Send custom chars
+    lcdBlockingCommand(0x40);
+    Delay_us(200);
+    LCD_RS=1;
+    for(i=0; i<8; i++){
+        for(j=0; j<8; j++){
+            lcdBlockingSend(customChars[i][j]);
+            Delay_us(200);
+        }
+    }
 }
 
 void lcdInit(void){
@@ -289,3 +350,4 @@ void lcdInit(void){
     lcdBlockingReturn();
     Delay_us(200);
 }
+

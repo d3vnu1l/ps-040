@@ -228,6 +228,36 @@ void dcHPF(fractional *source,  fractional *destination){
     }
 }
 
+void getAudioIntensity(fractional *signal){
+    volatile register int resultA asm("A");
+    volatile register int resultB asm("B");
+    static fractional lpf_alpha=Q15(0.0548501278);  // Tuned for 10 Hz
+    const fractional gain = Q15(0.4725749361);
+    //const fractional gain = Q15(1.0);
+    static fractional new_out, last_out, new_in, last_in;
+    
+    new_in = VectorMax(STREAMBUF, signal, NULL);
+    if((int)(new_in>20000)) stat.hard_clipped=TRUE;
+
+    resultA =__builtin_mpy(new_in, gain, NULL, NULL, 0, NULL, NULL, 0);
+    new_in=__builtin_sac(resultA, 0);
+    
+    resultA = __builtin_lac(new_in, 0);
+    resultB = __builtin_lac(last_in, 0);
+    resultA = __builtin_addab(resultA, resultB);
+    resultA = __builtin_mac(resultA, last_out, lpf_alpha, NULL, NULL, 0, NULL, NULL, 0, 0, resultA);
+    new_out=__builtin_sac(resultA, 0);
+    last_out = new_out;
+    last_in = new_in;
+        
+    if(stat.power_ack==TRUE){
+        stat.power=new_out;
+        stat.power_ack=FALSE;
+    }
+    else if(new_out>stat.power)
+        stat.power=new_out;
+}
+
 void processAudio(fractional *source, fractional *destination){
     volatile register int result1 asm("A");
     

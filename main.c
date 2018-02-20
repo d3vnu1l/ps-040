@@ -113,6 +113,7 @@ int main(void) {
             }
             
             dcHPF(ping, ping);          // Remove DC offset
+            getAudioIntensity(ping);
             
             stat.dma_rx_index=0;
             while(stat.dma_framesize>0){
