@@ -186,27 +186,41 @@ void lcdDrawMeter(unsigned char col){
     resultA =__builtin_mpy(scale, stat.power, NULL, NULL, 0, NULL, NULL, 0);
     scaledPower=__builtin_sac(resultA, 0);
     scaledPower=log2Meter[scaledPower];
-    for(i=3; i>=0; i--){
-        lcdSetCursorQ(col, i);
-        if(scaledPower<=0){ 
-            lcdWriteQMac(' ');
-        }   
-        else if(scaledPower>=(divs-i*row)){
-            lcdWriteQMac(0xFF);
-        }
-        else if(scaledPower<(divs-i*row)){
-            lcdWriteQMac((char)(0xFF&scaledPower));
-        }
-        else{
-            remainder = scaledPower%row;
-             if(remainder==0){ 
+    
+    if(stat.hard_clipped==TRUE){
+        lcdSetCursorQ(col, 0);
+        lcdWriteQMac('C');
+        lcdSetCursorQ(col, 1);
+        lcdWriteQMac('L');
+        lcdSetCursorQ(col, 2);
+        lcdWriteQMac('I');
+        lcdSetCursorQ(col, 3);
+        lcdWriteQMac('P');
+        stat.hard_clipped=FALSE;
+    }
+    else {
+        for(i=3; i>=0; i--){
+            lcdSetCursorQ(col, i);
+            if(scaledPower<=0){ 
                 lcdWriteQMac(' ');
-            } 
-            else{
-                lcdWriteQMac((char)(0xFF&remainder));
+            }   
+            else if(scaledPower>=(divs-i*row)){
+                lcdWriteQMac(0xFF);
             }
+            else if(scaledPower<(divs-i*row)){
+                lcdWriteQMac((char)(0xFF&scaledPower));
+            }
+            else{
+                remainder = scaledPower%row;
+                 if(remainder==0){ 
+                    lcdWriteQMac(' ');
+                } 
+                else{
+                    lcdWriteQMac((char)(0xFF&remainder));
+                }
+            }
+            scaledPower-=row;
         }
-        scaledPower-=row;
     }
   
     stat.power_ack=TRUE;

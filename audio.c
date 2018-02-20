@@ -51,7 +51,7 @@ void runBufferLooper(fractional *source){
 
 void runLPF(fractional *source, fractional *destination, fractional param1, fractional param2, fractional param3){
     volatile register int resultA asm("A");
-    volatile register int resultB asm("B");
+    static fractional lpf_alpha=Q15(0.5), lpf_inv_alpha=Q15(0.5);
     float costh, coef;
     static fractional del;
     int counter;
@@ -59,25 +59,29 @@ void runLPF(fractional *source, fractional *destination, fractional param1, frac
     //static fractional delayed_sample;
     volatile fractional sample;
     if(param3>=0x3FFF){     //LPF CONTROL
+        /*
         if(param1>=310){                      
             costh=2.0-cos(2*PI*param1/Fout);
             coef=sqrt(costh*costh-1.0); 
         }
-
+         */
         int *readPTR=source;
         int *rewritePTR=destination;
+        
+        lpf_alpha=param1; 
+        lpf_inv_alpha=(32767-lpf_alpha); 
 
         for(counter=0; counter<STREAMBUF; counter++){
             sample=*readPTR++; //!rw
 
-            sample=(fractional)(sample*(1 + coef) - del*coef);
-            del = sample;
+            //sample=(fractional)(sample*(1 + coef) - del*coef);
+            //del = sample;
             
             //LPF-EMA//   y(i)= ??x(i)+(1-?)?y(i-1)
-            //resultA =__builtin_mpy(sample,lpf_alpha, NULL, NULL, 0, NULL, NULL, 0);
-            //resultA =__builtin_mac(resultA, delayed_sample, lpf_inv_alpha, NULL, NULL, 0, NULL, NULL, 0, 0, resultA);
-            //delayed_sample=__builtin_sac(resultA, 0);
-            //sample=delayed_sample;
+            resultA =__builtin_mpy(sample,lpf_alpha, NULL, NULL, 0, NULL, NULL, 0);
+            resultA =__builtin_mac(resultA, del, lpf_inv_alpha, NULL, NULL, 0, NULL, NULL, 0, 0, resultA);
+            del=__builtin_sac(resultA, 0);
+            sample=del;
 
             *rewritePTR++=sample; //rw
         }
@@ -86,8 +90,8 @@ void runLPF(fractional *source, fractional *destination, fractional param1, frac
 }
 
 void runTRM(fractional *source, fractional *destination, fractional param1, fractional param2, fractional param3){
-    volatile register int result1 asm("A");
-    volatile register int result2 asm("B");
+    volatile register int resultA asm("A");
+    volatile register int resultB asm("B");
     volatile fractional sample, trem_mod;
     int *readPTR=source;
     int *rewritePTR=destination;
@@ -96,8 +100,8 @@ void runTRM(fractional *source, fractional *destination, fractional param1, frac
     const int pot_offset = 5;
     
     if(param3>=0x3FFF){     // TREM CONTROL
-        result1 =__builtin_mpy(param1,Q15(0.0006), NULL, NULL, 0, NULL, NULL, 0);
-        param1=__builtin_sac(result1, 0);
+        resultA =__builtin_mpy(param1,Q15(0.0006), NULL, NULL, 0, NULL, NULL, 0);
+        param1=__builtin_sac(resultA, 0);
         if(param2<-0x7) param2=0;
         
         for(; counter<STREAMBUF; counter++){
@@ -105,11 +109,11 @@ void runTRM(fractional *source, fractional *destination, fractional param1, frac
                                                            //TREMELO//
             if (trem_delay<=param1+pot_offset){
                 trem_delay++;
-                result1 =__builtin_mpy(param2,sintab[tremelo_ptr], NULL, NULL, 0, NULL, NULL, 0);
-                trem_mod=__builtin_sac(result1, 0);
+                resultA =__builtin_mpy(param2,sintab[tremelo_ptr], NULL, NULL, 0, NULL, NULL, 0);
+                trem_mod=__builtin_sac(resultA, 0);
                 trem_mod=0x7FF0-trem_mod;
-                result2 =__builtin_mpy(trem_mod,sample, NULL, NULL, 0, NULL, NULL, 0);
-                sample=__builtin_sac(result2, 0);
+                resultB =__builtin_mpy(trem_mod,sample, NULL, NULL, 0, NULL, NULL, 0);
+                sample=__builtin_sac(resultB, 0);
             }
             else{
                 trem_delay=0;
@@ -117,11 +121,11 @@ void runTRM(fractional *source, fractional *destination, fractional param1, frac
                     tremelo_ptr=0;
                 else tremelo_ptr++;
                 
-                result1 =__builtin_mpy(param2,sintab[tremelo_ptr], NULL, NULL, 0, NULL, NULL, 0);
-                trem_mod=__builtin_sac(result1, 0);
+                resultA =__builtin_mpy(param2,sintab[tremelo_ptr], NULL, NULL, 0, NULL, NULL, 0);
+                trem_mod=__builtin_sac(resultA, 0);
                 trem_mod=0x7FF0-trem_mod;
-                result2 =__builtin_mpy(trem_mod,sample, NULL, NULL, 0, NULL, NULL, 0);
-                sample=__builtin_sac(result2, 0);
+                resultB =__builtin_mpy(trem_mod,sample, NULL, NULL, 0, NULL, NULL, 0);
+                sample=__builtin_sac(resultB, 0);
             }
 
             *rewritePTR++=sample; //rw
@@ -130,10 +134,11 @@ void runTRM(fractional *source, fractional *destination, fractional param1, frac
 }
 
 void runBTC(fractional *source, fractional *destination, fractional param1, fractional param2, fractional param3){
-    volatile fractional sample;
+    volatile fractional sample, dryScale;
+    fractional temp[STREAMBUF];
     
     int *readPTR=source;
-    int *rewritePTR=destination;
+    int *rewritePTR=temp;
     int counter=0;
     int shift = scalePotsCustom(14, param1);
     fractional sign;
@@ -148,13 +153,23 @@ void runBTC(fractional *source, fractional *destination, fractional param1, frac
 
         *rewritePTR++=sample; //rw
     }
+    
+    // Dry Wet Control
+    VectorScale(STREAMBUF, temp, temp, param2);
+    dryScale=32767-param2;
+    VectorScale(STREAMBUF, source, source, dryScale);
+    VectorAdd(STREAMBUF, destination, source, temp);
+    
 }
 
 void runLOP(fractional *source, fractional *destination, fractional param1, fractional param2, fractional param3){
     volatile register int result asm("A");
+    fractional temp[STREAMBUF];
+    fractional dryScale;
+    int loop_lim;
     
     result =__builtin_mpy(param1, POT_LOOP, NULL, NULL, 0, NULL, NULL, 0);
-    int loop_lim = __builtin_sac(result, 0);
+    loop_lim = __builtin_sac(result, 0);
     
     __eds__ fractional *ptrr = history.start_ptr;
     ptrr+=loop_lim;
@@ -168,7 +183,12 @@ void runLOP(fractional *source, fractional *destination, fractional param1, frac
     }
     
     else {
-        ClipCopy_eds(STREAMBUF, destination, history.read_ptr);
+        ClipCopy_eds(STREAMBUF, temp, history.read_ptr);
+        // Dry Wet Control
+        VectorScale(STREAMBUF, temp, temp, param2);
+        dryScale=32767-param2;
+        VectorScale(STREAMBUF, source, source, dryScale);
+        VectorAdd(STREAMBUF, destination, source, temp);
     }
     history.read_ptr+=STREAMBUF;
 }
@@ -178,10 +198,12 @@ void runHPF(fractional *source, fractional *destination, fractional param1, frac
     volatile register int resultB asm("B");
     static fractional hpf_alpha=Q15(0.8360692637); 
     const fractional gain = Q15(0.91803463198);
+    fractional temp[STREAMBUF];
+    fractional dryScale;
     int counter;
     static fractional new_out, last_out, new_in, last_in;                 
     int *readPTR=source;
-    int *rewritePTR=destination;
+    int *rewritePTR=temp;
 
     VectorScale(STREAMBUF, readPTR, readPTR, gain);
     
@@ -198,6 +220,11 @@ void runHPF(fractional *source, fractional *destination, fractional param1, frac
             last_out = new_out;
             last_in = new_in;
         }
+        // Dry Wet Control
+        VectorScale(STREAMBUF, temp, temp, param2);
+        dryScale=32767-param2;
+        VectorScale(STREAMBUF, source, source, dryScale);
+        VectorAdd(STREAMBUF, destination, source, temp);
     }
 }
 

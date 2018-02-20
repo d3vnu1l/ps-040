@@ -324,23 +324,9 @@ void screenFX(void){
         //update here 
         fxModPointers[fxUnits[0]](0,  ctrl.pots_scaled[FX_1], ctrl.pots_scaled[FX_2], ctrl.pots_scaled[FX_3]);
         fxModPointers[fxUnits[1]](9, ctrl.pots_scaled[FX_4], ctrl.pots_scaled[FX_5], ctrl.pots_scaled[FX_6]);
-        if(stat.hard_clipped==TRUE){
-            lcdSetCursorQ(18, 0);
-            lcdWriteQ('C');
-            lcdSetCursorQ(18, 1);
-            lcdWriteQ('L');
-            lcdSetCursorQ(18, 2);
-            lcdWriteQ('I');
-            lcdSetCursorQ(18, 3);
-            lcdWriteQ('P');
-            stat.hard_clipped=FALSE;
-        }
-        else {
-            //lcdDrawMeter(8);
-            //lcdDrawMeter(9);
-            lcdDrawMeter(18);
-            lcdDrawMeter(19);
-        }
+        
+        lcdDrawMeter(18);
+        lcdDrawMeter(19);
     }
          
 }
