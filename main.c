@@ -128,7 +128,6 @@ int main(void) {
             /* State dependent controls*/
             if(state!=scrnBT) 
                 consPADops(ping);
-            
             if(state==scrnEDITone) 
                 consEDITONEops();
             else if(state==scrnEDITtwo) 

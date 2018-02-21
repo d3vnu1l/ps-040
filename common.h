@@ -141,8 +141,8 @@ struct sflags {
 
 struct bluetooth {
     fractional      rxBuf[BTBUF_WORDS];
-    char            *writePtr;
-    char            *btReadPtr;
+    unsigned char   *writePtr;
+    unsigned char   *btReadPtr;
     unsigned char   last;
     unsigned char   dataReady;
     unsigned char   status;

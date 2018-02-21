@@ -193,7 +193,6 @@ void consBTops(void){
     }
     //printf("AA\n");
     bluet.dataReady=FALSE;
-    SLED=~SLED;
 }
     
     

@@ -95,6 +95,7 @@ void __attribute__ ((interrupt, auto_psv)) _U1RXInterrupt(void){
         //BLOCKING SEND CHUNK TO flash
         consBTops();
         while(!SS3a);
+        Delay_us(10000);
         printf("AA\n"); // Continue
     }
     
