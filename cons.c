@@ -4,6 +4,8 @@
 #include "common.h"
 #include "utilities.h"
 #include "flash.h"
+#include <stdio.h>              /* Required for printf */
+#include <stdarg.h>             /* Required for printf */
 
 extern struct clip_flash clipmap[FLASH_NUMCHUNKS];
 extern struct ctrlsrfc ctrl;
@@ -175,7 +177,23 @@ void consEDITTWOops(void){
 }
 
 void consBTops(void){
-    flashWritePage(bluet.btRXbuf, clipmap[ctrl.last_pressed].start_address);
+    
+    flashWritePage(bluet.rxBuf, clipmap[ctrl.last_pressed].write_index);
+
+    clipmap[ctrl.last_pressed].end_address=clipmap[ctrl.last_pressed].write_index;
+    clipmap[ctrl.last_pressed].size_chunks=(clipmap[ctrl.last_pressed].write_index-clipmap[ctrl.last_pressed].start_address)/FLASH_PAGE;
+    clipmap[ctrl.last_pressed].end_chunk=clipmap[ctrl.last_pressed].size_chunks;
+    
+    if(clipmap[ctrl.last_pressed].write_index<clipmap[ctrl.last_pressed].end_limit)
+        clipmap[ctrl.last_pressed].write_index+=FLASH_PAGE;
+    else{                              // Reset case 1
+        clipmap[ctrl.last_pressed].end_address=clipmap[ctrl.last_pressed].write_index;
+        clipmap[ctrl.last_pressed].size_chunks=(clipmap[ctrl.last_pressed].write_index-clipmap[ctrl.last_pressed].start_address)/FLASH_PAGE;
+        clipmap[ctrl.last_pressed].end_chunk=clipmap[ctrl.last_pressed].size_chunks;
+    }
+    //printf("AA\n");
+    bluet.dataReady=FALSE;
+    SLED=~SLED;
 }
     
     

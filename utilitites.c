@@ -4,13 +4,13 @@
 #include <xc.h>
 #include <p33EP512GM310.h>
 #include <dsp.h>
-#include <stdio.h>              /* Required for printf */
-#include <stdarg.h>             /* Required for printf */
 #include "common.h"
 #include "sounds.h"
 #include "flash.h"
 #include "screens.h"
 #include "utilities.h"
+#include <stdio.h>              /* Required for printf */
+#include <stdarg.h>             /* Required for printf */
 
 extern enum fxStruct fxUnits[NUMFXUNITS];
 extern enum screenStruc state;
@@ -211,14 +211,17 @@ void display(void){
     _laststate=newstate;
     
     changeFX();
+    
+    if(stat.AT_MODE){
+        if(ctrl.pad[0])      printf("AT+ROLE=1\r\n");
+        else if(ctrl.pad[1]) printf("AT+UART=115200,0,0\r\n");
+        else if(ctrl.pad[2]) printf("AT+RESET\r\n");
+        else if(ctrl.pad[3]) printf("AT+ROLE=0\r\n");
+        
+    }
 
     // Update screen here
     screenUpdate();
-   
-   if(stat.UART_ON==TRUE){
-        //U1TXREG = 0x61;
-       printf("test\r\n");
-    }
    
    SLED=~SLED;
 }

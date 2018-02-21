@@ -4,6 +4,7 @@
 #include "common.h"
 #include "routines.h"
 #include "flash.h"
+#include "cons.h"
 
 extern fractional   outputA[STREAMBUF], outputB[STREAMBUF],
                     streamA[STREAMBUF], streamB[STREAMBUF];
@@ -85,13 +86,16 @@ void __attribute__((interrupt, auto_psv)) _DMA1Interrupt(void){
 //Dependencies: initUART1();
 void __attribute__ ((interrupt, auto_psv)) _U1RXInterrupt(void){
     //unsigned char trash;
-    bluet.btread=U1RXREG;
+    bluet.last=U1RXREG;
     
-    *bluet.btWritePtr++=bluet.btread;
-    if(bluet.btWritePtr==&bluet.btRXbuf[BTBUF_WORDS]){
-        bluet.btWritePtr=&bluet.btRXbuf[0];
-        bluet.btReady=TRUE;
+    *bluet.writePtr++=bluet.last;
+    if(bluet.writePtr==&bluet.rxBuf[BTBUF_WORDS]){
+        bluet.writePtr=&bluet.rxBuf[0];
+        bluet.dataReady=TRUE;
         //BLOCKING SEND CHUNK TO flash
+        consBTops();
+        while(!SS3a);
+        printf("AA\n"); // Continue
     }
     
     IFS0bits.U1RXIF = 0;            //clear flag, restart

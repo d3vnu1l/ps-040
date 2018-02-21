@@ -58,7 +58,7 @@ void screenDebugBuffers(void){
         lcdSetCursorQ(6,2);
         lcdWriteDecimalQ(flash_time,3);
         lcdSetCursorQ(6,3);
-        lcdWriteByteQ(bluet.btread);
+        lcdWriteByteQ(bluet.last);
         //lcdWriteDecimalQ();
         //lcdSetCursorQ(6,3);
         //lcdWriteDecimalQ();

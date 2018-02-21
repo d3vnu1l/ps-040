@@ -8,7 +8,7 @@
 #define Fcy     Fosc/2
 
 /* Timers and Frequencies */
-#define BAUDRATE 38400                      //target baud rate for *UART*           //peripheral configs
+#define BAUDRATE 115200  //38400                  //target baud rate for *UART*           //peripheral configs
 #define BRGVAL  ((Fcy/BAUDRATE)/16)-1       //calculate baud value (MAY TRUNCATE)
 #define Fscan   200                         //target buttons & pots sampling rate
 #define Fout    44100                       //target output sampling rate (~45k last measured)
@@ -126,6 +126,7 @@ struct ctrlsrfc {
 struct sflags {
     unsigned char UART_ON;
     unsigned char TEST_SIN;
+    unsigned char AT_MODE;
     unsigned char hard_clipped; 
     fractional    power;
     unsigned char power_ack;
@@ -139,11 +140,12 @@ struct sflags {
 
 
 struct bluetooth {
-    fractional      btRXbuf[BTBUF_WORDS];
-    char            *btWritePtr;
+    fractional      rxBuf[BTBUF_WORDS];
+    char            *writePtr;
     char            *btReadPtr;
-    unsigned char   btread;
-    unsigned char   btReady;
+    unsigned char   last;
+    unsigned char   dataReady;
+    unsigned char   status;
 };
 #endif	/* COMMON_H */
 

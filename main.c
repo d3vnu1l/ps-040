@@ -39,6 +39,7 @@ struct clip_flash clipmap[FLASH_NUMCHUNKS];
 
 struct sflags stat = {  .UART_ON = TRUE,
                         .TEST_SIN = FALSE,
+                        .AT_MODE = TRUE,
                         .hard_clipped = FALSE,
                         .dma_queue = 0,
                         .dma_framesize=0,
@@ -46,8 +47,9 @@ struct sflags stat = {  .UART_ON = TRUE,
                         .dma_writeQ_index=-1,
                         .dma_rts=FALSE};
 
-struct bluetooth bluet = {  .btread=0,
-                            .btReady=FALSE};
+struct bluetooth bluet = {  .last=0,
+                            .dataReady=FALSE,
+                            .status=0};
 
 /* Screen state variables */
 enum screenStruc state = scrnFX;
@@ -62,7 +64,7 @@ void initBuffers(void){
     for(i=0; i<STREAMBUF; i++){
         streamA[i]=0;
         streamB[i]=0;
-        bluet.btRXbuf[i]=0;
+        bluet.rxBuf[i]=0;
     }
     
     for(i=0; i<BUTTONS; i++)
@@ -76,8 +78,8 @@ void initBuffers(void){
         RxBufferA[i]=0;
     }
     
-    bluet.btWritePtr=&bluet.btRXbuf[0];
-    bluet.btReadPtr=&bluet.btRXbuf[0];
+    bluet.writePtr=&bluet.rxBuf[0];
+    bluet.btReadPtr=&bluet.rxBuf[0];
                             
 }
 
@@ -126,10 +128,6 @@ int main(void) {
             /* State dependent controls*/
             if(state!=scrnBT) 
                 consPADops(ping);
-            else if(bluet.btReady){
-                consBTops();
-                bluet.btReady=FALSE;
-            }
             
             if(state==scrnEDITone) 
                 consEDITONEops();
