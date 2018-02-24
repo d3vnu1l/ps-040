@@ -9,8 +9,7 @@
 #include "flash.h"
 #include "screens.h"
 #include "utilities.h"
-#include <stdio.h>              /* Required for printf */
-#include <stdarg.h>             /* Required for printf */
+#include "definitions.h"
 
 extern enum fxStruct fxUnits[NUMFXUNITS];
 extern enum screenStruc state;
@@ -154,42 +153,28 @@ void readPots(void){
 }
 
 void scalePots(void){
-    /* Potentiometer scaling for fx or lcd display */
-    volatile register int scaled asm("A");
+    /* Potentiometer scaling for fx or lcd display 
+     * Shift right 9 times, for 0-127
+     */
+    volatile register int scaled asm("A"); 
+    int i;
     
-    scaled=__builtin_mpy(ctrl.pots[0],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
-    ctrl.pots_scaled[0]=__builtin_sac(scaled, 7);
-    scaled=__builtin_mpy(ctrl.pots[1],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
-    ctrl.pots_scaled[1]=__builtin_sac(scaled, 7);
-    scaled=__builtin_mpy(ctrl.pots[2],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
-    ctrl.pots_scaled[2]=__builtin_sac(scaled, 7);
-    scaled=__builtin_mpy(ctrl.pots[3],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
-    ctrl.pots_scaled[3]=__builtin_sac(scaled, 7);
-    scaled=__builtin_mpy(ctrl.pots[4],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
-    ctrl.pots_scaled[4]=__builtin_sac(scaled, 7);
-    scaled=__builtin_mpy(ctrl.pots[5],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
-    ctrl.pots_scaled[5]=__builtin_sac(scaled, 7);
+    for(i=0; i<POTS; i++)
+        ctrl.pots_scaled[i]=(ctrl.pots[i]>>8);
     
-    scaled=__builtin_mpy(ctrl.pots[POT_FX_SELECT1],FXSCALE, NULL, NULL, 0, NULL, NULL, 0);
-    ctrl.pots_scaled[POT_FX_SELECT1]=__builtin_sac(scaled, 0);
-    scaled=__builtin_mpy(ctrl.pots[POT_FX_SELECT2],FXSCALE, NULL, NULL, 0, NULL, NULL, 0);
-    ctrl.pots_scaled[POT_FX_SELECT2]=__builtin_sac(scaled, 0);
-    
-    scaled=__builtin_mpy(ctrl.pots[POT_VOLUME],POT_PERCENT, NULL, NULL, 0, NULL, NULL, 0);
-    ctrl.pots_scaled[POT_VOLUME]=__builtin_sac(scaled, 0);
+    scaled=__builtin_mpy(ctrl.pots[POT_FX_SELECT1],FXSCALE, NULL, NULL, 0, NULL, NULL, 0); 
+    ctrl.pots_scaled[POT_FX_SELECT1]=__builtin_sac(scaled, 0); 
+    scaled=__builtin_mpy(ctrl.pots[POT_FX_SELECT2],FXSCALE, NULL, NULL, 0, NULL, NULL, 0); 
+    ctrl.pots_scaled[POT_FX_SELECT2]=__builtin_sac(scaled, 0); 
 }
 
-fractional scalePotsCustom(unsigned int steps, fractional scaleme){
+fractional scalePotCustom(unsigned int steps, fractional scaleme){
     volatile register int scaled asm("A");
     fractional scale = Q15(steps*0.000030518509476);
     
     scaled=__builtin_mpy(scaleme,scale, NULL, NULL, 0, NULL, NULL, 0);
     return(__builtin_sac(scaled, 0));
-}
-
-void changeFX(void){
-    fxUnits[0]=ctrl.pots_scaled[POT_FX_SELECT1];
-    fxUnits[1]=ctrl.pots_scaled[POT_FX_SELECT2];
+    
 }
 
 void display(void){
@@ -210,31 +195,22 @@ void display(void){
     }
     _laststate=newstate;
     
-    changeFX();
-    
-    if(stat.AT_MODE){
-        if(ctrl.pad[0])      printf("AT+ROLE=1\r\n");
-        else if(ctrl.pad[1]) printf("AT+UART=115200,0,0\r\n");
-        else if(ctrl.pad[2]) printf("AT+RESET\r\n");
-        else if(ctrl.pad[3]) printf("AT+ROLE=0\r\n");
-        
-    }
+    // Change FX
+    fxUnits[0]=ctrl.pots_scaled[POT_FX_SELECT1];
+    fxUnits[1]=ctrl.pots_scaled[POT_FX_SELECT2];
 
     // Update screen here
     screenUpdate();
    
+    LED_B = (stat.rgb_led&1);
+    LED_G = ((stat.rgb_led>>1)&1);
+    LED_R = ((stat.rgb_led>>2)&1);
+    
+    if(stat.rgb_led==7)
+        stat.rgb_led=0;
+    stat.rgb_led++;
+    
    SLED=~SLED;
-}
-
-void processRxData(fractional *sourceBuffer, fractional *targetBuffer){
-    /* This procedure loops back the received data to the*/
-    /* the codec output. The user application could process*/
-    /* this data as per application requirements.*/
-    int index;
-    for(index = 0;index < STREAMBUF;index ++)
-    {
-        targetBuffer[index] = sourceBuffer[index];
-    }
 }
 
 void ClipCopy_psv(int numElems, fractional * dstV, __psv__ fractional * srcV){

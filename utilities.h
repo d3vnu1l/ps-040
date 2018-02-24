@@ -13,10 +13,8 @@
 void scanButtons(void);
 void readPots(void);
 void scalePots(void);
-fractional scalePotsCustom(unsigned int, fractional);
-void changeFX(void);
+fractional scalePotCustom(unsigned int, fractional);
 void display(void);
-void processRxData(int *, int *);
 void ClipCopy_psv(int, fractional *, __psv__ fractional *);
 void ClipCopy_eds(int, fractional *, __eds__ fractional *);
 void ClipCopy_toeds(int, __eds__ fractional *, fractional *);

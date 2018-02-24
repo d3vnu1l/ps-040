@@ -1,6 +1,7 @@
 #include "xc.h"
 #include "audio.h"
 #include "common.h"
+#include "definitions.h"
 #include "sounds.h"
 #include <dsp.h>
 #include <math.h>
@@ -140,7 +141,7 @@ void runBTC(fractional *source, fractional *destination, fractional param1, frac
     int *readPTR=source;
     int *rewritePTR=temp;
     int counter=0;
-    int shift = scalePotsCustom(14, param1);
+    int shift = scalePotCustom(14, param1);
     fractional sign;
     
     for(; counter<STREAMBUF; counter++){

@@ -7,4 +7,5 @@ utilities.h  \
 sounds.h  \
 flash.h  \
 plcd.h  \
-cons.h 
+cons.h  \
+definitions.h 

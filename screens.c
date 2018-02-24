@@ -7,15 +7,12 @@
 
 
 #include <xc.h>
-#include "screens.h"
+#include <dsp.h>
 #include "common.h"
+#include "definitions.h"
+#include "screens.h"
 #include "plcd.h"
-#include "dsp.h"
 #include "flash.h"
-
-#include "sounds.h"
-
-extern unsigned int process_time, flash_time;
 
 extern fractional       TxBufferA[FLASH_DMAXFER_WORDS]__attribute__((space(xmemory))), 
                         RxBufferA[FLASH_DMA_RX_WORDS]__attribute__((space(xmemory)));
@@ -47,22 +44,14 @@ void screenDebugBuffers(void){
         lcdWriteStringQ("FX time:");
         lcdSetCursorQ(11,1);
         lcdWriteStringQ("/256");
-        lcdSetCursorQ(0,2);
-        lcdWriteStringQ("Flash:");
         lcdSetCursorQ(0,3);
         lcdWriteStringQ("btRd:");
     } else {
         //update here
         lcdSetCursorQ(8,1);
-        lcdWriteDecimalQ(process_time,3);
-        lcdSetCursorQ(6,2);
-        lcdWriteDecimalQ(flash_time,3);
+        lcdWriteDecimalQ(stat.process_time,3);
         lcdSetCursorQ(6,3);
         lcdWriteByteQ(bluet.last);
-        //lcdWriteDecimalQ();
-        //lcdSetCursorQ(6,3);
-        //lcdWriteDecimalQ();
-        //lcdWriteDecimalQ(3);
     }
 }
 
@@ -147,29 +136,27 @@ void screenDebugInput(void){
     } else {
         //update here
         lcdSetCursorQ(5,1);
-        lcdWriteWordUnsignedQ(sine.size);
+        //lcdWriteWordUnsignedQ(sine.size);
         lcdSetCursorQ(8,2);
-        lcdWriteWordUnsignedQ(sine.playing);
+        //lcdWriteWordUnsignedQ(sine.playing);
         lcdSetCursorQ(7,3);
-        lcdWriteDecimalQ(sine.block_index, 3);
+        //lcdWriteDecimalQ(sine.block_index, 3);
         
         lcdDrawPads(16);
     }
 }
 
 void screenNoFXmod(unsigned int col, fractional param1, fractional param2, fractional param3){
-        if(fxNow!=fxLast || state!=laststate){
+    int i;    
+    
+    if(fxNow!=fxLast || state!=laststate){
         // Setup here
-            
         lcdSetCursorQ(col+5,0);
         lcdWriteStringQ("OFF");
-        lcdSetCursorQ(col,1);
-        lcdWriteStringQ("        ");
-        lcdSetCursorQ(col,2);
-        lcdWriteStringQ("        ");
-        lcdSetCursorQ(col,3);
-        lcdWriteStringQ("        ");
-
+        for(i=1; i<4; i++){
+            lcdSetCursorQ(col,i);
+            lcdWriteStringQ("        ");   
+        }
     } else {
         // Update here
         lcdSetCursorQ(col+5,0);
@@ -178,16 +165,17 @@ void screenNoFXmod(unsigned int col, fractional param1, fractional param2, fract
 }
 
 void screenLPFmod(unsigned int col, fractional param1, fractional param2, fractional param3){
+    char* items[4][3] = {"LPF", "frq", "d/w", "pwr"};
+    int i;
+    
     if(fxNow!=fxLast || state!=laststate){
         // Setup here
         lcdSetCursorQ(col+5,0);
-        lcdWriteStringQ("LPF");
-        lcdSetCursorQ(col,1);
-        lcdWriteStringQ("frq");
-        lcdSetCursorQ(col,2);
-        lcdWriteStringQ("d/w");
-        lcdSetCursorQ(col,3);
-        lcdWriteStringQ("pwr");
+        lcdWriteStringQ(items[0][0]);
+        for(i=1; i<4; i++){
+            lcdSetCursorQ(col,i);
+            lcdWriteStringQ(items[i][0]);
+        }
     } else {
         // Update here
         lcdSetCursorQ(col+5,1);
@@ -310,16 +298,14 @@ void screenFX(void){
         for(j=0; j<4; j++){
            lcdSetCursorQ(8, j);
            lcdWriteQ('|');
-       }
+        }
         for(j=0; j<4; j++){
            lcdSetCursorQ(17, j);
            lcdWriteQ('|');
-       }
-
+        }
 
         fxModPointers[fxUnits[0]](0,  ctrl.pots_scaled[FX_1], ctrl.pots_scaled[FX_2], ctrl.pots_scaled[FX_3]);
         fxModPointers[fxUnits[1]](9, ctrl.pots_scaled[FX_4], ctrl.pots_scaled[FX_5], ctrl.pots_scaled[FX_6]);
-        
     } else {
         //update here 
         fxModPointers[fxUnits[0]](0,  ctrl.pots_scaled[FX_1], ctrl.pots_scaled[FX_2], ctrl.pots_scaled[FX_3]);

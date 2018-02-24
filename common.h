@@ -65,7 +65,9 @@
 #define FX_5                3
 #define FX_6                5
 
-
+#define LED_R   _LATF13
+#define LED_G   _LATD14
+#define LED_B   _LATF12
 
 /* Button Mapping
     12  13  14  15  |         Encoder:
@@ -90,30 +92,6 @@
 #define CHUNKSIZE               (FLASH_MAX/FLASH_NUMCHUNKS)
 #define FLASH_CHUNKSPER         CHUNKSIZE/(2*STREAMBUF)
 
-enum screenStruc{
-    scrnFX,
-    scrnEDITone,
-    scrnEDITtwo,
-    scrnBT,
-    debugscrnPOTS,
-    debugscrnFLASH,
-    debugscrnBUFFERS,
-    debugscrnINPUT,
-    debugscrnAUDIO,
-    scrnSHIFT,
-    start,
-    invalid
-};
-
-enum fxStruct{
-    off,
-    lpf,
-    trm,
-    lop,
-    btc,
-    hpf
-};
-
 struct ctrlsrfc {
     unsigned char   pad[BUTTONS];
     unsigned char   last_pressed;
@@ -128,6 +106,7 @@ struct sflags {
     unsigned char TEST_SIN;
     unsigned char AT_MODE;
     unsigned char hard_clipped; 
+    unsigned int  process_time;
     fractional    power;
     unsigned char power_ack;
     unsigned char dma_rts;
@@ -136,16 +115,19 @@ struct sflags {
     unsigned int  dma_rx_index;
     unsigned long dma_writeQ_index;
     fractional*   dma_write_buffer;
+    char          rgb_led;
 };
 
 
 struct bluetooth {
-    fractional      rxBuf[BTBUF_WORDS];
-    unsigned char   *writePtr;
-    unsigned char   *btReadPtr;
-    unsigned char   last;
-    unsigned char   dataReady;
-    unsigned char   status;
+    const unsigned char AT_MODE;
+    fractional          rxBuf[BTBUF_WORDS];
+    unsigned char       *writePtr;
+    unsigned char       *btReadPtr;
+    unsigned char       last;
+    unsigned char       dataReady;
+    unsigned char       status;
 };
+
 #endif	/* COMMON_H */
 

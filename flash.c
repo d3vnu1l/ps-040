@@ -10,7 +10,6 @@ char receive;
 unsigned long  eraseAddr=0;
 extern struct clip_flash clipmap[FLASH_NUMCHUNKS];
 
-
 extern struct sflags stat;
 extern struct ctrlsrfc ctrl;
 

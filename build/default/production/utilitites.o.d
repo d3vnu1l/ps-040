@@ -4,4 +4,5 @@ common.h  \
 sounds.h  \
  flash.h  \
 screens.h  \
-utilities.h 
+utilities.h  \
+definitions.h 

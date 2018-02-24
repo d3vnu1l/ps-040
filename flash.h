@@ -38,9 +38,6 @@ struct clip_flash{
     unsigned char action;   //0 off, 1 play, 2 record, 3 erase
 };
 
-
-
-
 void flashSoftSetup(void);
 void flashWriteReg(char);
 void flashWriteBreg(char);

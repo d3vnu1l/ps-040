@@ -13,7 +13,7 @@ extern struct sflags stat;
 extern struct bluetooth bluet;
 extern unsigned long readQueue[VOICES];
 
-extern fractional       RxBufferA[FLASH_DMA_RX_WORDS]__attribute__((space(xmemory)));
+extern fractional RxBufferA[FLASH_DMA_RX_WORDS]__attribute__((space(xmemory)));
 
 void consPADops(fractional* source){
     int i;
@@ -155,13 +155,13 @@ void consEDITTWOops(void){
     int tempp;
     
     if(ctrl.pot_moved[0]){
-        tempp= scalePotsCustom(clipmap[ctrl.last_pressed].end_chunk , ctrl.pots[0]);
+        tempp= scalePotCustom(clipmap[ctrl.last_pressed].end_chunk , ctrl.pots[0]);
         clipmap[ctrl.last_pressed].start_chunk= tempp;
         clipmap[ctrl.last_pressed].read_index=clipmap[ctrl.last_pressed].start_address+(clipmap[ctrl.last_pressed].start_chunk*FLASH_PAGE);
     }
     // gate
     if(ctrl.pot_moved[2]){
-        tempp= scalePotsCustom(clipmap[ctrl.last_pressed].size_chunks , ctrl.pots[2]);
+        tempp= scalePotCustom(clipmap[ctrl.last_pressed].size_chunks , ctrl.pots[2]);
         clipmap[ctrl.last_pressed].end_chunk= tempp;
         if(tempp<clipmap[ctrl.last_pressed].start_chunk)
             clipmap[ctrl.last_pressed].start_chunk= tempp;
@@ -195,4 +195,9 @@ void consBTops(void){
     bluet.dataReady=FALSE;
 }
     
-    
+void consBTATops(void){
+    if(ctrl.pad[0]==2)      printf("AT+ROLE=1\r\n");
+    else if(ctrl.pad[1]==2) printf("AT+UART=115200,0,0\r\n");
+    else if(ctrl.pad[2]==2) printf("AT+RESET\r\n");
+    else if(ctrl.pad[3]==2) printf("AT+ROLE=0\r\n");
+}

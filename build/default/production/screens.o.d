@@ -1,7 +1,7 @@
 build/default/production/screens.o:  \
 screens.c  \
-screens.h  \
 common.h  \
+definitions.h  \
+ screens.h  \
 plcd.h  \
- flash.h  \
-sounds.h 
+flash.h 

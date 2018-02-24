@@ -1,8 +1,6 @@
 #include <xc.h>
 #include <p33EP512GM310.h>
 #include <dsp.h>
-#include <stdio.h>              /* Required for printf */
-#include <stdarg.h>             /* Required for printf */
 #include "common.h"
 #include "devInits.h"
 #include "utilities.h"
@@ -11,6 +9,7 @@
 #include "flash.h"
 #include "plcd.h"
 #include "cons.h"
+#include "definitions.h"
 
 #pragma config ICS = PGD1       //pgeDC 1 is used
 #pragma config JTAGEN = OFF     //disable jtag
@@ -32,22 +31,20 @@ fractional      TxBufferA[FLASH_DMAXFER_WORDS] __attribute__((space(xmemory))),
 
 unsigned long readQueue[VOICES];
 
-/* Debug Variables */
-unsigned int process_time=0, flash_time = 0;
-
 struct clip_flash clipmap[FLASH_NUMCHUNKS];
 
 struct sflags stat = {  .UART_ON = TRUE,
                         .TEST_SIN = FALSE,
-                        .AT_MODE = TRUE,
                         .hard_clipped = FALSE,
                         .dma_queue = 0,
                         .dma_framesize=0,
                         .dma_rx_index=0,
                         .dma_writeQ_index=-1,
-                        .dma_rts=FALSE};
+                        .dma_rts=FALSE,
+                        .rgb_led=0};
 
-struct bluetooth bluet = {  .last=0,
+struct bluetooth bluet = {  .AT_MODE=FALSE,
+                            .last=0,
                             .dataReady=FALSE,
                             .status=0};
 
@@ -101,6 +98,9 @@ int main(void) {
     //initT5();
     lcdDrawSplash();
     
+    LED_G=1;
+    LED_B=1;
+    
     while(1){    
         if(frameReady) {
             scanButtons();                  // Read button matrix
@@ -128,30 +128,32 @@ int main(void) {
             /* State dependent controls*/
             if(state!=scrnBT) 
                 consPADops(ping);
+            
             if(state==scrnEDITone) 
                 consEDITONEops();
             else if(state==scrnEDITtwo) 
                 consEDITTWOops();
+            else if(state==scrnBT){
+                if(bluet.AT_MODE) consBTATops();
+            }
             
             processAudio(ping, pong);
-            //while(!SS3a);               //wait for flash transmissions to complete
 
             if(stat.dma_writeQ_index!=-1){
                 while(stat.dma_rts==FALSE){
                     if(_T3IF) {
                         lcdPoll();
-                    _T3IF=0;
+                        _T3IF=0;
                     }
                 }
                 flashWritePage(pong, clipmap[stat.dma_writeQ_index].write_index); 
                 stat.dma_writeQ_index=-1; 
             }
             while(!SS3a);
-            flash_time=write_ptr;
-            process_time=write_ptr;    //DEBUG
+            
+            stat.process_time=write_ptr;    //DEBUG
             frameReady=0;
         }
-
         if(_T1IF){
             display();
             _T1IF=0;
