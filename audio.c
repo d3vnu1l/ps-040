@@ -294,8 +294,8 @@ void processAudio(fractional *source, fractional *destination){
     fractional temp;
     
     if(state==scrnFX){
-        if(fxUnits[0]==0); else fxFuncPointers[fxUnits[0]](source, source, ctrl.pots[FX_1], ctrl.pots[FX_2], ctrl.pots[FX_3]);
-        if(fxUnits[1]==0); else fxFuncPointers[fxUnits[1]](source, source, ctrl.pots[FX_4], ctrl.pots[FX_5], ctrl.pots[FX_6]);
+        if(fxUnits[0]==0); else fxFuncPointers[fxUnits[0]](source, source, ctrl.pots_filtered[FX_1], ctrl.pots_filtered[FX_2], ctrl.pots_filtered[FX_3]);
+        if(fxUnits[1]==0); else fxFuncPointers[fxUnits[1]](source, source, ctrl.pots_filtered[FX_4], ctrl.pots_filtered[FX_5], ctrl.pots_filtered[FX_6]);
     }
 
     if(kick.playing==TRUE){
@@ -328,14 +328,14 @@ void processAudio(fractional *source, fractional *destination){
     VectorCopy(STREAMBUF, destination, source);     //copy from ping to pong buffer
     
     //VOLUME CONTROL
-    if(ctrl.pots[POT_VOLUME]>=0x7FF7);
-    else if(ctrl.pots[POT_VOLUME]<=0x000F)
+    if(ctrl.pots_filtered[POT_VOLUME]>=0x7FF7);
+    else if(ctrl.pots_filtered[POT_VOLUME]<=0x000F)
         VectorScale(STREAMBUF, destination, destination, 0);
     else{
-        resultA =__builtin_mpy(scale_vollog, ctrl.pots[POT_VOLUME], NULL, NULL, 0, NULL, NULL, 0);
+        resultA =__builtin_mpy(scale_vollog, ctrl.pots_filtered[POT_VOLUME], NULL, NULL, 0, NULL, NULL, 0);
         temp=__builtin_sac(resultA, 0);
         temp=vol2log[temp];
         //VectorScale(STREAMBUF, destination, destination, temp);
-        VectorScale(STREAMBUF, destination, destination, ctrl.pots[POT_VOLUME]); 
+        VectorScale(STREAMBUF, destination, destination, ctrl.pots_filtered[POT_VOLUME]); 
     }
 }

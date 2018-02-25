@@ -130,21 +130,21 @@ void consPADops(fractional* source){
 void consEDITONEops(void){    
     // loop
     if(ctrl.pot_moved[0]){
-        if(ctrl.pots[0]>=0x3FFF) 
+        if(ctrl.pots_filtered[0]>=0x3FFF) 
             clipmap[ctrl.last_pressed].loop = TRUE;
         else 
             clipmap[ctrl.last_pressed].loop = FALSE;
     }
     // gate
     if(ctrl.pot_moved[2]){
-        if(ctrl.pots[2]>=0x3FFF) 
+        if(ctrl.pots_filtered[2]>=0x3FFF) 
             clipmap[ctrl.last_pressed].gate = TRUE;
         else 
             clipmap[ctrl.last_pressed].gate = FALSE;
     }
     // choke
     if(ctrl.pot_moved[4]){
-        if(ctrl.pots[4]>=0x3FFF) 
+        if(ctrl.pots_filtered[4]>=0x3FFF) 
             clipmap[ctrl.last_pressed].choke = TRUE;
         else 
             clipmap[ctrl.last_pressed].choke = FALSE;
@@ -155,13 +155,13 @@ void consEDITTWOops(void){
     int tempp;
     
     if(ctrl.pot_moved[0]){
-        tempp= scalePotCustom(clipmap[ctrl.last_pressed].end_chunk , ctrl.pots[0]);
+        tempp= scalePotCustom(clipmap[ctrl.last_pressed].end_chunk , ctrl.pots_filtered[0]);
         clipmap[ctrl.last_pressed].start_chunk= tempp;
         clipmap[ctrl.last_pressed].read_index=clipmap[ctrl.last_pressed].start_address+(clipmap[ctrl.last_pressed].start_chunk*FLASH_PAGE);
     }
     // gate
     if(ctrl.pot_moved[2]){
-        tempp= scalePotCustom(clipmap[ctrl.last_pressed].size_chunks , ctrl.pots[2]);
+        tempp= scalePotCustom(clipmap[ctrl.last_pressed].size_chunks , ctrl.pots_filtered[2]);
         clipmap[ctrl.last_pressed].end_chunk= tempp;
         if(tempp<clipmap[ctrl.last_pressed].start_chunk)
             clipmap[ctrl.last_pressed].start_chunk= tempp;
@@ -169,7 +169,7 @@ void consEDITTWOops(void){
     }
     // choke
     if(ctrl.pot_moved[4]){
-        if(ctrl.pots[4]>=0x3FFF) 
+        if(ctrl.pots_filtered[4]>=0x3FFF) 
             clipmap[ctrl.last_pressed].choke = TRUE;
         else 
             clipmap[ctrl.last_pressed].choke = FALSE;

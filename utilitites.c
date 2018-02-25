@@ -93,63 +93,68 @@ void scanButtons(void){
 }
 
 void readPots(void){
-    volatile register int result asm("A");
-    fractional pots_buf[POTS/2]; 
-    fractional pots_last[POTS/2];
-    static fractional pots_smoothed[POTS/2];
-    const fractional pot_alpha = 0x0F80;    //larger = rougher, lower = more latency
-    const fractional pot_alpha_inv = 32767-pot_alpha;
-    const unsigned int shift = 0xFE00;
-    int i, j;
+    volatile register int resultA asm("A"); 
+    volatile register int resultB asm("B"); 
     
-    _AD1IF = 0; // Clear conversion done status bit
+    fractional pots_last_raw[POTS/2], pots_last_filtered[POTS/2];
+    fractional pot_alpha;                       //larger = rougher, lower = more latency
+    int i, j, val, speed;
     
-    if(ctrl.pad[BTN_SPECIAL]<2)i=0;
-    else i=POTS/2;
+    if(ctrl.pad[BTN_SPECIAL]<2)
+        i=0;
+    else 
+        i=POTS/2;
     
     for(j=0; j<POTS; j++){
         ctrl.pot_moved[j]=FALSE;
     }
     
-    pots_buf[0]=(ADC1BUF5>>1)|0x7;
-    pots_buf[1]=(ADC1BUF2>>1)|0x7;
-    pots_buf[2]=(ADC1BUF4>>1)|0x7;
-    pots_buf[3]=(ADC1BUF1>>1)|0x7;
-    pots_buf[4]=(ADC1BUF3>>1)|0x7;
-    pots_buf[5]=(ADC1BUF0>>1)|0x7;
+    for(j=0; j<POTS/2; j++){
+        pots_last_raw[j] = ctrl.pots_raw[j];
+        pots_last_filtered[j] = ctrl.pots_filtered[i+j];
+    }
     
-    pots_last[0]=(pots_smoothed[0]&shift);
-    pots_last[1]=(pots_smoothed[1]&shift);
-    pots_last[2]=(pots_smoothed[2]&shift);
-    pots_last[3]=(pots_smoothed[3]&shift);
-    pots_last[4]=(pots_smoothed[4]&shift);
-    pots_last[5]=(pots_smoothed[5]&shift);
+    ctrl.pots_raw[0]=ADC1BUF5>>1;
+    ctrl.pots_raw[1]=ADC1BUF2>>1;
+    ctrl.pots_raw[2]=ADC1BUF4>>1;
+    ctrl.pots_raw[3]=ADC1BUF1>>1;
+    ctrl.pots_raw[4]=ADC1BUF3>>1;
+    ctrl.pots_raw[5]=ADC1BUF0>>1;
     
-    result =__builtin_mpy(pots_buf[0],pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
-    result =__builtin_mac(result, pots_smoothed[0], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
-    pots_smoothed[0]=__builtin_sac(result, 0);
-    result =__builtin_mpy(pots_buf[1],pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
-    result =__builtin_mac(result, pots_smoothed[1], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
-    pots_smoothed[1]=__builtin_sac(result, 0);
-    result =__builtin_mpy(pots_buf[2],pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
-    result =__builtin_mac(result, pots_smoothed[2], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
-    pots_smoothed[2]=__builtin_sac(result, 0);
-    result =__builtin_mpy(pots_buf[3],pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
-    result =__builtin_mac(result, pots_smoothed[3], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
-    pots_smoothed[3]=__builtin_sac(result, 0);
-    result =__builtin_mpy(pots_buf[4],pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
-    result =__builtin_mac(result, pots_smoothed[4], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
-    pots_smoothed[4]=__builtin_sac(result, 0);
-    result =__builtin_mpy(pots_buf[5],pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
-    result =__builtin_mac(result, pots_smoothed[5], pot_alpha_inv, NULL, NULL, 0, NULL, NULL, 0, 0, result);
-    pots_smoothed[5]=__builtin_sac(result, 0);
+    for(j=0; j<POTS/2; j++){
+        // Calculate dynamic alpha
+        ///*
+        
+        if(ctrl.pots_raw[j]>pots_last_raw[j])
+            speed=ctrl.pots_raw[j]-pots_last_raw[j];
+        else
+            speed=pots_last_raw[j]-ctrl.pots_raw[j];
+        
+        unsigned long test = speed + FRACMAX;
+        pot_alpha = FRACMAX-(FRACMAX/test);
+        
+        //*/
+        //pot_alpha = Q15(0.0001);
+        
+        // Run EMA
+        resultA = __builtin_lac(ctrl.pots_raw[j],0);        // input
+        resultB = __builtin_lac(ctrl.pots_filtered[i+j],0);   // output
+        resultA = __builtin_subab(resultA, resultB);
+        val = __builtin_sac(resultA, 0);
+        resultA = __builtin_mpy(val, pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
+        resultB = __builtin_addab(resultA, resultB);
+        ctrl.pots_filtered[i+j] = __builtin_sac(resultB, 0);
+    }
+    printf(speed);
+        printf("\n");
     
     for(j=0; j<(POTS/2); j++){
-        if((pots_smoothed[j]&shift)!=pots_last[j]){ 
-            ctrl.pots[i+j]=pots_buf[j];
+        if((ctrl.pots_filtered[i+j])!=pots_last_filtered[j]){ 
             ctrl.pot_moved[i+j]=TRUE;
         }
     }
+    
+    _AD1IF = 0; // Clear conversion done status bit
 }
 
 void scalePots(void){
@@ -160,11 +165,11 @@ void scalePots(void){
     int i;
     
     for(i=0; i<POTS; i++)
-        ctrl.pots_scaled[i]=(ctrl.pots[i]>>8);
+        ctrl.pots_scaled[i]=(ctrl.pots_filtered[i]>>8);
     
-    scaled=__builtin_mpy(ctrl.pots[POT_FX_SELECT1],FXSCALE, NULL, NULL, 0, NULL, NULL, 0); 
+    scaled=__builtin_mpy(ctrl.pots_filtered[POT_FX_SELECT1],FXSCALE, NULL, NULL, 0, NULL, NULL, 0); 
     ctrl.pots_scaled[POT_FX_SELECT1]=__builtin_sac(scaled, 0); 
-    scaled=__builtin_mpy(ctrl.pots[POT_FX_SELECT2],FXSCALE, NULL, NULL, 0, NULL, NULL, 0); 
+    scaled=__builtin_mpy(ctrl.pots_filtered[POT_FX_SELECT2],FXSCALE, NULL, NULL, 0, NULL, NULL, 0); 
     ctrl.pots_scaled[POT_FX_SELECT2]=__builtin_sac(scaled, 0); 
 }
 

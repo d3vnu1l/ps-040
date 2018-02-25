@@ -50,6 +50,7 @@
 #define POT_PERCENT Q15(0.3937)      // For pot 0-100 display
 #define POT_LOOP Q15(1.0*LOOP_BUF_SIZE/32767.0)
 #define FXSCALE Q15(NUMFX*0.000030518509476)
+#define FRACMAX Q15(1.0)
 
 /* Potentiometer mapping 
     0   1  |  6   7
@@ -95,7 +96,8 @@
 struct ctrlsrfc {
     unsigned char   pad[BUTTONS];
     unsigned char   last_pressed;
-    fractional      pots[POTS];
+    fractional      pots_filtered[POTS];
+    fractional      pots_raw[POTS];
     unsigned char   pot_moved[POTS];
     fractional      pots_scaled[POTS];
     fractional      pots_custom[POTS];

@@ -4,8 +4,6 @@
  *
  * Created on January 28, 2018, 11:17 PM
  */
-
-
 #include <xc.h>
 #include <dsp.h>
 #include "common.h"
@@ -78,11 +76,11 @@ void screenDebugPots(void){
             lcdSetCursorQ(0,i);
             lcdWriteDecimalQ(ctrl.pots_scaled[bank], 3);
             lcdWriteQ(',');
-            lcdWriteWordUnsignedQ(ctrl.pots[bank++]);
+            lcdWriteWordUnsignedQ(ctrl.pots_filtered[bank]);
             lcdSetCursorQ(11,i);
             lcdWriteDecimalQ(ctrl.pots_scaled[bank], 3);
             lcdWriteQ(',');
-            lcdWriteWordUnsignedQ(ctrl.pots[bank++]);
+            lcdWriteWordUnsignedQ(ctrl.pots_raw[bank++]);
         }
     }
 }
