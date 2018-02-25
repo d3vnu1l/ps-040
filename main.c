@@ -49,9 +49,10 @@ struct bluetooth bluet = {  .AT_MODE=FALSE,
                             .status=0};
 
 /* Screen state variables */
-enum screenStruc state = scrnFX;
+enum screenStruc state = debugscrnPOTS;
 enum screenStruc laststate = invalid;
 enum fxStruct fxUnits[NUMFXUNITS]={0,0};
+enum colors rgbLED = OFF;
 
 /* Buttons & Potentiometers */
 struct ctrlsrfc ctrl = {0};
@@ -97,9 +98,6 @@ int main(void) {
     initT3();                           // Configure & start T3 for lcd
     //initT5();
     lcdDrawSplash();
-    
-    LED_G=1;
-    LED_B=1;
     
     while(1){    
         if(frameReady) {

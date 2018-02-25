@@ -202,13 +202,14 @@ void display(void){
     // Update screen here
     screenUpdate();
    
-    LED_B = (stat.rgb_led&1);
-    LED_G = ((stat.rgb_led>>1)&1);
-    LED_R = ((stat.rgb_led>>2)&1);
     
-    if(stat.rgb_led==7)
-        stat.rgb_led=0;
-    stat.rgb_led++;
+    // RGB LED
+    stat.rgb_led=state;
+    if(stat.rgb_led>7)
+        stat.rgb_led-=7;
+    LED_R = (stat.rgb_led&1);
+    LED_G = ((stat.rgb_led>>1)&1);
+    LED_B = ((stat.rgb_led>>2)&1);
     
    SLED=~SLED;
 }

@@ -27,5 +27,15 @@ enum fxStruct{
     hpf
 };
 
+enum colors{
+    OFF,
+    RED,
+    GREEN,
+    YELLOW,
+    BLUE,
+    MAGENTA,
+    CYAN,
+    WHITE
+};
 #endif	/* XC_HEADER_TEMPLATE_H */
 
