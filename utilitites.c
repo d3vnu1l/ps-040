@@ -96,17 +96,22 @@ void readPots(void){
     volatile register int resultA asm("A"); 
     volatile register int resultB asm("B");
     fractional pots_last_raw[POTS/2], pots_last_filtered[POTS/2];
-    fractional pot_alpha, pot_alpha_base = Q15(0.06755);                 //larger = rougher, lower = more latency
-    int i, j, val;
+    fractional pot_alpha, pot_alpha_base = Q15(0.0425);                 //larger = rougher, lower = more latency
+    int bank, j, val;
     unsigned int speed=0;
     
     if(ctrl.pad[BTN_SPECIAL]<2)
-        i=0;
+        bank=0;
     else 
-        i=POTS/2;
+        bank=POTS/2;
     
     for(j=0; j<POTS; j++){
         ctrl.pot_moved[j]=FALSE;
+    }
+    // Store previous values
+    for(j=0; j<POTS/2; j++){
+        pots_last_raw[j] = ctrl.pots_raw[j];
+        pots_last_filtered[j] = ctrl.pots_filtered[bank+j];
     }
     
     ctrl.pots_raw[0]=ADC1BUF5>>1;
@@ -117,48 +122,56 @@ void readPots(void){
     ctrl.pots_raw[5]=ADC1BUF0>>1;
     
     for(j=0; j<POTS/2; j++){
-        // Store previous values
-        pots_last_raw[j] = ctrl.pots_raw[j];
-        pots_last_filtered[j] = ctrl.pots_filtered[i+j];
-        
         // Calculate dynamic alpha from raw values     
         if(ctrl.pots_raw[j]>pots_last_raw[j])
             speed=ctrl.pots_raw[j]-pots_last_raw[j];
         else
             speed=pots_last_raw[j]-ctrl.pots_raw[j];
+        if(speed>56){
+            speed=speed<<6;
+            if(speed>0x7FFF)
+                speed =0x7FFF;
+        }
         
-        pot_alpha=pot_alpha_base + (speed<<4);
-       
+        pot_alpha=pot_alpha_base;
+        
+        if(j==0) printf("%u\r\n", speed);
+        
         // Run EMA
         resultA = __builtin_lac(ctrl.pots_raw[j],0);        // input
-        resultB = __builtin_lac(ctrl.pots_filtered[i+j],0);   // output
+        resultB = __builtin_lac(ctrl.pots_filtered[bank+j],0);   // output
         resultA = __builtin_subab(resultA, resultB);
         val = __builtin_sac(resultA, 0);
         resultA = __builtin_mpy(val, pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
         resultB = __builtin_addab(resultA, resultB);
-        ctrl.pots_filtered[i+j] = __builtin_sac(resultB, 0);
+        ctrl.pots_filtered[bank+j] = __builtin_sac(resultB, 0);
         
         // Upward bias to compensate for filter
         if(ctrl.pots_raw[j]>=0x7FE0)
             ctrl.pots_filtered[j]|=0x001F;
         
         // Check for movement from filtered values
-        if((ctrl.pots_filtered[i+j])>= pots_last_filtered[j]){ 
-            if(((ctrl.pots_filtered[i+j]-pots_last_filtered[j]))>=POT_THRESHOLD)
-                ctrl.pot_moved[i+j]=TRUE;
+        if((ctrl.pots_filtered[bank+j])>= pots_last_filtered[j]){ 
+            if(((ctrl.pots_filtered[bank+j]-pots_last_filtered[j]))>=POT_THRESHOLD)
+                ctrl.pot_moved[bank+j]=TRUE;
         }
-        else if(((pots_last_filtered[j]-ctrl.pots_filtered[i+j]))>=POT_THRESHOLD){
-            ctrl.pot_moved[i+j]=TRUE;
+        else if(((pots_last_filtered[j]-ctrl.pots_filtered[bank+j]))>=POT_THRESHOLD){
+            ctrl.pot_moved[bank+j]=TRUE;
         }
         
-        if(ctrl.pot_moved[i+j]==TRUE){
-            T2CONbits.TON=0;
-            TMR2 = 0x0000;          //clear timer 2
-            TMR3 = 0x0000;          //clera timer 3
-            _T3IF=0;
-            T2CONbits.TON=1;
+        // Movement Timer Reset
+        if(ctrl.pot_moved[bank+j]==TRUE){
+            T4CONbits.TON=0;
+            TMR4 = 0x0000;          //clear timer 4
+            _T4IF=0;
+            T4CONbits.TON=1;
         }
     }    
+    
+    if(POT_ACTIVE) {
+        SLED=0;
+    } 
+    else SLED=1;
     _AD1IF = 0; // Clear conversion done status bit
 }
 
@@ -190,6 +203,7 @@ fractional scalePotCustom(unsigned int steps, fractional scaleme){
 void display(void){
     long int newstate;
     static long int _laststate=0;
+    static unsigned char rgbStatLast;
     
     scalePots();
     
@@ -215,16 +229,26 @@ void display(void){
     
     // RGB LED
     stat.rgb_led=state;
-    if(stat.rgb_led>7)
-        stat.rgb_led-=7;
-    LED_R = (stat.rgb_led&1);
-    LED_G = ((stat.rgb_led>>1)&1);
-    LED_B = ((stat.rgb_led>>2)&1);
-    
-    if(POT_ACTIVE) {
-        SLED=1;
-    } 
-    else SLED=0;
+    if(stat.rgb_led>7){
+        if(stat.rgb_led!=rgbStatLast)
+            LED_R=LED_G=LED_B=0;
+        if(_T3IF){
+            unsigned int tempstat = stat.rgb_led>>3;
+            if(tempstat&1)
+                LED_R=~LED_R;
+            if((tempstat>>1)&1)
+                LED_G = ~LED_G;
+            if((tempstat>>2)&1)
+                LED_B = ~LED_B;
+            _T3IF = 0;
+        }
+    }
+    else{
+        LED_R = (stat.rgb_led&1);
+        LED_G = ((stat.rgb_led>>1)&1);
+        LED_B = ((stat.rgb_led>>2)&1);
+    }
+    rgbStatLast = stat.rgb_led;
 }
 
 void ClipCopy_psv(int numElems, fractional * dstV, __psv__ fractional * srcV){

@@ -48,8 +48,8 @@
 
 #define POT_PERCENT Q15(0.3937)      // For pot 0-100 display
 #define POT_LOOP Q15(1.0*LOOP_BUF_SIZE/32767.0)
-#define POT_ACTIVE  !_T3IF
-#define POT_THRESHOLD   5
+#define POT_ACTIVE  !_T4IF
+#define POT_THRESHOLD  5
 #define FXSCALE Q15(NUMFX*0.000030518509476)
 #define FRACMAX Q15(1.0)
 

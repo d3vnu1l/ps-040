@@ -12,7 +12,6 @@ enum screenStruc{
     debugscrnFLASH,
     debugscrnBUFFERS,
     debugscrnINPUT,
-    debugscrnAUDIO,
     scrnSHIFT,
     start,
     invalid
@@ -35,7 +34,15 @@ enum colors{
     BLUE,
     MAGENTA,
     CYAN,
-    WHITE
+    WHITE,
+    BLINK_RED,
+    BLINK_GREEN,
+    BLINK_YELLOW,
+    BLINK_BLUE,
+    BLINK_MAGENTA,
+    BLINK_CYAN,
+    BLINK_WHITE,
+    
 };
 #endif	/* XC_HEADER_TEMPLATE_H */
 

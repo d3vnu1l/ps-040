@@ -282,9 +282,9 @@ void lcdDrawSplash(void){
             //ptrA++;
             i++;
         }
-        if(_T3IF) {
+        if(_T5IF) {
             lcdPoll();
-            _T3IF=0;
+            _T5IF=0;
         }
         Delay_us(60);
     }

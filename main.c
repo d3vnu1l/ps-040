@@ -94,7 +94,8 @@ int main(void) {
     initQEI_ENC();
     if(stat.UART_ON) initUART1();       // Configure & enable UART
     initT1();                           // Configure & start T1 display
-    initT2();                           // Configure & start T2 pots sleep                        
+    initT2();                           // T2 is for RGB led blink      
+    initT4();                           // T4 is for pot sleep
     initT5();                           // Configure & start T3 for lcd poll
     lcdDrawSplash();
     

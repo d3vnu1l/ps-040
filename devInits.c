@@ -118,7 +118,7 @@ void initADC1(void){
     AD1CON2bits.SMPI=(POTS/2)-1;    // Sample 6 channels
     AD1CON3 = 0x0F0F;               // Sample for n*TAD before converting
     AD1CON1bits.FORM=2;             // right aligned integer format 
-    AD1CON3bits.ADCS=0xFF;
+    AD1CON3bits.ADCS=0x0F;
     AD1CON3bits.SAMC=0x1F;
     AD1CSSLbits.CSS6=1;             //AN6 in channel scan
     AD1CSSLbits.CSS7=1;             //AN7 in channel scan
@@ -171,18 +171,28 @@ void initT1(void){          //16 bit timer
     T1CONbits.TON = 1;      //start timer
 }
 
-//Description:  handles potentiometer sleep
+//Description:  handles RGB blink
 void initT2(void){          // 16/32 bit timer
     T2CONbits.TON = 0;      // Stop timer
     TMR2 = 0x0000;          //clear timer 2
     TMR3 = 0x0000;          //clera timer 3
     T2CONbits.T32 = 1;      // 16 bit mode
     T2CONbits.TCKPS = 3;    //prescale 1:256
-    PR2 = 0xEEFF;           // About a 1/4 of a second
-    PR3 = 0x0003;
+    PR2 = 0xFFFF;           // About a 1/4 of a second
+    PR3 = 0x0001;
     T2CONbits.TON = 1;      //start timer
 }
 
+void initT4(void){
+    TMR4 = 0x0000;
+    PR4  = 0xFFFF;         
+    T4CONbits.TCKPS = 3;    // Prescale 256:1
+    IFS1bits.T4IF = 0;
+    IEC1bits.T4IE = 0;
+
+    //Start Timer 4
+    T4CONbits.TON = 1;
+}
 
 //Description: Initialize timer handling LCD sending
 //Frequency: variable depending on lcd latency values in datasheet
