@@ -117,8 +117,8 @@ void initADC1(void){
     AD1CON2 = 0x0408;               // Sample alternately using channel scanning
     AD1CON2bits.SMPI=(POTS/2)-1;    // Sample 6 channels
     AD1CON3 = 0x0F0F;               // Sample for n*TAD before converting
-    AD1CON1bits.FORM=2;             // right aligned integer format 
-    AD1CON3bits.ADCS=0x07;
+    AD1CON1bits.FORM=0;             // right aligned integer format 
+    AD1CON3bits.ADCS=0xFF;
     AD1CON3bits.SAMC=0x1F;
     AD1CSSLbits.CSS6=1;             //AN6 in channel scan
     AD1CSSLbits.CSS7=1;             //AN7 in channel scan

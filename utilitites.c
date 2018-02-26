@@ -94,47 +94,54 @@ void scanButtons(void){
 
 void readPots(void){
     volatile register int resultA asm("A"); 
-    volatile register int resultB asm("B"); 
-    
+    volatile register int resultB asm("B");
+    fractional const inverse12bit = Q15(0.000244140625);
     fractional pots_last_raw[POTS/2], pots_last_filtered[POTS/2];
     fractional pot_alpha;                       //larger = rougher, lower = more latency
-    int i, j, val, speed;
+    int i, j, val;
+    fractional test, test2, rem;
+    unsigned int speed=0;
+    float speed_f, calca;
     
     if(ctrl.pad[BTN_SPECIAL]<2)
         i=0;
     else 
         i=POTS/2;
     
-    for(j=0; j<POTS; j++){
-        ctrl.pot_moved[j]=FALSE;
-    }
-    
     for(j=0; j<POTS/2; j++){
         pots_last_raw[j] = ctrl.pots_raw[j];
         pots_last_filtered[j] = ctrl.pots_filtered[i+j];
     }
     
-    ctrl.pots_raw[0]=ADC1BUF5>>1;
-    ctrl.pots_raw[1]=ADC1BUF2>>1;
-    ctrl.pots_raw[2]=ADC1BUF4>>1;
-    ctrl.pots_raw[3]=ADC1BUF1>>1;
-    ctrl.pots_raw[4]=ADC1BUF3>>1;
-    ctrl.pots_raw[5]=ADC1BUF0>>1;
+    ctrl.pots_raw[0]=ADC1BUF5;
+    ctrl.pots_raw[1]=ADC1BUF2;
+    ctrl.pots_raw[2]=ADC1BUF4;
+    ctrl.pots_raw[3]=ADC1BUF1;
+    ctrl.pots_raw[4]=ADC1BUF3;
+    ctrl.pots_raw[5]=ADC1BUF0;
     
     for(j=0; j<POTS/2; j++){
-        // Calculate dynamic alpha
-        ///*
-        
-        if(ctrl.pots_raw[j]>pots_last_raw[j])
+        // Calculate dynamic alpha        
+       if(ctrl.pots_raw[j]>pots_last_raw[j])
             speed=ctrl.pots_raw[j]-pots_last_raw[j];
         else
             speed=pots_last_raw[j]-ctrl.pots_raw[j];
+
+        //FRACMAX-FRACMAX*(inverse12bit*(y+4096));
         
-        unsigned long test = speed + FRACMAX;
-        pot_alpha = FRACMAX-(FRACMAX/test);
+        //test = speed+4096;
+        //resultA = __builtin_lac(32676, 0);
+        //resultB = __builtin_mpy(test, inverse12bit, NULL, NULL, 0, NULL, NULL, 0);
+        //test2 = __builtin_sac(resultB, 0);
+        //resultB = __builtin_mpy(test2, 32767, NULL, NULL, 0, NULL, NULL, 0);
+        //resultB = __builtin_lac(test2, 0);
+        //resultB = __builtin_subab(resultA, resultB);
+        //pot_alpha = 32767-test2;
+        int b = 1024;
+        speed_f = (float)(speed)/(float)(b);
+        calca = 1.0 - (1.0/(1.0+speed_f));
+        pot_alpha = (fractional)(32767*calca);
         
-        //*/
-        //pot_alpha = Q15(0.0001);
         
         // Run EMA
         resultA = __builtin_lac(ctrl.pots_raw[j],0);        // input
@@ -144,10 +151,14 @@ void readPots(void){
         resultA = __builtin_mpy(val, pot_alpha, NULL, NULL, 0, NULL, NULL, 0);
         resultB = __builtin_addab(resultA, resultB);
         ctrl.pots_filtered[i+j] = __builtin_sac(resultB, 0);
+        
+        if(j==0)
+            printf("%5f\r\n", calca);
     }
-    printf(speed);
-        printf("\n");
     
+    for(j=0; j<POTS; j++){
+        ctrl.pot_moved[j]=FALSE;
+    }
     for(j=0; j<(POTS/2); j++){
         if((ctrl.pots_filtered[i+j])!=pots_last_filtered[j]){ 
             ctrl.pot_moved[i+j]=TRUE;
