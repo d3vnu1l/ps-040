@@ -2,6 +2,7 @@
 #include <dsp.h>
 #include "cons.h"
 #include "common.h"
+#include "definitions.h"
 #include "utilities.h"
 #include "flash.h"
 #include <stdio.h>              /* Required for printf */
@@ -10,6 +11,7 @@
 extern struct clip_flash clipmap[FLASH_NUMCHUNKS];
 extern struct ctrlsrfc ctrl;
 extern struct sflags stat;
+extern struct dmaVars dmaStat;
 extern struct bluetooth bluet;
 extern unsigned long readQueue[VOICES];
 
@@ -17,8 +19,8 @@ extern fractional RxBufferA[FLASH_DMA_RX_WORDS]__attribute__((space(xmemory)));
 
 void consPADops(fractional* source){
     int i;
-    stat.dma_writeQ_index = -1;
-    stat.dma_queue=stat.dma_rx_index=0;
+    dmaStat.dma_writeQ_index = -1;
+    dmaStat.dma_queue=dmaStat.dma_rx_index=0;
     
     if(ctrl.pad[BTN_ENCSPEC]==2){
         flashBulkErase();
@@ -81,8 +83,8 @@ void consPADops(fractional* source){
                     clipmap[i].read_index=clipmap[i].start_address+(clipmap[i].start_chunk*FLASH_PAGE);
                 }
             }
-            else if(stat.dma_queue<VOICES){                  // Check queue size to avoid overflow
-                readQueue[stat.dma_queue++]=clipmap[i].read_index;
+            else if(dmaStat.dma_queue<VOICES){                  // Check queue size to avoid overflow
+                readQueue[dmaStat.dma_queue++]=clipmap[i].read_index;
                 if(clipmap[i].read_index<clipmap[i].end_address)
                     clipmap[i].read_index+=FLASH_PAGE;
                 else if(clipmap[i].loop) 
@@ -97,12 +99,14 @@ void consPADops(fractional* source){
         }
         /* RECORD actions */
         else if(clipmap[i].action==2){
-            stat.dma_write_buffer=source;
-            stat.dma_writeQ_index=i;                                             //Store write pad
+            stat.recording=TRUE;
+            dmaStat.dma_write_buffer=source;
+            dmaStat.dma_writeQ_index=i;                                             //Store write pad
             if(clipmap[i].write_index<clipmap[i].end_limit)
                 clipmap[i].write_index+=FLASH_PAGE;
             
             if(ctrl.pad[i]==1){                                    // Reset case 1
+                stat.recording=FALSE;
                 clipmap[i].action=0;            // off
                 clipmap[i].end_address=clipmap[i].write_index;
                 clipmap[i].size_chunks=(clipmap[i].write_index-clipmap[i].start_address)/FLASH_PAGE;
@@ -112,18 +116,16 @@ void consPADops(fractional* source){
     }
     
     // Kick off reads
-    stat.dma_framesize=stat.dma_queue;
-    stat.dma_queue=0;
-    if(stat.dma_queue<stat.dma_framesize){
-        stat.dma_rts=FALSE;
+    dmaStat.dma_framesize=dmaStat.dma_queue;
+    dmaStat.dma_queue=0;
+    if(dmaStat.dma_queue<dmaStat.dma_framesize){
+        dmaStat.dma_rts=FALSE;
         flashStartRead(readQueue[0], &RxBufferA[0]);
-        stat.dma_rx_index+=FLASH_DMAXFER_WORDS;
-        stat.dma_queue++;
+        dmaStat.dma_rx_index+=FLASH_DMAXFER_WORDS;
+        dmaStat.dma_queue++;
     }
-    else if(stat.dma_writeQ_index!=-1){
-        //flashWritePage(stat.dma_write_buffer, clipmap[stat.dma_writeQ_index].write_index);
-        //stat.dma_writeQ_index=-1;
-        stat.dma_rts=TRUE;
+    else if(dmaStat.dma_writeQ_index!=-1){
+        dmaStat.dma_rts=TRUE;
     }
 }
 

@@ -17,7 +17,6 @@ static fractional loopbuf[LOOP_BUF_SIZE] __attribute__ ((eds)) = {0};
 static fractional psvbuf[STREAMBUF]={0};
 
 extern enum fxStruct fxUnits[NUMFXUNITS];
-extern enum screenStruc state;
 extern struct clip_psv sine, kick, snare;
 extern struct sflags stat;
 extern struct ctrlsrfc ctrl;
@@ -293,7 +292,7 @@ void processAudio(fractional *source, fractional *destination){
     const fractional scale_vollog = Q15(0.125003814814); // Scales value between 0-4096 for lookup
     fractional temp;
     
-    if(state==scrnFX){
+    if(stat.state==scrnFX){
         if(fxUnits[0]==0); else fxFuncPointers[fxUnits[0]](source, source, ctrl.pots_filtered[FX_1], ctrl.pots_filtered[FX_2], ctrl.pots_filtered[FX_3]);
         if(fxUnits[1]==0); else fxFuncPointers[fxUnits[1]](source, source, ctrl.pots_filtered[FX_4], ctrl.pots_filtered[FX_5], ctrl.pots_filtered[FX_6]);
     }

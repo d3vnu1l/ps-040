@@ -31,7 +31,7 @@
 #define NUMFX   6
 #define NUMFXUNITS 2
 #define SCREENS 9
-#define VOICES 6
+#define VOICES 4
 
 #define LOGMETER_SIZE 64
 #define LOGVOLUME_SIZE 4096
@@ -49,7 +49,7 @@
 #define POT_PERCENT Q15(0.3937)      // For pot 0-100 display
 #define POT_LOOP Q15(1.0*LOOP_BUF_SIZE/32767.0)
 #define POT_ACTIVE  !_T4IF
-#define POT_THRESHOLD  5
+#define POT_THRESHOLD  8
 #define FXSCALE Q15(NUMFX*0.000030518509476)
 #define FRACMAX Q15(1.0)
 
@@ -105,6 +105,8 @@ struct ctrlsrfc {
 };
 
 struct sflags {
+    char            state;
+    char            laststate;
     unsigned char UART_ON;
     unsigned char TEST_SIN;
     unsigned char AT_MODE;
@@ -112,13 +114,17 @@ struct sflags {
     unsigned int  process_time;
     fractional    power;
     unsigned char power_ack;
+    char          recording;
+    char          rgb_led;
+};
+
+struct dmaVars {
     unsigned char dma_rts;
     unsigned char dma_queue; 
     unsigned char dma_framesize;
     unsigned int  dma_rx_index;
     unsigned long dma_writeQ_index;
     fractional*   dma_write_buffer;
-    char          rgb_led;
 };
 
 

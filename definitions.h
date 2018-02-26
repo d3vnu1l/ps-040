@@ -44,5 +44,6 @@ enum colors{
     BLINK_WHITE,
     
 };
+
 #endif	/* XC_HEADER_TEMPLATE_H */
 

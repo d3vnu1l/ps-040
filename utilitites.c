@@ -12,8 +12,6 @@
 #include "definitions.h"
 
 extern enum fxStruct fxUnits[NUMFXUNITS];
-extern enum screenStruc state;
-extern enum screenStruc laststate;
 extern struct ctrlsrfc ctrl;
 extern struct sflags stat;
 extern struct clip_psv sine, kick, snare;
@@ -96,7 +94,7 @@ void readPots(void){
     volatile register int resultA asm("A"); 
     volatile register int resultB asm("B");
     fractional pots_last_raw[POTS/2], pots_last_filtered[POTS/2];
-    fractional pot_alpha, pot_alpha_base = Q15(0.0425);                 //larger = rougher, lower = more latency
+    fractional pot_alpha, pot_alpha_base = Q15(0.025);                 //larger = rougher, lower = more latency
     int bank, j, val;
     unsigned int speed=0;
     
@@ -127,13 +125,13 @@ void readPots(void){
             speed=ctrl.pots_raw[j]-pots_last_raw[j];
         else
             speed=pots_last_raw[j]-ctrl.pots_raw[j];
-        if(speed>56){
+        if(speed>256){
             speed=speed<<6;
-            if(speed>0x7FFF)
-                speed =0x7FFF;
         }
         
-        pot_alpha=pot_alpha_base;
+        pot_alpha=pot_alpha_base+speed;
+        if(pot_alpha>0x7FFF)
+            pot_alpha =0x7FFF;
         
         if(j==0) printf("%u\r\n", speed);
         
@@ -147,8 +145,8 @@ void readPots(void){
         ctrl.pots_filtered[bank+j] = __builtin_sac(resultB, 0);
         
         // Upward bias to compensate for filter
-        if(ctrl.pots_raw[j]>=0x7FE0)
-            ctrl.pots_filtered[j]|=0x001F;
+        if(ctrl.pots_raw[j]>=0x7FD7)
+            ctrl.pots_filtered[j]|=0x003F;
         
         // Check for movement from filtered values
         if((ctrl.pots_filtered[bank+j])>= pots_last_filtered[j]){ 
@@ -210,12 +208,12 @@ void display(void){
     // Update ui state logic here
     newstate = (ENCODERCNTL/4);
     if(newstate > _laststate){
-        if(state<(SCREENS-1))
-            state++;
+        if(stat.state<(SCREENS-1))
+            stat.state++;
     } 
     else if(newstate < _laststate){
-        if(state>0)
-            state--;
+        if(stat.state>0)
+            stat.state--;
     }
     _laststate=newstate;
     
@@ -228,7 +226,11 @@ void display(void){
    
     
     // RGB LED
-    stat.rgb_led=state;
+    if(stat.recording)
+        stat.rgb_led=BLINK_RED;
+    else 
+        stat.rgb_led=stat.state+2;
+    
     if(stat.rgb_led>7){
         if(stat.rgb_led!=rgbStatLast)
             LED_R=LED_G=LED_B=0;

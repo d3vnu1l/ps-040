@@ -14,8 +14,7 @@ extern fractional       TxBufferA[FLASH_DMAXFER_WORDS]__attribute__((space(xmemo
                         RxBufferA[FLASH_DMA_RX_WORDS]__attribute__((space(xmemory)));
 
 extern unsigned long readQueue[VOICES];
-extern struct clip_flash clipmap[FLASH_NUMCHUNKS];
-extern struct sflags stat;
+extern struct dmaVars dmaStat;
 extern struct bluetooth bluet;
 
 //Description: This interrupt triggers at the completion of DCI output
@@ -68,18 +67,14 @@ void __attribute__((interrupt, auto_psv)) _DMA1Interrupt(void){
     IFS5bits.SPI3IF = 0;        // Clear the Interrupt flag
     
     // Continue queue'd reads
-    if(stat.dma_queue<stat.dma_framesize){
-        flashStartRead(readQueue[stat.dma_queue], &RxBufferA[stat.dma_rx_index]);
-        stat.dma_rx_index+=FLASH_DMAXFER_WORDS;
-        stat.dma_queue++;
+    if(dmaStat.dma_queue<dmaStat.dma_framesize){
+        flashStartRead(readQueue[dmaStat.dma_queue], &RxBufferA[dmaStat.dma_rx_index]);
+        dmaStat.dma_rx_index+=FLASH_DMAXFER_WORDS;
+        dmaStat.dma_queue++;
     }
-    else if(stat.dma_writeQ_index!=-1){ 
-        stat.dma_rts=TRUE;
-        //flashWritePage(stat.dma_write_buffer, clipmap[stat.dma_writeQ_index].write_index); 
-        //stat.dma_writeQ_index=-1; 
+    else if(dmaStat.dma_writeQ_index!=-1){ 
+        dmaStat.dma_rts=TRUE;
     } 
-    
-
 }
 
 //Description: This interrupt handles UART reception

@@ -15,7 +15,6 @@
 extern fractional       TxBufferA[FLASH_DMAXFER_WORDS]__attribute__((space(xmemory))), 
                         RxBufferA[FLASH_DMA_RX_WORDS]__attribute__((space(xmemory)));
 
-extern enum screenStruc state, laststate;
 extern enum fxStruct fxUnits[NUMFXUNITS];
 extern struct clip sine;
 extern struct ctrlsrfc ctrl;
@@ -33,7 +32,7 @@ void screenDebugAudio(void){
 }
 
 void screenDebugBuffers(void){
-    if(state!=laststate){
+    if(stat.state!=stat.laststate){
         //setup here
         lcdClearQ();
         lcdSetCursorQ(0,0);
@@ -56,7 +55,7 @@ void screenDebugBuffers(void){
 void screenDebugPots(void){
     int bank=0, i;
     
-    if(state!=laststate){
+    if(stat.state!=stat.laststate){
         // Setup here
         lcdClearQ();
         lcdSetCursorQ(0,0);
@@ -88,7 +87,7 @@ void screenDebugPots(void){
 void screenDebugFlash(void){
     int i, j, k;
     
-    if(state!=laststate){
+    if(stat.state!=stat.laststate){
         //setup here
         lcdClearQ();
         
@@ -120,7 +119,7 @@ void screenDebugFlash(void){
 }
 
 void screenDebugInput(void){
-    if(state!=laststate){
+    if(stat.state!=stat.laststate){
         //setup here
         lcdClearQ();
         lcdSetCursorQ(0,0);
@@ -147,7 +146,7 @@ void screenDebugInput(void){
 void screenNoFXmod(unsigned int col, fractional param1, fractional param2, fractional param3){
     int i;    
     
-    if(fxNow!=fxLast || state!=laststate){
+    if(fxNow!=fxLast || stat.state!=stat.laststate){
         // Setup here
         lcdSetCursorQ(col+5,0);
         lcdWriteStringQ("OFF");
@@ -166,7 +165,7 @@ void screenLPFmod(unsigned int col, fractional param1, fractional param2, fracti
     char* items[4][3] = {"LPF", "frq", "d/w", "pwr"};
     int i;
     
-    if(fxNow!=fxLast || state!=laststate){
+    if(fxNow!=fxLast || stat.state!=stat.laststate){
         // Setup here
         lcdSetCursorQ(col+5,0);
         lcdWriteStringQ(items[0][0]);
@@ -188,7 +187,7 @@ void screenLPFmod(unsigned int col, fractional param1, fractional param2, fracti
 }
 
 void screenTRMmod(unsigned int col, fractional param1, fractional param2, fractional param3){
-    if(fxNow!=fxLast || state!=laststate){
+    if(fxNow!=fxLast || stat.state!=stat.laststate){
         // Setup here
         lcdSetCursorQ(col+5,0);
         lcdWriteStringQ("TRM");
@@ -212,7 +211,7 @@ void screenTRMmod(unsigned int col, fractional param1, fractional param2, fracti
 }
 
 void screenLOPmod(unsigned int col, fractional param1, fractional param2, fractional param3){
-    if(fxNow!=fxLast || state!=laststate){
+    if(fxNow!=fxLast || stat.state!=stat.laststate){
         // Setup here
         lcdSetCursorQ(col+5,0);
         lcdWriteStringQ("LOP");
@@ -236,7 +235,7 @@ void screenLOPmod(unsigned int col, fractional param1, fractional param2, fracti
 }
 
 void screenBTCmod(unsigned int col, fractional param1, fractional param2, fractional param3){
-    if(fxNow!=fxLast || state!=laststate){
+    if(fxNow!=fxLast || stat.state!=stat.laststate){
         // Setup here
         lcdSetCursorQ(col+5,0);
         lcdWriteStringQ("BIT");
@@ -260,7 +259,7 @@ void screenBTCmod(unsigned int col, fractional param1, fractional param2, fracti
 }
 
 void screenHPFmod(unsigned int col, fractional param1, fractional param2, fractional param3){
-    if(fxNow!=fxLast || state!=laststate){
+    if(fxNow!=fxLast || stat.state!=stat.laststate){
         // Setup here
         lcdSetCursorQ(col+5,0);
         lcdWriteStringQ("HPF");
@@ -286,7 +285,7 @@ void screenHPFmod(unsigned int col, fractional param1, fractional param2, fracti
 void screenFX(void){
     int i,j ;
     
-    if(state!=laststate){
+    if(stat.state!=stat.laststate){
         //setup here
         lcdClearQ();
         lcdSetCursorQ(0,0);
@@ -316,7 +315,7 @@ void screenFX(void){
 }
 
 void screenSHIFT(void){
-    if(state!=laststate){
+    if(stat.state!=stat.laststate){
         //setup here
         lcdClearQ();
         lcdSetCursorQ(0,0);
@@ -341,7 +340,7 @@ void screenEditOne(void){
         else grid[i]=0;
     }
     
-    if(state!=laststate){
+    if(stat.state!=stat.laststate){
         //setup here
         lcdClearQ();
         lcdSetCursorQ(0,0);
@@ -391,7 +390,7 @@ void screenEditOne(void){
 void screenEditTwo(void){
     int i;
     
-    if(state!=laststate){
+    if(stat.state!=stat.laststate){
         //setup here
         lcdClearQ();
         lcdSetCursorQ(0,0);
@@ -440,7 +439,7 @@ void screenEditTwo(void){
 void screenBluetooth(void){
     int i;
     
-    if(state!=laststate){
+    if(stat.state!=stat.laststate){
         //setup here
         lcdClearQ();
         lcdSetCursorQ(0,0);
@@ -468,8 +467,8 @@ void screenBluetooth(void){
 void screenUpdate(void){
     fxNow=fxUnits[0]+fxUnits[1];
     
-    screenPointers[state]();
+    screenPointers[stat.state]();
     
-    laststate=state;
+    stat.laststate=stat.state;
     fxLast=fxUnits[0]+fxUnits[1];
 }

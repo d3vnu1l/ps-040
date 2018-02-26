@@ -33,15 +33,20 @@ unsigned long readQueue[VOICES];
 
 struct clip_flash clipmap[FLASH_NUMCHUNKS];
 
-struct sflags stat = {  .UART_ON = TRUE,
+struct sflags stat = {  .state = debugscrnPOTS,
+                        .laststate = invalid,
+                        .UART_ON = TRUE,
                         .TEST_SIN = FALSE,
                         .hard_clipped = FALSE,
+                        .rgb_led=0,
+                        .recording=FALSE};
+
+struct dmaVars dmaStat = {
                         .dma_queue = 0,
                         .dma_framesize=0,
                         .dma_rx_index=0,
                         .dma_writeQ_index=-1,
-                        .dma_rts=FALSE,
-                        .rgb_led=0};
+                        .dma_rts=FALSE,};
 
 struct bluetooth bluet = {  .AT_MODE=FALSE,
                             .last=0,
@@ -49,8 +54,8 @@ struct bluetooth bluet = {  .AT_MODE=FALSE,
                             .status=0};
 
 /* Screen state variables */
-enum screenStruc state = debugscrnPOTS;
-enum screenStruc laststate = invalid;
+//enum screenStruc state = debugscrnPOTS;
+//enum screenStruc laststate = invalid;
 enum fxStruct fxUnits[NUMFXUNITS]={0,0};
 enum colors rgbLED = OFF;
 
@@ -115,37 +120,37 @@ int main(void) {
             dcHPF(ping, ping);          // Remove DC offset
             getAudioIntensity(ping);
             
-            stat.dma_rx_index=0;
-            while(stat.dma_framesize>0){
+            dmaStat.dma_rx_index=0;
+            while(dmaStat.dma_framesize>0){
                 //VectorCopy(STREAMBUF, ping, rcvPtr);
-                VectorAdd(STREAMBUF, ping, ping, &RxBufferA[stat.dma_rx_index]);
-                stat.dma_rx_index+=FLASH_DMAXFER_WORDS;
-                stat.dma_framesize--;
+                VectorAdd(STREAMBUF, ping, ping, &RxBufferA[dmaStat.dma_rx_index]);
+                dmaStat.dma_rx_index+=FLASH_DMAXFER_WORDS;
+                dmaStat.dma_framesize--;
             }
             
             /* State dependent controls*/
-            if(state!=scrnBT) 
+            if(stat.state!=scrnBT) 
                 consPADops(ping);
             
-            if(state==scrnEDITone) 
+            if(stat.state==scrnEDITone) 
                 consEDITONEops();
-            else if(state==scrnEDITtwo) 
+            else if(stat.state==scrnEDITtwo) 
                 consEDITTWOops();
-            else if(state==scrnBT){
+            else if(stat.state==scrnBT){
                 if(bluet.AT_MODE) consBTATops();
             }
             
             processAudio(ping, pong);
 
-            if(stat.dma_writeQ_index!=-1){
-                while(stat.dma_rts==FALSE){
+            if(dmaStat.dma_writeQ_index!=-1){
+                while(dmaStat.dma_rts==FALSE){
                     if(_T3IF) {
                         lcdPoll();
                         _T3IF=0;
                     }
                 }
-                flashWritePage(pong, clipmap[stat.dma_writeQ_index].write_index); 
-                stat.dma_writeQ_index=-1; 
+                flashWritePage(pong, clipmap[dmaStat.dma_writeQ_index].write_index); 
+                dmaStat.dma_writeQ_index=-1; 
             }
             while(!SS3a);
             
