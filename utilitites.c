@@ -95,54 +95,40 @@ void scanButtons(void){
 void readPots(void){
     volatile register int resultA asm("A"); 
     volatile register int resultB asm("B");
-    fractional const inverse12bit = Q15(0.000244140625);
     fractional pots_last_raw[POTS/2], pots_last_filtered[POTS/2];
-    fractional pot_alpha;                       //larger = rougher, lower = more latency
+    fractional pot_alpha, pot_alpha_base = Q15(0.06755);                 //larger = rougher, lower = more latency
     int i, j, val;
-    fractional test, test2, rem;
     unsigned int speed=0;
-    float speed_f, calca;
     
     if(ctrl.pad[BTN_SPECIAL]<2)
         i=0;
     else 
         i=POTS/2;
     
-    for(j=0; j<POTS/2; j++){
-        pots_last_raw[j] = ctrl.pots_raw[j];
-        pots_last_filtered[j] = ctrl.pots_filtered[i+j];
+    for(j=0; j<POTS; j++){
+        ctrl.pot_moved[j]=FALSE;
     }
     
-    ctrl.pots_raw[0]=ADC1BUF5;
-    ctrl.pots_raw[1]=ADC1BUF2;
-    ctrl.pots_raw[2]=ADC1BUF4;
-    ctrl.pots_raw[3]=ADC1BUF1;
-    ctrl.pots_raw[4]=ADC1BUF3;
-    ctrl.pots_raw[5]=ADC1BUF0;
+    ctrl.pots_raw[0]=ADC1BUF5>>1;
+    ctrl.pots_raw[1]=ADC1BUF2>>1;
+    ctrl.pots_raw[2]=ADC1BUF4>>1;
+    ctrl.pots_raw[3]=ADC1BUF1>>1;
+    ctrl.pots_raw[4]=ADC1BUF3>>1;
+    ctrl.pots_raw[5]=ADC1BUF0>>1;
     
     for(j=0; j<POTS/2; j++){
-        // Calculate dynamic alpha        
-       if(ctrl.pots_raw[j]>pots_last_raw[j])
+        // Store previous values
+        pots_last_raw[j] = ctrl.pots_raw[j];
+        pots_last_filtered[j] = ctrl.pots_filtered[i+j];
+        
+        // Calculate dynamic alpha from raw values     
+        if(ctrl.pots_raw[j]>pots_last_raw[j])
             speed=ctrl.pots_raw[j]-pots_last_raw[j];
         else
             speed=pots_last_raw[j]-ctrl.pots_raw[j];
-
-        //FRACMAX-FRACMAX*(inverse12bit*(y+4096));
         
-        //test = speed+4096;
-        //resultA = __builtin_lac(32676, 0);
-        //resultB = __builtin_mpy(test, inverse12bit, NULL, NULL, 0, NULL, NULL, 0);
-        //test2 = __builtin_sac(resultB, 0);
-        //resultB = __builtin_mpy(test2, 32767, NULL, NULL, 0, NULL, NULL, 0);
-        //resultB = __builtin_lac(test2, 0);
-        //resultB = __builtin_subab(resultA, resultB);
-        //pot_alpha = 32767-test2;
-        int b = 1024;
-        speed_f = (float)(speed)/(float)(b);
-        calca = 1.0 - (1.0/(1.0+speed_f));
-        pot_alpha = (fractional)(32767*calca);
-        
-        
+        pot_alpha=pot_alpha_base + (speed<<4);
+       
         // Run EMA
         resultA = __builtin_lac(ctrl.pots_raw[j],0);        // input
         resultB = __builtin_lac(ctrl.pots_filtered[i+j],0);   // output
@@ -152,19 +138,27 @@ void readPots(void){
         resultB = __builtin_addab(resultA, resultB);
         ctrl.pots_filtered[i+j] = __builtin_sac(resultB, 0);
         
-        if(j==0)
-            printf("%5f\r\n", calca);
-    }
-    
-    for(j=0; j<POTS; j++){
-        ctrl.pot_moved[j]=FALSE;
-    }
-    for(j=0; j<(POTS/2); j++){
-        if((ctrl.pots_filtered[i+j])!=pots_last_filtered[j]){ 
+        // Upward bias to compensate for filter
+        if(ctrl.pots_raw[j]>=0x7FE0)
+            ctrl.pots_filtered[j]|=0x001F;
+        
+        // Check for movement from filtered values
+        if((ctrl.pots_filtered[i+j])>= pots_last_filtered[j]){ 
+            if(((ctrl.pots_filtered[i+j]-pots_last_filtered[j]))>=POT_THRESHOLD)
+                ctrl.pot_moved[i+j]=TRUE;
+        }
+        else if(((pots_last_filtered[j]-ctrl.pots_filtered[i+j]))>=POT_THRESHOLD){
             ctrl.pot_moved[i+j]=TRUE;
         }
-    }
-    
+        
+        if(ctrl.pot_moved[i+j]==TRUE){
+            T2CONbits.TON=0;
+            TMR2 = 0x0000;          //clear timer 2
+            TMR3 = 0x0000;          //clera timer 3
+            _T3IF=0;
+            T2CONbits.TON=1;
+        }
+    }    
     _AD1IF = 0; // Clear conversion done status bit
 }
 
@@ -227,7 +221,10 @@ void display(void){
     LED_G = ((stat.rgb_led>>1)&1);
     LED_B = ((stat.rgb_led>>2)&1);
     
-   SLED=~SLED;
+    if(POT_ACTIVE) {
+        SLED=1;
+    } 
+    else SLED=0;
 }
 
 void ClipCopy_psv(int numElems, fractional * dstV, __psv__ fractional * srcV){

@@ -294,12 +294,12 @@ void lcdPoll(void){
     if(lcdWritePtr!=lcdReadPtr){   
         if((*lcdReadPtr>>8)&1) LCD_RS=0;
         else LCD_RS=1;
-        if((*lcdReadPtr>>9)&1) PR3=0x2DF0; //2DF0 for ~1.3mS
-        else PR3=0x0120; //120 for ~40uS
+        if((*lcdReadPtr>>9)&1) PR5=0x2DF0; //2DF0 for ~1.3mS
+        else PR5=0x0120; //120 for ~40uS
         PMDIN1=(*lcdReadPtr++)&0x00FF;
         if(lcdReadPtr==&lcdBuf[LCDBUF]) lcdReadPtr=lcdBuf;
     } 
-    TMR3=0x0000; 
+    TMR5=0x0000; 
 }
 
 //ALWAYS SENDS, blocks program

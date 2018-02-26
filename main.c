@@ -94,9 +94,8 @@ int main(void) {
     initQEI_ENC();
     if(stat.UART_ON) initUART1();       // Configure & enable UART
     initT1();                           // Configure & start T1 display
-    //initT2();                         // Configure & start T2 btns & pots
-    initT3();                           // Configure & start T3 for lcd
-    //initT5();
+    initT2();                           // Configure & start T2 pots sleep                        
+    initT5();                           // Configure & start T3 for lcd poll
     lcdDrawSplash();
     
     while(1){    
@@ -156,9 +155,9 @@ int main(void) {
             display();
             _T1IF=0;
         }
-        if(_T3IF) {
+        if(_T5IF) {
             lcdPoll();
-            _T3IF=0;
+            _T5IF=0;
         }
     }
     return 0;

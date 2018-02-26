@@ -10,7 +10,6 @@
 /* Timers and Frequencies */
 #define BAUDRATE 115200  //38400                  //target baud rate for *UART*           //peripheral configs
 #define BRGVAL  ((Fcy/BAUDRATE)/16)-1       //calculate baud value (MAY TRUNCATE)
-#define Fscan   200                         //target buttons & pots sampling rate
 #define Fout    44100                       //target output sampling rate (~45k last measured)
 #define Fdisp   20                          //15hz display update rate
 
@@ -49,6 +48,8 @@
 
 #define POT_PERCENT Q15(0.3937)      // For pot 0-100 display
 #define POT_LOOP Q15(1.0*LOOP_BUF_SIZE/32767.0)
+#define POT_ACTIVE  !_T3IF
+#define POT_THRESHOLD   5
 #define FXSCALE Q15(NUMFX*0.000030518509476)
 #define FRACMAX Q15(1.0)
 

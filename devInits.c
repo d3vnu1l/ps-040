@@ -117,7 +117,7 @@ void initADC1(void){
     AD1CON2 = 0x0408;               // Sample alternately using channel scanning
     AD1CON2bits.SMPI=(POTS/2)-1;    // Sample 6 channels
     AD1CON3 = 0x0F0F;               // Sample for n*TAD before converting
-    AD1CON1bits.FORM=0;             // right aligned integer format 
+    AD1CON1bits.FORM=2;             // right aligned integer format 
     AD1CON3bits.ADCS=0xFF;
     AD1CON3bits.SAMC=0x1F;
     AD1CSSLbits.CSS6=1;             //AN6 in channel scan
@@ -171,43 +171,30 @@ void initT1(void){          //16 bit timer
     T1CONbits.TON = 1;      //start timer
 }
 
-//Description:  Initializes timer handles polling button input
-//Prereq: initADC1() 
-//Frequency: 512Hz
-void initT2(void){          //16/32 bit timer
-    TMR2 = 0x0000;          //clear timer 4
-    T2CONbits.T32 = 0;      //16 bit mode
-    T2CONbits.TCKPS = 1;    //prescale 1:8
-    T2CONbits.TCS = 0;      //use internal clock
-    T2CONbits.TGATE = 0;    //gate accumulation disabled
-    PR2 = Fcy/(8*Fscan);      //period register about 512hz, PR2 = 0x3938 
-
+//Description:  handles potentiometer sleep
+void initT2(void){          // 16/32 bit timer
+    T2CONbits.TON = 0;      // Stop timer
+    TMR2 = 0x0000;          //clear timer 2
+    TMR3 = 0x0000;          //clera timer 3
+    T2CONbits.T32 = 1;      // 16 bit mode
+    T2CONbits.TCKPS = 3;    //prescale 1:256
+    PR2 = 0xEEFF;           // About a 1/4 of a second
+    PR3 = 0x0003;
     T2CONbits.TON = 1;      //start timer
 }
 
+
 //Description: Initialize timer handling LCD sending
 //Frequency: variable depending on lcd latency values in datasheet
-void initT3(void){          //16/32 bit timer
-    TMR3 = 0x0000;          //clear timer 3
-    T3CONbits.TCKPS = 1;    //prescale 8:1
-    T3CONbits.TCS = 0;      //use internal clock
-    T3CONbits.TGATE = 0;    //gate accumulation disabled
-    //PR3 = Fcy/(256*T3freq);           //period register
-    PR3 = 0x01D0;           //45uS initial delay
-    
-    T3CONbits.TON = 1;
-    
-}
-
 void initT5() 
 {
         TMR5 = 0x0000;
-        PR5 = 4999;
-        T5CONbits.TCKPS = 2;    //prescale 8:1
+        PR5 = 0x01D0;           // 45uS initial delay
+        T5CONbits.TCKPS = 1;    // Prescale 8:1
         IFS1bits.T5IF = 0;
         IEC1bits.T5IE = 0;
 
-        //Start Timer 3
+        //Start Timer 5
         T5CONbits.TON = 1;
 
 }

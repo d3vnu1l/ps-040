@@ -11,7 +11,6 @@
 void initPorts(void);
 void initT1(void);
 void initT2(void);
-void initT3(void);
 void initT5(void);
 void initUART1(void);
 void initADC1(void);
